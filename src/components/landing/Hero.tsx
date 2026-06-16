@@ -1,32 +1,29 @@
-import { motion, useScroll, useTransform, useMotionValue, useSpring, useMotionTemplate, AnimatePresence } from "motion/react";
-import { ArrowRight, Sparkles, Play, X } from "lucide-react";
+import { motion, AnimatePresence, useScroll, useTransform } from "motion/react";
+import { ArrowRight, Sparkles, Play, X, TrendingUp, Zap, Target, Award } from "lucide-react";
 import { useRef, useState, useEffect } from "react";
 import { HERO_VIDEO } from "@/lib/portfolio-data";
 import { supabase } from "@/lib/supabase";
 
 export function Hero() {
   const [showreelOpen, setShowreelOpen] = useState(false);
-  const [colorGradeMode, setColorGradeMode] = useState<"before" | "after">("after");
+  const [sliderPos, setSliderPos] = useState(50);
   const [heroData, setHeroData] = useState({
-    headline: 'Edits That <span class="font-display italic font-normal text-gradient-brand">Hold Attention</span> <br/> And Drive Results.',
-    subheadline: 'Raqvine transforms raw footage into cinematic, high-retention content built to move audiences, scale channels, and grow ambitious brands worldwide.'
+    headline: 'High-End Video Editing<br/>That Scales Your <span class="text-gradient-brand font-display italic font-normal">Views, Retention, & Revenue.</span>',
+    subheadline:
+      "Raqvine transforms raw footage into cinematic, high-retention content built to move audiences, scale channels, and grow ambitious brands worldwide.",
   });
 
   useEffect(() => {
     async function loadHero() {
       try {
-        const { data, error } = await supabase
+        const { data } = await supabase
           .from("hero_settings")
           .select("*")
           .order("createdAt", { ascending: false })
           .limit(1)
           .maybeSingle();
-
         if (data) {
-          setHeroData({
-            headline: data.headline,
-            subheadline: data.subheadline,
-          });
+          setHeroData({ headline: data.headline, subheadline: data.subheadline });
         }
       } catch (err) {
         console.error("Failed to load hero settings", err);
@@ -36,302 +33,287 @@ export function Hero() {
   }, []);
 
   const ref = useRef<HTMLDivElement>(null);
-  
+  const sliderContainerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
-  const y = useTransform(scrollYProgress, [0, 1], [0, 120]);
-  const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0]);
+  
+  // Parallax constraints for GPU execution
+  const y = useTransform(scrollYProgress, [0, 1], [0, 60]);
+  const opacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
 
-  // 3D Perspective Card Tilt states using Motion Values
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
+  // Handle Before/After slider coordinate calculations
+  const handleSliderMove = (clientX: number) => {
+    if (!sliderContainerRef.current) return;
+    const rect = sliderContainerRef.current.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
+    setSliderPos(percentage);
+  };
 
-  const rotateX = useSpring(useTransform(mouseY, [-0.5, 0.5], [10, -10]), { stiffness: 120, damping: 18 });
-  const rotateY = useSpring(useTransform(mouseX, [-0.5, 0.5], [-10, 10]), { stiffness: 120, damping: 18 });
+  const onMouseMove = (e: React.MouseEvent) => {
+    handleSliderMove(e.clientX);
+  };
 
-  // Glare / Reflection effect values
-  const glareX = useSpring(useTransform(mouseX, [-0.5, 0.5], [0, 100]), { stiffness: 120, damping: 18 });
-  const glareY = useSpring(useTransform(mouseY, [-0.5, 0.5], [0, 100]), { stiffness: 120, damping: 18 });
-  const glareBg = useMotionTemplate`radial-gradient(circle at ${glareX}% ${glareY}%, rgba(255, 255, 255, 0.12) 0%, transparent 65%)`;
-
-  function handleMouseMove(e: React.MouseEvent<HTMLDivElement>) {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const width = rect.width;
-    const height = rect.height;
-    const clientX = e.clientX - rect.left;
-    const clientY = e.clientY - rect.top;
-
-    mouseX.set(clientX / width - 0.5);
-    mouseY.set(clientY / height - 0.5);
-  }
-
-  function handleMouseLeave() {
-    mouseX.set(0);
-    mouseY.set(0);
-  }
+  const onTouchMove = (e: React.TouchEvent) => {
+    if (e.touches.length > 0) {
+      handleSliderMove(e.touches[0].clientX);
+    }
+  };
 
   return (
-    <section ref={ref} id="top" className="relative min-h-[100svh] w-full overflow-hidden">
+    <section ref={ref} id="top" className="relative min-h-[100svh] w-full overflow-hidden bg-[#050508]">
+
+      {/* ── BACKGROUND LAYER: animated aurora orbs (CSS, GPU-only) ── */}
+      <div className="pointer-events-none absolute inset-0 z-0">
+        {/* Large slow-rotating cyan orb */}
+        <div className="hero-orb hero-orb-cyan" />
+        {/* Large slow-rotating violet orb */}
+        <div className="hero-orb hero-orb-violet" />
+        {/* Bottom edge fade */}
+        <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-[#050508] to-transparent" />
+        {/* Vignette top */}
+        <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-[#050508]/80 to-transparent" />
+      </div>
+
+      {/* ── BACKGROUND VIDEO (subtle, low-opacity) ── */}
       <video
-        className="absolute inset-0 size-full scale-105 object-cover opacity-35 blur-[2px]"
+        className="absolute inset-0 size-full object-cover opacity-15 mix-blend-luminosity"
         src={HERO_VIDEO}
         autoPlay
         muted
         loop
         playsInline
         preload="metadata"
-        poster=""
       />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_72%_38%,rgba(0,212,255,0.14),transparent_24%),radial-gradient(circle_at_28%_78%,rgba(139,92,246,0.14),transparent_28%)]" />
-      <div className="absolute inset-0 bg-gradient-to-b from-background/45 via-background/75 to-background" />
-      <div className="hero-grid absolute inset-0 opacity-20" />
-      <div className="absolute left-[8%] top-24 h-56 w-56 rounded-full bg-electric/10 blur-[110px]" />
-      <div className="absolute bottom-16 right-[4%] h-72 w-72 rounded-full bg-violet-glow/15 blur-[130px]" />
 
-      {/* Floating Sparkle Particles in Background */}
-      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-[20%] left-[15%] size-1.5 rounded-full bg-electric/30 animate-pulse-glow" style={{ animationDelay: "1s" }} />
-        <div className="absolute top-[65%] left-[25%] size-1 rounded-full bg-violet-glow/40 animate-pulse-glow" style={{ animationDelay: "2s" }} />
-        <div className="absolute top-[40%] right-[30%] size-2 rounded-full bg-electric/25 animate-pulse-glow" style={{ animationDelay: "0.5s" }} />
-        <div className="absolute top-[80%] right-[15%] size-1.5 rounded-full bg-violet-glow/30 animate-pulse-glow" style={{ animationDelay: "1.5s" }} />
+      {/* ── GRID OVERLAY ── */}
+      <div className="hero-grid absolute inset-0 opacity-[0.05]" />
+
+      {/* ── BRIGHT ACCENT DOTS (Reduced for Simplification) ── */}
+      <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+        <span className="hero-dot" style={{ top: "18%", left: "12%", animationDelay: "0s", width: 6, height: 6, background: "#00D4FF" }} />
+        <span className="hero-dot" style={{ top: "45%", right: "14%", animationDelay: "0.6s", width: 5, height: 5, background: "#00D4FF" }} />
+        <span className="hero-dot" style={{ top: "75%", left: "38%", animationDelay: "0.9s", width: 4, height: 4, background: "#8B5CF6" }} />
       </div>
 
+      {/* ── MAIN CONTENT ── */}
       <motion.div
         style={{ y, opacity }}
-        className="relative z-10 mx-auto grid min-h-[100svh] max-w-7xl items-center gap-14 px-5 pb-16 pt-32 sm:px-8 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16 lg:pb-20 lg:pt-36"
+        className="relative z-10 mx-auto grid min-h-[100svh] max-w-7xl items-center gap-14 px-5 pb-16 pt-32 sm:px-8 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12 lg:pb-24 lg:pt-36"
       >
+        {/* LEFT: Text column */}
         <div className="text-center lg:text-left">
+
+          {/* Badge */}
           <motion.div
-            initial={{ opacity: 0, y: 12 }}
+            initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="mb-6 inline-flex items-center gap-2 rounded-full glass px-4 py-2 text-[10px] uppercase tracking-[0.24em] text-foreground/70 sm:text-xs"
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-[10px] uppercase tracking-[0.24em] text-foreground/70 sm:text-xs backdrop-blur-sm"
           >
-            <Sparkles className="size-3.5 text-electric animate-spin" style={{ animationDuration: "3s" }} />
-            Premium post-production studio
+            <Sparkles className="size-3.5 text-[#00D4FF]" style={{ filter: "drop-shadow(0 0 6px #00D4FF)" }} />
+            Premium Post-Production Studio
             <span className="h-3 w-px bg-white/15" />
-            <span className="text-electric">Now booking</span>
+            <span className="text-[#00D4FF] font-semibold" style={{ textShadow: "0 0 12px #00D4FF88" }}>Now Booking Q3</span>
           </motion.div>
 
+          {/* Headline */}
           <motion.h1
-            initial={{ opacity: 0, y: 24 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-            className="font-display text-[42px] leading-[0.96] tracking-[-0.03em] sm:text-6xl lg:text-[72px] xl:text-[80px]"
+            transition={{ duration: 0.7, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+            className="font-display text-[42px] leading-[0.98] tracking-[-0.03em] sm:text-6xl lg:text-[66px] xl:text-[72px]"
             dangerouslySetInnerHTML={{ __html: heroData.headline }}
           />
 
+          {/* Subheadline */}
           <motion.p
-            initial={{ opacity: 0, y: 16 }}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, delay: 0.15 }}
+            transition={{ duration: 0.7, delay: 0.22 }}
             className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg lg:mx-0"
           >
             {heroData.subheadline}
           </motion.p>
 
-          {/* CTA Buttons */}
+          {/* Trust statement & Client Logos */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, delay: 0.3 }}
-            className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center lg:justify-start"
+            transition={{ duration: 0.7, delay: 0.28 }}
+            className="mt-6 flex flex-col gap-4 items-center lg:items-start"
           >
-            <button
-              onClick={() => setShowreelOpen(true)}
-              className="group inline-flex w-full items-center justify-center gap-3 rounded-full bg-foreground px-7 py-4 text-sm font-semibold text-background shadow-[0_0_30px_-5px_rgba(0,212,255,0.3)] hover:shadow-[0_0_30px_5px_rgba(0,212,255,0.5)] transition-all hover:-translate-y-0.5 sm:w-auto"
-            >
-              <Play className="size-4 fill-current" />
-              View Showreel
-            </button>
-            <a
-              href="#contact"
-              className="group inline-flex w-full items-center justify-center gap-2 rounded-full glass px-7 py-4 text-sm font-medium text-white/90 transition-all hover:-translate-y-0.5 hover:bg-white/5 hover:border-white/20 sm:w-auto"
-            >
-              Book A Free Consultation
-              <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-            </a>
-          </motion.div>
-
-          {/* Software Logos Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, delay: 0.38 }}
-            className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:items-center sm:gap-6 justify-center lg:justify-start"
-          >
-            <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-semibold">Software Used:</span>
-            <div className="flex items-center gap-3.5">
-              <div className="group/tool relative flex items-center gap-1.5 rounded-lg border border-white/8 bg-white/2 px-2.5 py-1.5 transition-colors hover:border-[#00D4FF]/30 hover:bg-[#00D4FF]/5">
-                <svg className="size-4 text-[#00E5FF]" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c0 1.1.9-2 2-2V4c0-1.1-.9-2-2-2zM9.9 16.5H8.2V9.3h3c1.5 0 2.2.7 2.2 1.8 0 1.2-.8 1.8-2 1.8H9.9v3.6zm0-5.1v1.6h1.2c.4 0 .7-.2.7-.8s-.3-.8-.7-.8h-1.2zm6.2 5.1h-1.6v-5.2h1.6v1.1c.3-.8.9-1.2 1.6-1.2.2 0 .4 0 .6.1v1.5c-.2-.1-.5-.1-.7-.1-.9 0-1.5.6-1.5 1.7v2.1z" />
-                </svg>
-                <span className="text-[9px] font-bold tracking-widest text-white/90">Premiere Pro</span>
+            <div className="flex items-center gap-2.5 text-xs text-foreground/80 font-medium">
+              <div className="flex -space-x-2">
+                <span className="size-6 rounded-full border border-black bg-gradient-to-tr from-cyan-400 to-blue-500 flex items-center justify-center text-[8px] font-black text-white uppercase">M</span>
+                <span className="size-6 rounded-full border border-black bg-gradient-to-tr from-purple-400 to-pink-500 flex items-center justify-center text-[8px] font-black text-white uppercase">V</span>
+                <span className="size-6 rounded-full border border-black bg-gradient-to-tr from-amber-400 to-red-500 flex items-center justify-center text-[8px] font-black text-white uppercase">A</span>
               </div>
-              <div className="group/tool relative flex items-center gap-1.5 rounded-lg border border-white/8 bg-white/2 px-2.5 py-1.5 transition-colors hover:border-[#8B5CF6]/30 hover:bg-[#8B5CF6]/5">
-                <svg className="size-4 text-[#D3B7FF]" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M20 2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c0 1.1.9-2 2-2V4c0-1.1-.9-2-2-2zm-8.8 14.5L10.3 14H7.7l-.9 2.5H5.1l3.3-9.2h1.8l3.3 9.2h-1.7zm1.1-5.1c.4-.7.9-1 1.6-1 .3 0 .6.1.8.2l-.3 1.5c-.2-.1-.4-.1-.6-.1-.5 0-.9.3-1.1.8v3.7h-1.6V9.4h1.5v1.2zm-2.9 2.1l-.8-2.5-.8 2.5h1.6z" />
-                </svg>
-                <span className="text-[9px] font-bold tracking-widest text-white/90">After Effects</span>
-              </div>
-              <div className="group/tool relative flex items-center gap-1.5 rounded-lg border border-white/8 bg-white/2 px-2.5 py-1.5 transition-colors hover:border-amber-500/30 hover:bg-amber-500/5">
-                <svg className="size-4 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10" />
-                  <circle cx="12" cy="12" r="4" />
-                  <path d="M12 2v6M12 16v6M2 12h6M16 12h6" />
-                </svg>
-                <span className="text-[9px] font-bold tracking-widest text-white/90">Resolve</span>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Trust Bar + Stats Section */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, delay: 0.44 }}
-            className="mt-10 mx-auto max-w-xl border-t border-white/10 pt-6 lg:mx-0"
-          >
-            <div className="text-center lg:text-left">
-              <span className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground font-semibold">
-                Trusted By Creators, Brands & Businesses Worldwide
-              </span>
+              <span>Trusted by creators and brands generating <span className="text-white font-bold">50M+ views</span> worldwide.</span>
             </div>
             
-            <div className="mt-5 grid grid-cols-3 divide-x divide-white/10">
-              <div className="px-2 text-center lg:text-left first:pl-0">
-                <div className="font-display text-2xl text-foreground sm:text-3xl font-bold tracking-tight">50M+</div>
-                <div className="mt-1 text-[9px] uppercase tracking-[0.16em] text-muted-foreground font-medium">Views Generated</div>
-              </div>
-              <div className="px-4 text-center lg:text-left">
-                <div className="font-display text-2xl text-foreground sm:text-3xl font-bold tracking-tight">500+</div>
-                <div className="mt-1 text-[9px] uppercase tracking-[0.16em] text-muted-foreground font-medium">Projects Shipped</div>
-              </div>
-              <div className="px-4 text-center lg:text-left">
-                <div className="font-display text-2xl text-foreground sm:text-3xl font-bold tracking-tight">100+</div>
-                <div className="mt-1 text-[9px] uppercase tracking-[0.16em] text-muted-foreground font-medium">Happy Clients</div>
-              </div>
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-5 gap-y-1.5 opacity-45 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+              <span className="client-logo-hover cursor-default">NEXUS MEDIA</span>
+              <span className="client-logo-hover cursor-default">VORTEX CLIPS</span>
+              <span className="client-logo-hover cursor-default">AURA LAB</span>
+              <span className="client-logo-hover cursor-default">APEX DIGITAL</span>
+              <span className="client-logo-hover cursor-default">ECLIPSE HQ</span>
+            </div>
+          </motion.div>
+
+          {/* CTA Buttons - Conversion Optimized */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.34 }}
+            className="mt-8 flex flex-col items-center gap-4.5 sm:flex-row sm:justify-center lg:justify-start"
+          >
+            <a
+              href="#contact"
+              className="group relative inline-flex w-full items-center justify-center gap-3 overflow-hidden rounded-full px-8 py-4.5 text-sm font-bold tracking-wide text-white transition-all duration-300 hover:scale-[1.02] sm:w-auto"
+              style={{ 
+                background: "linear-gradient(135deg, #00D4FF 0%, #8B5CF6 100%)", 
+                boxShadow: "0 0 32px rgba(0,212,255,0.4), 0 4px 20px rgba(139,92,246,0.3)" 
+              }}
+            >
+              <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: "linear-gradient(135deg, #00b8db 0%, #7c3aed 100%)" }} />
+              <span className="relative">Book A Strategy Call</span>
+              <ArrowRight className="relative size-4 transition-transform group-hover:translate-x-1" />
+            </a>
+
+            <button
+              onClick={() => setShowreelOpen(true)}
+              className="group inline-flex w-full items-center justify-center gap-2.5 rounded-full border border-white/10 bg-white/[0.03] hover:bg-white/[0.07] px-8 py-4.5 text-sm font-semibold text-white/90 transition-all duration-200 sm:w-auto backdrop-blur-sm"
+            >
+              <Play className="size-4 fill-white text-white group-hover:scale-110 transition-transform" />
+              <span>Watch Showreel</span>
+            </button>
+          </motion.div>
+
+          {/* Outcome Badges (Replacing raw software badges) */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.44 }}
+            className="mt-8 flex flex-col gap-3.5 items-center lg:items-start"
+          >
+            <span className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground/85 font-bold">
+              Engineered For Outcomes:
+            </span>
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2">
+              {[
+                {
+                  label: "↑ High Retention Hook",
+                  color: "#00E5FF",
+                  bg: "rgba(0,229,255,0.06)",
+                  border: "rgba(0,229,255,0.18)",
+                  icon: <TrendingUp className="size-3.5 shrink-0" />,
+                },
+                {
+                  label: "⚡ 24h Turnaround Available",
+                  color: "#C4ABFF",
+                  bg: "rgba(196,171,255,0.06)",
+                  border: "rgba(139,92,246,0.2)",
+                  icon: <Zap className="size-3.5 shrink-0" />,
+                },
+                {
+                  label: "🎯 Platform-Native Optimization",
+                  color: "#34D399",
+                  bg: "rgba(52,211,153,0.06)",
+                  border: "rgba(52,211,153,0.18)",
+                  icon: <Target className="size-3.5 shrink-0" />,
+                },
+                {
+                  label: "📈 Revenue-Driven Editing",
+                  color: "#FBB724",
+                  bg: "rgba(251,183,36,0.06)",
+                  border: "rgba(251,183,36,0.18)",
+                  icon: <Award className="size-3.5 shrink-0" />,
+                },
+              ].map(({ label, color, bg, border, icon }) => (
+                <span
+                  key={label}
+                  className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[10px] font-bold tracking-wider transition-all duration-200 hover:scale-105 hover:brightness-110 cursor-default"
+                  style={{ color, background: bg, border: `1px solid ${border}`, boxShadow: `0 0 12px ${color}10` }}
+                >
+                  {icon}
+                  {label}
+                </span>
+              ))}
             </div>
           </motion.div>
         </div>
 
-        {/* Right Side: Interactive 3D Card + Hologram Elements */}
-        <div className="relative mx-auto w-full max-w-[560px] lg:mx-0">
-          
-          {/* Floating Premium Stats above card */}
-          <div className="absolute -top-12 left-0 z-30 hidden sm:flex flex-col gap-3">
-            <motion.div
-              animate={{ y: [0, -6, 0] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-              className="flex items-center gap-2 rounded-xl border border-white/10 bg-black/60 px-3 py-2 shadow-lg backdrop-blur-md"
-            >
-              <span className="size-1.5 rounded-full bg-electric animate-pulse" />
-              <span className="text-[10px] font-bold tracking-wider text-white/90">Ultra HD 4K Export</span>
-            </motion.div>
+        {/* RIGHT: Visual Area - Interactive Video Slider */}
+        <div className="relative mx-auto w-full max-w-[540px] lg:mx-0">
 
-            <motion.div
-              animate={{ y: [0, -6, 0] }}
-              transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-              className="flex items-center gap-2 rounded-xl border border-white/10 bg-black/60 px-3 py-2 shadow-lg backdrop-blur-md"
-            >
-              <span className="size-1.5 rounded-full bg-amber-400 animate-pulse" />
-              <span className="text-[10px] font-bold tracking-wider text-white/90">24-Hour Delivery</span>
-            </motion.div>
-          </div>
-
-          {/* Floating Sound Waveform Card (top-right) */}
+          {/* Floating stat: Retention Widget (Outcome Proof) */}
           <motion.div
-            animate={{ y: [0, 8, 0] }}
-            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute -top-10 -right-8 z-30 hidden sm:block rounded-2xl border border-white/10 bg-black/60 p-3.5 shadow-xl backdrop-blur-md w-36"
-          >
-            <div className="text-[8px] font-bold uppercase tracking-wider text-muted-foreground">Audio Master</div>
-            <div className="mt-2 flex items-end gap-1.5 h-6 justify-center">
-              <span className="w-1 rounded-full bg-[#00D4FF] h-2 animate-bounce" style={{ animationDuration: "0.8s" }} />
-              <span className="w-1 rounded-full bg-[#00D4FF] h-5 animate-bounce" style={{ animationDuration: "1.2s", animationDelay: "0.2s" }} />
-              <span className="w-1 rounded-full bg-[#8B5CF6] h-3 animate-bounce" style={{ animationDuration: "0.9s", animationDelay: "0.1s" }} />
-              <span className="w-1 rounded-full bg-[#8B5CF6] h-6 animate-bounce" style={{ animationDuration: "1.4s", animationDelay: "0.3s" }} />
-              <span className="w-1 rounded-full bg-[#00D4FF] h-4 animate-bounce" style={{ animationDuration: "1.1s", animationDelay: "0.15s" }} />
-              <span className="w-1 rounded-full bg-[#00D4FF] h-2 animate-bounce" style={{ animationDuration: "0.7s", animationDelay: "0.05s" }} />
-            </div>
-          </motion.div>
-
-          {/* Floating Timeline Tracks Card (bottom-left) */}
-          <motion.div
-            animate={{ y: [0, -8, 0] }}
-            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: 0.3 }}
-            className="absolute -bottom-8 -left-12 z-30 hidden sm:block rounded-2xl border border-white/10 bg-black/75 p-3.5 shadow-2xl backdrop-blur-md w-48"
-          >
-            <div className="flex items-center justify-between border-b border-white/5 pb-1.5">
-              <span className="text-[8px] font-bold uppercase tracking-wider text-[#00D4FF]">Timeline.prproj</span>
-              <span className="text-[8px] text-white/45">00:14:02</span>
-            </div>
-            <div className="mt-2 space-y-1.5">
-              <div className="flex items-center gap-1">
-                <span className="text-[6px] text-white/30 w-3">V2</span>
-                <div className="h-3.5 rounded bg-[#8B5CF6]/20 border border-[#8B5CF6]/40 w-28 flex items-center px-1 overflow-hidden">
-                  <span className="text-[5px] text-[#D3B7FF] font-semibold truncate">Motion_Title.aep</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-1">
-                <span className="text-[6px] text-white/30 w-3">V1</span>
-                <div className="h-3.5 rounded bg-[#00D4FF]/20 border border-[#00D4FF]/40 w-36 flex items-center px-1 overflow-hidden">
-                  <span className="text-[5px] text-[#00E5FF] font-semibold truncate">Raw_Showreel_2026.mp4</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-1">
-                <span className="text-[6px] text-white/30 w-3">A1</span>
-                <div className="h-3.5 rounded bg-emerald-500/15 border border-emerald-500/35 w-36 flex items-center px-1 overflow-hidden">
-                  <span className="text-[5px] text-emerald-400 font-semibold truncate">SFX_Impact_Whoosh.wav</span>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-
-          {/* Floating Analytics Card (bottom-right) */}
-          <motion.div
-            animate={{ y: [0, 6, 0] }}
-            transition={{ duration: 4.8, repeat: Infinity, ease: "easeInOut", delay: 0.8 }}
-            className="absolute -right-12 -bottom-4 z-30 hidden sm:block rounded-2xl border border-white/10 bg-black/75 p-3.5 shadow-2xl backdrop-blur-md w-36"
+            animate={{ y: [0, -6, 0] }}
+            transition={{ duration: 3.8, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute -top-12 left-2 z-30 hidden sm:block rounded-2xl border border-white/10 bg-black/80 p-3.5 shadow-2xl w-40 backdrop-blur-md"
+            style={{ willChange: "transform" }}
           >
             <div className="text-[8px] font-bold uppercase tracking-wider text-muted-foreground">Avg. Retention</div>
             <div className="mt-1 flex items-baseline gap-1">
-              <span className="font-display text-lg font-bold text-emerald-400">+142%</span>
-              <span className="text-[6px] text-[#00D4FF]">vs Benchmark</span>
+              <span className="font-display text-2xl font-black text-emerald-400" style={{ textShadow: "0 0 16px rgba(52,211,153,0.4)" }}>+142%</span>
+              <span className="text-[7px] text-[#00D4FF] font-semibold">vs Benchmark</span>
             </div>
-            <div className="mt-1.5 flex items-end gap-0.5 h-6">
-              <span className="w-1 rounded-t bg-white/5 h-2" />
-              <span className="w-1 rounded-t bg-white/10 h-3" />
-              <span className="w-1 rounded-t bg-white/15 h-2.5" />
-              <span className="w-1 rounded-t bg-emerald-500/30 h-4" />
-              <span className="w-1 rounded-t bg-emerald-500/60 h-5" />
-              <span className="w-1 rounded-t bg-emerald-500 h-6" />
+            <div className="mt-2 flex items-end gap-1 h-5">
+              {[12, 18, 15, 28, 36, 48].map((h, i) => (
+                <span
+                  key={i}
+                  className="w-1.5 rounded-t bg-emerald-400"
+                  style={{ 
+                    height: `${h}%`,
+                    opacity: 0.35 + (i * 0.12)
+                  }}
+                />
+              ))}
             </div>
           </motion.div>
 
-          {/* Main 3D Card Showcase */}
+          {/* Floating stat: Views scale (Outcome Proof) */}
           <motion.div
-            onMouseMove={handleMouseMove}
-            onMouseLeave={handleMouseLeave}
-            style={{
-              rotateX,
-              rotateY,
-              transformStyle: "preserve-3d",
-              perspective: 1000,
-            }}
-            className="group relative cursor-pointer"
+            animate={{ y: [0, 6, 0] }}
+            transition={{ duration: 4.4, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+            className="absolute -bottom-8 -right-4 z-30 hidden sm:block rounded-2xl border border-white/10 bg-black/80 p-3.5 shadow-2xl w-36 backdrop-blur-md"
+            style={{ willChange: "transform" }}
           >
-            {/* Slower rotating gradient backdrop glow */}
-            <div className="absolute -inset-8 rounded-[40px] bg-gradient-to-br from-electric/30 via-transparent to-violet-glow/40 opacity-70 blur-3xl transition-opacity duration-1000 group-hover:opacity-90 animate-pulse-glow" style={{ animationDuration: "8s" }} />
-            
-            <div 
-              style={{ transform: "translateZ(10px)", transformStyle: "preserve-3d" }}
-              className="relative overflow-hidden rounded-[28px] border border-white/15 bg-black/65 p-2 shadow-[0_45px_100px_-35px_rgba(0,0,0,0.95)] backdrop-blur-xl transition-all duration-300 group-hover:border-white/30"
+            <div className="text-[8px] font-bold uppercase tracking-wider text-[#00D4FF]">Single Edit Reach</div>
+            <div className="mt-1 flex items-baseline gap-0.5">
+              <span className="text-xl font-black text-white">12.8M</span>
+              <span className="text-[8px] text-muted-foreground">views</span>
+            </div>
+            <div className="mt-2 flex justify-between items-center text-[7px] text-muted-foreground/80 font-bold uppercase">
+              <span>Duration:</span>
+              <span className="text-emerald-400">Viral Spike</span>
+            </div>
+          </motion.div>
+
+          {/* Main Video Slider Card */}
+          <div className="relative group">
+            {/* Outer glow ring */}
+            <div
+              className="absolute -inset-6 rounded-[36px] opacity-50 group-hover:opacity-75 transition-opacity duration-700 pointer-events-none"
+              style={{
+                background: "conic-gradient(from 0deg at 50% 50%, #00D4FF22, #8B5CF622, #00D4FF22)",
+                filter: "blur(24px)",
+                animation: "spin-slow 8s linear infinite",
+              }}
+            />
+
+            <div
+              className="relative overflow-hidden rounded-[28px] border border-white/12 bg-black/70 p-2 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.95)] transition-all duration-300 group-hover:border-white/25"
+              style={{ willChange: "transform" }}
             >
+              {/* Interactive Slide Container */}
               <div 
-                style={{ transform: "translateZ(30px)", transformStyle: "preserve-3d" }}
-                className="relative aspect-[4/5] overflow-hidden rounded-[22px] sm:aspect-[16/13] lg:aspect-[4/5] xl:aspect-[16/13]"
+                ref={sliderContainerRef}
+                onMouseMove={onMouseMove}
+                onTouchMove={onTouchMove}
+                className="relative aspect-[4/5] overflow-hidden rounded-[22px] sm:aspect-[16/13] lg:aspect-[4/5] xl:aspect-[16/13] cursor-ew-resize select-none"
               >
-                {/* Auto Playing Showreel with dynamic color-grade flat filters */}
+                {/* Underlay layer: RAW log footage */}
                 <video
                   src={HERO_VIDEO}
                   autoPlay
@@ -339,100 +321,126 @@ export function Hero() {
                   loop
                   playsInline
                   preload="metadata"
-                  className={`size-full object-cover transition-all duration-700 ${
-                    colorGradeMode === "before" 
-                      ? "saturate-[0.30] contrast-[0.75] brightness-[1.1] sepia-[10%] filter blur-[0.4px]" 
-                      : "saturate-[1.12] contrast-[1.04]"
-                  }`}
+                  className="absolute inset-0 size-full object-cover contrast-[0.65] brightness-[1.15] saturate-[0.15] sepia-[0.05]"
+                />
+                
+                {/* Overlay layer: Color graded & dynamic editing */}
+                <video
+                  src={HERO_VIDEO}
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="metadata"
+                  className="absolute inset-0 size-full object-cover saturate-[1.25] contrast-[1.05]"
+                  style={{
+                    clipPath: `polygon(0 0, ${sliderPos}% 0, ${sliderPos}% 100%, 0 100%)`
+                  }}
                 />
 
-                {/* Pulse Play Showreel overlay */}
+                {/* Left/Right Text badges inside the player */}
+                <div className="absolute top-4 left-4 z-20 pointer-events-none bg-black/60 border border-white/10 rounded-lg px-2.5 py-1 text-[8px] font-bold text-white uppercase tracking-wider">
+                  Raw Log
+                </div>
                 <div 
-                  className="absolute inset-0 flex items-center justify-center z-20 cursor-pointer"
-                  onClick={() => setShowreelOpen(true)}
+                  className="absolute top-4 right-4 z-20 pointer-events-none bg-[#00D4FF]/20 border border-[#00D4FF]/30 rounded-lg px-2.5 py-1 text-[8px] font-bold text-[#00D4FF] uppercase tracking-wider backdrop-blur-sm"
+                  style={{
+                    opacity: sliderPos < 80 ? 1 : 0,
+                    transition: "opacity 0.2s"
+                  }}
                 >
-                  <div className="relative grid size-16 place-items-center rounded-full border border-white/20 bg-black/45 backdrop-blur-md shadow-[0_8px_32px_rgba(0,0,0,0.4)] transition-all duration-500 scale-90 group-hover:scale-100 group-hover:bg-white/15 group-hover:border-white/45">
-                    <div className="absolute inset-0 rounded-full border-2 border-electric opacity-0 scale-90 group-hover:animate-ping group-hover:opacity-60 duration-1000" />
-                    <Play className="size-6 text-white fill-white transition-transform duration-300 group-hover:scale-110 ml-0.5" />
+                  Cinematic Grade
+                </div>
+
+                {/* Center Sliding Divider line */}
+                <div 
+                  className="absolute top-0 bottom-0 w-[2px] bg-[#00D4FF] z-30 pointer-events-none"
+                  style={{ left: `${sliderPos}%` }}
+                >
+                  <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 z-40 bg-black/95 text-white border border-white/15 rounded-full py-1.5 px-3.5 text-[9px] font-extrabold tracking-widest uppercase flex items-center gap-1.5 shadow-[0_0_24px_rgba(0,212,255,0.45)] whitespace-nowrap slider-handle-glow select-none">
+                    <Sparkles className="size-3 text-[#00D4FF] animate-pulse" />
+                    <span>Drag / Hover</span>
                   </div>
                 </div>
 
-                {/* Interactive Color Grade Toggle */}
+                {/* Play action overlay button */}
                 <div 
-                  className="absolute bottom-4 right-4 z-30 flex items-center rounded-full border border-white/10 bg-black/75 p-1 backdrop-blur-md"
-                  onClick={(e) => e.stopPropagation()}
+                  className="absolute inset-0 flex items-center justify-center z-10 cursor-pointer"
+                  onClick={() => setShowreelOpen(true)}
                 >
-                  <button
-                    onClick={() => setColorGradeMode("before")}
-                    className={`rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider transition-all ${
-                      colorGradeMode === "before" 
-                        ? "bg-white/10 text-white" 
-                        : "text-white/40 hover:text-white"
-                    }`}
-                  >
-                    Raw Log
-                  </button>
-                  <span className="text-white/20 text-[9px] px-0.5">|</span>
-                  <button
-                    onClick={() => setColorGradeMode("after")}
-                    className={`rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider transition-all ${
-                      colorGradeMode === "after" 
-                        ? "bg-gradient-to-r from-electric to-violet-glow text-white shadow-lg" 
-                        : "text-white/40 hover:text-white"
-                    }`}
-                  >
-                    Graded
-                  </button>
+                  <div className="grid size-14 place-items-center rounded-full border border-white/15 bg-black/50 shadow-[0_8px_32px_rgba(0,0,0,0.6)] backdrop-blur-sm scale-90 group-hover:scale-100 transition-all duration-300 hover:border-[#00D4FF] hover:bg-black/75">
+                    <Play className="size-5 text-white fill-white ml-0.5" />
+                  </div>
                 </div>
-                
-                {/* Glare Reflection */}
-                <motion.div
-                  className="pointer-events-none absolute inset-0 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                  style={{ background: glareBg }}
-                />
               </div>
             </div>
-          </motion.div>
+          </div>
         </div>
       </motion.div>
 
-      <div className="pointer-events-none absolute bottom-5 left-1/2 z-10 hidden -translate-x-1/2 items-center gap-3 text-[9px] uppercase tracking-[0.32em] text-muted-foreground lg:flex">
-        <span className="h-px w-10 bg-gradient-to-r from-transparent to-white/25" />
-        Scroll to discover
-        <span className="h-px w-10 bg-gradient-to-l from-transparent to-white/25" />
+      {/* ── SOCIAL PROOF METRICS SECTION (4 Premium Cards) ── */}
+      <div className="relative z-10 mx-auto max-w-7xl px-5 pb-20 sm:px-8">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+          {[
+            { val: "50M+", label: "Views Generated" },
+            { val: "500+", label: "Edits Delivered" },
+            { val: "100+", label: "Retained Clients" },
+            { val: "24-Hour", label: "Turnaround Option" },
+          ].map(({ val, label }) => (
+            <div 
+              key={label} 
+              className="relative overflow-hidden rounded-2xl border border-white/5 bg-white/[0.02] p-5 sm:p-6 backdrop-blur-md transition-all duration-300 hover:border-white/12 hover:bg-white/[0.04] metric-card-glow text-center lg:text-left"
+            >
+              <div 
+                className="font-display text-3xl sm:text-4xl font-black tracking-tight"
+                style={{ 
+                  background: "linear-gradient(135deg, #fff 40%, #00D4FF 100%)", 
+                  WebkitBackgroundClip: "text", 
+                  WebkitTextFillColor: "transparent" 
+                }}
+              >
+                {val}
+              </div>
+              <div className="mt-2 text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-muted-foreground/80 font-extrabold">{label}</div>
+            </div>
+          ))}
+        </div>
       </div>
 
-      {/* Fully Interactive Immersive Video Modal */}
+      {/* Scroll indicator */}
+      <div className="pointer-events-none absolute bottom-4 left-1/2 z-10 hidden -translate-x-1/2 flex-col items-center gap-2 lg:flex">
+        <div className="h-8 w-5 rounded-full border border-white/10 flex justify-center pt-1.5">
+          <div className="w-0.5 h-2 bg-[#00D4FF] hero-scroll-dot" />
+        </div>
+      </div>
+
+      {/* Showreel Modal */}
       <AnimatePresence>
         {showreelOpen && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4 backdrop-blur-lg"
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4"
             onClick={() => setShowreelOpen(false)}
           >
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              initial={{ opacity: 0, scale: 0.96, y: 16 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+              exit={{ opacity: 0, scale: 0.96, y: 16 }}
+              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
               onClick={(e) => e.stopPropagation()}
-              className="relative aspect-video w-full max-w-5xl overflow-hidden rounded-3xl border border-white/10 bg-black shadow-[0_0_50px_rgba(0,0,0,0.8)]"
+              className="relative aspect-video w-full max-w-5xl overflow-hidden rounded-3xl border border-white/10 bg-black shadow-[0_0_60px_rgba(0,0,0,0.9)]"
             >
               <button
                 onClick={() => setShowreelOpen(false)}
-                className="absolute right-4 top-4 z-50 grid size-10 place-items-center rounded-full border border-white/10 bg-black/40 text-white backdrop-blur-md transition-colors hover:bg-white/10"
+                className="absolute right-4 top-4 z-50 grid size-10 place-items-center rounded-full border border-white/10 bg-black/50 text-white transition-colors hover:bg-white/10"
                 aria-label="Close modal"
               >
                 <X className="size-5" />
               </button>
-              <video
-                src={HERO_VIDEO}
-                controls
-                autoPlay
-                className="size-full object-cover"
-              />
+              <video src={HERO_VIDEO} controls autoPlay className="size-full object-cover" />
             </motion.div>
           </motion.div>
         )}
