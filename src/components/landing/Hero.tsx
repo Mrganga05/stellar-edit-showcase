@@ -78,23 +78,10 @@ export function Hero() {
       {/* ── MAIN CONTENT ── */}
       <motion.div
         style={{ y, opacity }}
-        className="relative z-10 mx-auto grid min-h-[100svh] max-w-7xl items-center gap-14 px-5 pb-16 pt-32 sm:px-8 lg:grid-cols-[1fr_1.15fr] lg:gap-12 lg:pb-24 lg:pt-36"
+        className="relative z-10 mx-auto grid min-h-[100svh] max-w-[1400px] items-center gap-10 px-5 pb-16 pt-32 sm:px-8 lg:grid-cols-[0.75fr_1.4fr] lg:gap-14 lg:pb-24 lg:pt-36"
       >
         {/* LEFT: Text column */}
-        <div className="text-center lg:text-left">
-
-          {/* Badge */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-            className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-[10px] uppercase tracking-[0.24em] text-foreground/70 sm:text-xs backdrop-blur-sm"
-          >
-            <Sparkles className="size-3.5 text-[#00D4FF]" style={{ filter: "drop-shadow(0 0 6px #00D4FF)" }} />
-            Premium Post-Production Studio
-            <span className="h-3 w-px bg-white/15" />
-            <span className="text-[#00D4FF] font-semibold" style={{ textShadow: "0 0 12px #00D4FF88" }}>Now Booking Q3</span>
-          </motion.div>
+        <div className="text-center lg:text-left flex flex-col justify-center">
 
           {/* Headline */}
           <motion.h1
@@ -121,28 +108,20 @@ export function Hero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.34 }}
-            className="mt-8 flex flex-col items-center gap-4.5 sm:flex-row sm:justify-center lg:justify-start"
+            className="mt-8 flex flex-col items-center sm:flex-row sm:justify-center lg:justify-start"
           >
             <a
               href="#contact"
-              className="group relative inline-flex w-full items-center justify-center gap-3 overflow-hidden rounded-full px-8 py-4.5 text-sm font-bold tracking-wide text-white transition-all duration-300 hover:scale-[1.02] sm:w-auto"
+              className="group relative inline-flex w-full items-center justify-center gap-3 overflow-hidden rounded-full px-10 py-5 text-sm font-bold tracking-wide text-white transition-all duration-300 hover:scale-[1.03] sm:w-auto"
               style={{ 
                 background: "linear-gradient(135deg, #00D4FF 0%, #8B5CF6 100%)", 
-                boxShadow: "0 0 32px rgba(0,212,255,0.4), 0 4px 20px rgba(139,92,246,0.3)" 
+                boxShadow: "0 0 40px rgba(0,212,255,0.45), 0 8px 30px rgba(139,92,246,0.35)" 
               }}
             >
               <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: "linear-gradient(135deg, #00b8db 0%, #7c3aed 100%)" }} />
-              <span className="relative">Book A Strategy Call</span>
-              <ArrowRight className="relative size-4 transition-transform group-hover:translate-x-1" />
+              <span className="relative text-[15px]">Book A Strategy Call</span>
+              <ArrowRight className="relative size-4.5 transition-transform group-hover:translate-x-1" />
             </a>
-
-            <button
-              onClick={() => setShowreelOpen(true)}
-              className="group inline-flex w-full items-center justify-center gap-2.5 rounded-full border border-white/10 bg-white/[0.03] hover:bg-white/[0.07] px-8 py-4.5 text-sm font-semibold text-white/90 transition-all duration-200 sm:w-auto backdrop-blur-sm"
-            >
-              <Play className="size-4 fill-white text-white group-hover:scale-110 transition-transform" />
-              <span>Watch Showreel</span>
-            </button>
           </motion.div>
 
           {/* Outcome Badges (Replacing raw software badges) */}
