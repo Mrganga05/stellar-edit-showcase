@@ -78,7 +78,7 @@ export function Hero() {
       {/* ── MAIN CONTENT ── */}
       <motion.div
         style={{ y, opacity }}
-        className="relative z-10 mx-auto grid min-h-[100svh] max-w-7xl items-center gap-14 px-5 pb-16 pt-32 sm:px-8 lg:grid-cols-[1.1fr_0.9fr] lg:gap-12 lg:pb-24 lg:pt-36"
+        className="relative z-10 mx-auto grid min-h-[100svh] max-w-7xl items-center gap-14 px-5 pb-16 pt-32 sm:px-8 lg:grid-cols-[1fr_1.15fr] lg:gap-12 lg:pb-24 lg:pt-36"
       >
         {/* LEFT: Text column */}
         <div className="text-center lg:text-left">
@@ -199,27 +199,34 @@ export function Hero() {
           </motion.div>
         </div>
 
-        {/* RIGHT: Visual Area - Full-width Workspace Image */}
-        <div className="relative w-full lg:mx-0">
+        {/* RIGHT: Visual Area - Full-width Workspace Image with subtle float */}
+        <motion.div 
+          animate={{ y: [0, -10, 0] }}
+          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+          className="relative w-full lg:pl-4 xl:pl-8"
+          style={{ willChange: "transform" }}
+        >
           {/* Main Workspace Preview Card */}
           <div className="relative group">
-            {/* Outer glow ring */}
+            {/* Ambient luxury backdrop glow */}
             <div
-              className="absolute -inset-6 rounded-[36px] opacity-50 group-hover:opacity-75 transition-opacity duration-700 pointer-events-none"
+              className="absolute -inset-8 rounded-[40px] opacity-40 group-hover:opacity-60 transition-opacity duration-700 pointer-events-none"
               style={{
-                background: "conic-gradient(from 0deg at 50% 50%, #00D4FF22, #8B5CF622, #00D4FF22)",
-                filter: "blur(24px)",
-                animation: "spin-slow 8s linear infinite",
+                background: "radial-gradient(circle at 50% 50%, rgba(0, 212, 255, 0.25), rgba(139, 92, 246, 0.15), transparent 70%)",
+                filter: "blur(32px)",
               }}
             />
 
             <div
-              className="relative overflow-hidden rounded-[28px] border border-white/12 bg-black/70 p-2 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.95)] transition-all duration-300 group-hover:border-white/25"
+              className="relative overflow-hidden rounded-[28px] border border-white/10 bg-black/60 p-2 shadow-[0_45px_90px_-25px_rgba(0,0,0,0.95)] transition-all duration-500 group-hover:border-white/20"
               style={{ willChange: "transform" }}
             >
-              {/* Image Preview Container with landscape aspect ratios to show the full workspace image */}
+              {/* Glassmorphic border reflection highlight */}
+              <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent pointer-events-none" />
+
+              {/* Image Preview Container with maximized view layout ratios */}
               <div 
-                className="relative aspect-video overflow-hidden rounded-[22px] sm:aspect-[16/10] lg:aspect-[16/10] xl:aspect-[16/10] select-none"
+                className="relative aspect-video overflow-hidden rounded-[22px] sm:aspect-[16/10] lg:aspect-[16/10.5] xl:aspect-[16/10] select-none"
               >
                 <img
                   src={heroEditorImg}
@@ -227,10 +234,13 @@ export function Hero() {
                   className="absolute inset-0 size-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                   loading="eager"
                 />
+
+                {/* Subtle vignette boundary shadow */}
+                <div className="absolute inset-0 bg-gradient-to-tr from-black/20 via-transparent to-black/10 pointer-events-none" />
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
       </motion.div>
 
       {/* ── SOCIAL PROOF METRICS SECTION (4 Premium Cards) ── */}
