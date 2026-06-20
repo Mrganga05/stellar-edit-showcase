@@ -259,9 +259,8 @@ export function Hero() {
             />
 
             <div
-              className="relative overflow-hidden rounded-[28px] border border-white/12 bg-black/70 p-2 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.95)] transition-all duration-300 group-hover:border-white/25 cursor-pointer"
+              className="relative overflow-hidden rounded-[28px] border border-white/12 bg-black/70 p-2 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.95)] transition-all duration-300 group-hover:border-white/25"
               style={{ willChange: "transform" }}
-              onClick={() => setShowreelOpen(true)}
             >
               {/* Image Preview Container */}
               <div 
@@ -273,22 +272,6 @@ export function Hero() {
                   className="absolute inset-0 size-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
                   loading="eager"
                 />
-
-                {/* Dark gradient overlay for visual separation */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/30 opacity-60 group-hover:opacity-40 transition-opacity duration-300" />
-
-                {/* Play action overlay button */}
-                <div className="absolute inset-0 flex items-center justify-center z-10">
-                  <div className="grid size-16 place-items-center rounded-full border border-white/20 bg-black/40 shadow-[0_8px_32px_rgba(0,0,0,0.5)] backdrop-blur-sm scale-90 group-hover:scale-100 transition-all duration-300 group-hover:border-[#00D4FF] group-hover:bg-black/60">
-                    <Play className="size-6 text-white fill-white ml-0.5 group-hover:text-[#00D4FF] group-hover:fill-[#00D4FF] transition-colors duration-300" />
-                  </div>
-                </div>
-
-                {/* Interactive visual helper tag */}
-                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 bg-black/75 border border-white/10 rounded-full py-1.5 px-3.5 text-[9px] font-extrabold tracking-widest uppercase flex items-center gap-1.5 shadow-[0_4px_12px_rgba(0,0,0,0.5)] whitespace-nowrap">
-                  <Sparkles className="size-3 text-[#00D4FF]" />
-                  <span>Click to Watch Showreel</span>
-                </div>
               </div>
             </div>
           </div>
