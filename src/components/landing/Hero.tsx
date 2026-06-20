@@ -3,10 +3,10 @@ import { ArrowRight, Sparkles, Play, X, TrendingUp, Zap, Target, Award } from "l
 import { useRef, useState, useEffect } from "react";
 import { HERO_VIDEO } from "@/lib/portfolio-data";
 import { supabase } from "@/lib/supabase";
+import heroEditorImg from "@/assets/hero-editor.jpg";
 
 export function Hero() {
   const [showreelOpen, setShowreelOpen] = useState(false);
-  const [sliderPos, setSliderPos] = useState(50);
   const [heroData, setHeroData] = useState({
     headline: 'High-End Video Editing<br/>That Scales Your <span class="text-gradient-brand font-display italic font-normal">Views, Retention, & Revenue.</span>',
     subheadline:
@@ -33,31 +33,11 @@ export function Hero() {
   }, []);
 
   const ref = useRef<HTMLDivElement>(null);
-  const sliderContainerRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
   
   // Parallax constraints for GPU execution
   const y = useTransform(scrollYProgress, [0, 1], [0, 60]);
   const opacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
-
-  // Handle Before/After slider coordinate calculations
-  const handleSliderMove = (clientX: number) => {
-    if (!sliderContainerRef.current) return;
-    const rect = sliderContainerRef.current.getBoundingClientRect();
-    const x = clientX - rect.left;
-    const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100));
-    setSliderPos(percentage);
-  };
-
-  const onMouseMove = (e: React.MouseEvent) => {
-    handleSliderMove(e.clientX);
-  };
-
-  const onTouchMove = (e: React.TouchEvent) => {
-    if (e.touches.length > 0) {
-      handleSliderMove(e.touches[0].clientX);
-    }
-  };
 
   return (
     <section ref={ref} id="top" className="relative min-h-[100svh] w-full overflow-hidden bg-[#050508]">
@@ -135,30 +115,6 @@ export function Hero() {
             {heroData.subheadline}
           </motion.p>
 
-          {/* Trust statement & Client Logos */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.28 }}
-            className="mt-6 flex flex-col gap-4 items-center lg:items-start"
-          >
-            <div className="flex items-center gap-2.5 text-xs text-foreground/80 font-medium">
-              <div className="flex -space-x-2">
-                <span className="size-6 rounded-full border border-black bg-gradient-to-tr from-cyan-400 to-blue-500 flex items-center justify-center text-[8px] font-black text-white uppercase">M</span>
-                <span className="size-6 rounded-full border border-black bg-gradient-to-tr from-purple-400 to-pink-500 flex items-center justify-center text-[8px] font-black text-white uppercase">V</span>
-                <span className="size-6 rounded-full border border-black bg-gradient-to-tr from-amber-400 to-red-500 flex items-center justify-center text-[8px] font-black text-white uppercase">A</span>
-              </div>
-              <span>Trusted by creators and brands generating <span className="text-white font-bold">50M+ views</span> worldwide.</span>
-            </div>
-            
-            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-x-5 gap-y-1.5 opacity-45 text-[10px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-              <span className="client-logo-hover cursor-default">NEXUS MEDIA</span>
-              <span className="client-logo-hover cursor-default">VORTEX CLIPS</span>
-              <span className="client-logo-hover cursor-default">AURA LAB</span>
-              <span className="client-logo-hover cursor-default">APEX DIGITAL</span>
-              <span className="client-logo-hover cursor-default">ECLIPSE HQ</span>
-            </div>
-          </motion.div>
 
           {/* CTA Buttons - Conversion Optimized */}
           <motion.div
@@ -290,7 +246,7 @@ export function Hero() {
             </div>
           </motion.div>
 
-          {/* Main Video Slider Card */}
+          {/* Main Video Preview Card */}
           <div className="relative group">
             {/* Outer glow ring */}
             <div
@@ -303,74 +259,35 @@ export function Hero() {
             />
 
             <div
-              className="relative overflow-hidden rounded-[28px] border border-white/12 bg-black/70 p-2 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.95)] transition-all duration-300 group-hover:border-white/25"
+              className="relative overflow-hidden rounded-[28px] border border-white/12 bg-black/70 p-2 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.95)] transition-all duration-300 group-hover:border-white/25 cursor-pointer"
               style={{ willChange: "transform" }}
+              onClick={() => setShowreelOpen(true)}
             >
-              {/* Interactive Slide Container */}
+              {/* Image Preview Container */}
               <div 
-                ref={sliderContainerRef}
-                onMouseMove={onMouseMove}
-                onTouchMove={onTouchMove}
-                className="relative aspect-[4/5] overflow-hidden rounded-[22px] sm:aspect-[16/13] lg:aspect-[4/5] xl:aspect-[16/13] cursor-ew-resize select-none"
+                className="relative aspect-[4/5] overflow-hidden rounded-[22px] sm:aspect-[16/13] lg:aspect-[4/5] xl:aspect-[16/13] select-none"
               >
-                {/* Underlay layer: RAW log footage */}
-                <video
-                  src={HERO_VIDEO}
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  preload="metadata"
-                  className="absolute inset-0 size-full object-cover contrast-[0.65] brightness-[1.15] saturate-[0.15] sepia-[0.05]"
-                />
-                
-                {/* Overlay layer: Color graded & dynamic editing */}
-                <video
-                  src={HERO_VIDEO}
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  preload="metadata"
-                  className="absolute inset-0 size-full object-cover saturate-[1.25] contrast-[1.05]"
-                  style={{
-                    clipPath: `polygon(0 0, ${sliderPos}% 0, ${sliderPos}% 100%, 0 100%)`
-                  }}
+                <img
+                  src={heroEditorImg}
+                  alt="Premium Video Editing Workspace"
+                  className="absolute inset-0 size-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                  loading="eager"
                 />
 
-                {/* Left/Right Text badges inside the player */}
-                <div className="absolute top-4 left-4 z-20 pointer-events-none bg-black/60 border border-white/10 rounded-lg px-2.5 py-1 text-[8px] font-bold text-white uppercase tracking-wider">
-                  Raw Log
-                </div>
-                <div 
-                  className="absolute top-4 right-4 z-20 pointer-events-none bg-[#00D4FF]/20 border border-[#00D4FF]/30 rounded-lg px-2.5 py-1 text-[8px] font-bold text-[#00D4FF] uppercase tracking-wider backdrop-blur-sm"
-                  style={{
-                    opacity: sliderPos < 80 ? 1 : 0,
-                    transition: "opacity 0.2s"
-                  }}
-                >
-                  Cinematic Grade
-                </div>
-
-                {/* Center Sliding Divider line */}
-                <div 
-                  className="absolute top-0 bottom-0 w-[2px] bg-[#00D4FF] z-30 pointer-events-none"
-                  style={{ left: `${sliderPos}%` }}
-                >
-                  <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 z-40 bg-black/95 text-white border border-white/15 rounded-full py-1.5 px-3.5 text-[9px] font-extrabold tracking-widest uppercase flex items-center gap-1.5 shadow-[0_0_24px_rgba(0,212,255,0.45)] whitespace-nowrap slider-handle-glow select-none">
-                    <Sparkles className="size-3 text-[#00D4FF] animate-pulse" />
-                    <span>Drag / Hover</span>
-                  </div>
-                </div>
+                {/* Dark gradient overlay for visual separation */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/30 opacity-60 group-hover:opacity-40 transition-opacity duration-300" />
 
                 {/* Play action overlay button */}
-                <div 
-                  className="absolute inset-0 flex items-center justify-center z-10 cursor-pointer"
-                  onClick={() => setShowreelOpen(true)}
-                >
-                  <div className="grid size-14 place-items-center rounded-full border border-white/15 bg-black/50 shadow-[0_8px_32px_rgba(0,0,0,0.6)] backdrop-blur-sm scale-90 group-hover:scale-100 transition-all duration-300 hover:border-[#00D4FF] hover:bg-black/75">
-                    <Play className="size-5 text-white fill-white ml-0.5" />
+                <div className="absolute inset-0 flex items-center justify-center z-10">
+                  <div className="grid size-16 place-items-center rounded-full border border-white/20 bg-black/40 shadow-[0_8px_32px_rgba(0,0,0,0.5)] backdrop-blur-sm scale-90 group-hover:scale-100 transition-all duration-300 group-hover:border-[#00D4FF] group-hover:bg-black/60">
+                    <Play className="size-6 text-white fill-white ml-0.5 group-hover:text-[#00D4FF] group-hover:fill-[#00D4FF] transition-colors duration-300" />
                   </div>
+                </div>
+
+                {/* Interactive visual helper tag */}
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 bg-black/75 border border-white/10 rounded-full py-1.5 px-3.5 text-[9px] font-extrabold tracking-widest uppercase flex items-center gap-1.5 shadow-[0_4px_12px_rgba(0,0,0,0.5)] whitespace-nowrap">
+                  <Sparkles className="size-3 text-[#00D4FF]" />
+                  <span>Click to Watch Showreel</span>
                 </div>
               </div>
             </div>
