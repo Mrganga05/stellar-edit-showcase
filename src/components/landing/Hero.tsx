@@ -199,54 +199,9 @@ export function Hero() {
           </motion.div>
         </div>
 
-        {/* RIGHT: Visual Area - Interactive Video Slider */}
-        <div className="relative mx-auto w-full max-w-[540px] lg:mx-0">
-
-          {/* Floating stat: Retention Widget (Outcome Proof) */}
-          <motion.div
-            animate={{ y: [0, -6, 0] }}
-            transition={{ duration: 3.8, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute -top-12 left-2 z-30 hidden sm:block rounded-2xl border border-white/10 bg-black/80 p-3.5 shadow-2xl w-40 backdrop-blur-md"
-            style={{ willChange: "transform" }}
-          >
-            <div className="text-[8px] font-bold uppercase tracking-wider text-muted-foreground">Avg. Retention</div>
-            <div className="mt-1 flex items-baseline gap-1">
-              <span className="font-display text-2xl font-black text-emerald-400" style={{ textShadow: "0 0 16px rgba(52,211,153,0.4)" }}>+142%</span>
-              <span className="text-[7px] text-[#00D4FF] font-semibold">vs Benchmark</span>
-            </div>
-            <div className="mt-2 flex items-end gap-1 h-5">
-              {[12, 18, 15, 28, 36, 48].map((h, i) => (
-                <span
-                  key={i}
-                  className="w-1.5 rounded-t bg-emerald-400"
-                  style={{ 
-                    height: `${h}%`,
-                    opacity: 0.35 + (i * 0.12)
-                  }}
-                />
-              ))}
-            </div>
-          </motion.div>
-
-          {/* Floating stat: Views scale (Outcome Proof) */}
-          <motion.div
-            animate={{ y: [0, 6, 0] }}
-            transition={{ duration: 4.4, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-            className="absolute -bottom-8 -right-4 z-30 hidden sm:block rounded-2xl border border-white/10 bg-black/80 p-3.5 shadow-2xl w-36 backdrop-blur-md"
-            style={{ willChange: "transform" }}
-          >
-            <div className="text-[8px] font-bold uppercase tracking-wider text-[#00D4FF]">Single Edit Reach</div>
-            <div className="mt-1 flex items-baseline gap-0.5">
-              <span className="text-xl font-black text-white">12.8M</span>
-              <span className="text-[8px] text-muted-foreground">views</span>
-            </div>
-            <div className="mt-2 flex justify-between items-center text-[7px] text-muted-foreground/80 font-bold uppercase">
-              <span>Duration:</span>
-              <span className="text-emerald-400">Viral Spike</span>
-            </div>
-          </motion.div>
-
-          {/* Main Video Preview Card */}
+        {/* RIGHT: Visual Area - Full-width Workspace Image */}
+        <div className="relative w-full lg:mx-0">
+          {/* Main Workspace Preview Card */}
           <div className="relative group">
             {/* Outer glow ring */}
             <div
@@ -262,9 +217,9 @@ export function Hero() {
               className="relative overflow-hidden rounded-[28px] border border-white/12 bg-black/70 p-2 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.95)] transition-all duration-300 group-hover:border-white/25"
               style={{ willChange: "transform" }}
             >
-              {/* Image Preview Container */}
+              {/* Image Preview Container with landscape aspect ratios to show the full workspace image */}
               <div 
-                className="relative aspect-[4/5] overflow-hidden rounded-[22px] sm:aspect-[16/13] lg:aspect-[4/5] xl:aspect-[16/13] select-none"
+                className="relative aspect-video overflow-hidden rounded-[22px] sm:aspect-[16/10] lg:aspect-[16/10] xl:aspect-[16/10] select-none"
               >
                 <img
                   src={heroEditorImg}
