@@ -34,7 +34,7 @@ export function Hero() {
 
   const ref = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
-  
+
   // Parallax constraints for GPU execution
   const y = useTransform(scrollYProgress, [0, 1], [0, 60]);
   const opacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
@@ -78,10 +78,38 @@ export function Hero() {
       {/* ── MAIN CONTENT ── */}
       <motion.div
         style={{ y, opacity }}
-        className="relative z-10 mx-auto grid min-h-[100svh] max-w-[1400px] items-center gap-10 px-5 pb-16 pt-32 sm:px-8 lg:grid-cols-[0.75fr_1.4fr] lg:gap-14 lg:pb-24 lg:pt-36"
+        className="relative z-10 mx-auto grid min-h-[100svh] max-w-[1400px] items-center gap-12 px-5 pb-16 pt-32 sm:px-8 lg:grid-cols-[0.8fr_1.35fr] lg:gap-16 lg:pb-24 lg:pt-36"
       >
         {/* LEFT: Text column */}
         <div className="text-center lg:text-left flex flex-col justify-center">
+
+          {/* Engineered For Outcomes Banner */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+            className="mb-8 flex flex-col items-center lg:items-start gap-4.5"
+          >
+            <div className="inline-flex items-center gap-2 rounded-full border border-[#00D4FF]/25 bg-[#00D4FF]/5 px-4 py-2 text-[10px] font-bold uppercase tracking-[0.25em] text-[#00D4FF] backdrop-blur-sm shadow-[0_0_24px_rgba(0,212,255,0.08)]">
+              <Sparkles className="size-3.5 text-[#00D4FF] animate-pulse" />
+              Engineered For Outcomes
+            </div>
+            
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2.5 text-xs font-bold tracking-wide text-foreground/95">
+              <span className="flex items-center gap-1.5 bg-white/[0.03] hover:bg-white/[0.07] border border-white/10 rounded-full px-4 py-2 transition-all hover:scale-[1.03] duration-200 shadow-md">
+                <span className="text-emerald-400 font-extrabold">↑</span> High Retention Hook
+              </span>
+              <span className="flex items-center gap-1.5 bg-white/[0.03] hover:bg-white/[0.07] border border-white/10 rounded-full px-4 py-2 transition-all hover:scale-[1.03] duration-200 shadow-md">
+                <span>⚡</span> 24h Turnaround Available
+              </span>
+              <span className="flex items-center gap-1.5 bg-white/[0.03] hover:bg-white/[0.07] border border-white/10 rounded-full px-4 py-2 transition-all hover:scale-[1.03] duration-200 shadow-md">
+                <span>🎯</span> Platform-Native Optimization
+              </span>
+              <span className="flex items-center gap-1.5 bg-white/[0.03] hover:bg-white/[0.07] border border-white/10 rounded-full px-4 py-2 transition-all hover:scale-[1.03] duration-200 shadow-md">
+                <span>📈</span> Revenue-Driven Editing
+              </span>
+            </div>
+          </motion.div>
 
           {/* Headline */}
           <motion.h1
@@ -102,7 +130,6 @@ export function Hero() {
             {heroData.subheadline}
           </motion.p>
 
-
           {/* CTA Buttons - Conversion Optimized */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -113,9 +140,9 @@ export function Hero() {
             <a
               href="#contact"
               className="group relative inline-flex w-full items-center justify-center gap-3 overflow-hidden rounded-full px-10 py-5 text-sm font-bold tracking-wide text-white transition-all duration-300 hover:scale-[1.03] sm:w-auto"
-              style={{ 
-                background: "linear-gradient(135deg, #00D4FF 0%, #8B5CF6 100%)", 
-                boxShadow: "0 0 40px rgba(0,212,255,0.45), 0 8px 30px rgba(139,92,246,0.35)" 
+              style={{
+                background: "linear-gradient(135deg, #00D4FF 0%, #8B5CF6 100%)",
+                boxShadow: "0 0 40px rgba(0,212,255,0.45), 0 8px 30px rgba(139,92,246,0.35)"
               }}
             >
               <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: "linear-gradient(135deg, #00b8db 0%, #7c3aed 100%)" }} />
@@ -124,62 +151,63 @@ export function Hero() {
             </a>
           </motion.div>
 
-          {/* Outcome Badges (Replacing raw software badges) */}
+          {/* Software & Tools Section */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.44 }}
-            className="mt-8 flex flex-col gap-3.5 items-center lg:items-start"
+            className="mt-10 flex flex-col gap-3.5 items-center lg:items-start"
           >
-            <span className="text-[9px] uppercase tracking-[0.2em] text-muted-foreground/85 font-bold">
-              Engineered For Outcomes:
+            <span className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground/80 font-extrabold">
+              Production Stack & Tools:
             </span>
-            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2">
-              {[
-                {
-                  label: "↑ High Retention Hook",
-                  color: "#00E5FF",
-                  bg: "rgba(0,229,255,0.06)",
-                  border: "rgba(0,229,255,0.18)",
-                  icon: <TrendingUp className="size-3.5 shrink-0" />,
-                },
-                {
-                  label: "⚡ 24h Turnaround Available",
-                  color: "#C4ABFF",
-                  bg: "rgba(196,171,255,0.06)",
-                  border: "rgba(139,92,246,0.2)",
-                  icon: <Zap className="size-3.5 shrink-0" />,
-                },
-                {
-                  label: "🎯 Platform-Native Optimization",
-                  color: "#34D399",
-                  bg: "rgba(52,211,153,0.06)",
-                  border: "rgba(52,211,153,0.18)",
-                  icon: <Target className="size-3.5 shrink-0" />,
-                },
-                {
-                  label: "📈 Revenue-Driven Editing",
-                  color: "#FBB724",
-                  bg: "rgba(251,183,36,0.06)",
-                  border: "rgba(251,183,36,0.18)",
-                  icon: <Award className="size-3.5 shrink-0" />,
-                },
-              ].map(({ label, color, bg, border, icon }) => (
-                <span
-                  key={label}
-                  className="inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-[10px] font-bold tracking-wider transition-all duration-200 hover:scale-105 hover:brightness-110 cursor-default"
-                  style={{ color, background: bg, border: `1px solid ${border}`, boxShadow: `0 0 12px ${color}10` }}
-                >
-                  {icon}
-                  {label}
-                </span>
-              ))}
+            <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2.5">
+              <span className="inline-flex items-center gap-2 rounded-full border border-[#00C4FF]/20 bg-[#00C4FF]/5 px-3.5 py-2 text-[10px] font-extrabold tracking-wider text-[#00C4FF] transition-all hover:scale-105 hover:bg-[#00C4FF]/10 duration-200 cursor-default">
+                <svg className="size-3.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect width="24" height="24" rx="4" fill="#00005C"/>
+                  <rect x="0.5" y="0.5" width="23" height="23" rx="3.5" stroke="#00C4FF" strokeOpacity="0.4"/>
+                  <text x="5" y="16.5" fill="#00C4FF" fontSize="10" fontWeight="black" fontFamily="sans-serif">Pr</text>
+                </svg>
+                Premiere Pro
+              </span>
+              <span className="inline-flex items-center gap-2 rounded-full border border-[#D966FF]/20 bg-[#D966FF]/5 px-3.5 py-2 text-[10px] font-extrabold tracking-wider text-[#D966FF] transition-all hover:scale-105 hover:bg-[#D966FF]/10 duration-200 cursor-default">
+                <svg className="size-3.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect width="24" height="24" rx="4" fill="#1C0030"/>
+                  <rect x="0.5" y="0.5" width="23" height="23" rx="3.5" stroke="#D966FF" strokeOpacity="0.4"/>
+                  <text x="5" y="16.5" fill="#D966FF" fontSize="10" fontWeight="black" fontFamily="sans-serif">Ae</text>
+                </svg>
+                After Effects
+              </span>
+              <span className="inline-flex items-center gap-2 rounded-full border border-[#FF9F1C]/20 bg-[#FF9F1C]/5 px-3.5 py-2 text-[10px] font-extrabold tracking-wider text-[#FF9F1C] transition-all hover:scale-105 hover:bg-[#FF9F1C]/10 duration-200 cursor-default">
+                <div className="relative size-3.5 flex items-center justify-center rounded-sm bg-black border border-[#FF9F1C]/30 overflow-hidden">
+                  <div className="absolute inset-0 bg-gradient-to-tr from-red-500 via-blue-500 to-green-500 opacity-80" />
+                  <div className="absolute inset-[1px] bg-black rounded-[1px]" />
+                  <span className="absolute text-[7px] font-black text-[#FF9F1C]">Dr</span>
+                </div>
+                DaVinci Resolve
+              </span>
+              <span className="inline-flex items-center gap-2 rounded-full border border-[#00C8FF]/20 bg-[#00C8FF]/5 px-3.5 py-2 text-[10px] font-extrabold tracking-wider text-[#00C8FF] transition-all hover:scale-105 hover:bg-[#00C8FF]/10 duration-200 cursor-default">
+                <svg className="size-3.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect width="24" height="24" rx="4" fill="#001C26"/>
+                  <rect x="0.5" y="0.5" width="23" height="23" rx="3.5" stroke="#00C8FF" strokeOpacity="0.4"/>
+                  <text x="5" y="16.5" fill="#00C8FF" fontSize="10" fontWeight="black" fontFamily="sans-serif">Ps</text>
+                </svg>
+                Photoshop
+              </span>
+              <span className="inline-flex items-center gap-2 rounded-full border border-[#00FFC2]/20 bg-[#00FFC2]/5 px-3.5 py-2 text-[10px] font-extrabold tracking-wider text-[#00FFC2] transition-all hover:scale-105 hover:bg-[#00FFC2]/10 duration-200 cursor-default">
+                <svg className="size-3.5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect width="24" height="24" rx="4" fill="#00261C"/>
+                  <rect x="0.5" y="0.5" width="23" height="23" rx="3.5" stroke="#00FFC2" strokeOpacity="0.4"/>
+                  <text x="5" y="16.5" fill="#00FFC2" fontSize="10" fontWeight="black" fontFamily="sans-serif">Au</text>
+                </svg>
+                Audition
+              </span>
             </div>
           </motion.div>
         </div>
 
         {/* RIGHT: Visual Area - Full-width Workspace Image with subtle float */}
-        <motion.div 
+        <motion.div
           animate={{ y: [0, -10, 0] }}
           transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
           className="relative w-full lg:pl-4 xl:pl-8"
@@ -204,7 +232,7 @@ export function Hero() {
               <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/15 to-transparent pointer-events-none" />
 
               {/* Image Preview Container with maximized view layout ratios */}
-              <div 
+              <div
                 className="relative aspect-video overflow-hidden rounded-[22px] sm:aspect-[16/10] lg:aspect-[16/10.5] xl:aspect-[16/10] select-none"
               >
                 <img
@@ -231,16 +259,16 @@ export function Hero() {
             { val: "100+", label: "Retained Clients" },
             { val: "24-Hour", label: "Turnaround Option" },
           ].map(({ val, label }) => (
-            <div 
-              key={label} 
+            <div
+              key={label}
               className="relative overflow-hidden rounded-2xl border border-white/5 bg-white/[0.02] p-5 sm:p-6 backdrop-blur-md transition-all duration-300 hover:border-white/12 hover:bg-white/[0.04] metric-card-glow text-center lg:text-left"
             >
-              <div 
+              <div
                 className="font-display text-3xl sm:text-4xl font-black tracking-tight"
-                style={{ 
-                  background: "linear-gradient(135deg, #fff 40%, #00D4FF 100%)", 
-                  WebkitBackgroundClip: "text", 
-                  WebkitTextFillColor: "transparent" 
+                style={{
+                  background: "linear-gradient(135deg, #fff 40%, #00D4FF 100%)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent"
                 }}
               >
                 {val}
