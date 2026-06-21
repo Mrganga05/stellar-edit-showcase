@@ -14,7 +14,11 @@ export function Results() {
       <div className="relative mx-auto max-w-7xl px-5 sm:px-8">
         <SectionHeading
           eyebrow="Results & Impact"
-          title={<>Numbers that <span className="text-gradient-brand">don't lie</span>.</>}
+          title={
+            <>
+              Numbers that <span className="text-gradient-brand">don't lie</span>.
+            </>
+          }
         />
         <div className="mt-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {stats.map((s) => (
@@ -22,7 +26,9 @@ export function Results() {
               <div className="font-display text-5xl text-gradient-brand sm:text-6xl">
                 <AnimatedCounter to={s.to} suffix={s.suffix} />
               </div>
-              <div className="mt-3 text-[11px] uppercase tracking-[0.22em] text-muted-foreground">{s.label}</div>
+              <div className="mt-3 text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+                {s.label}
+              </div>
             </div>
           ))}
         </div>

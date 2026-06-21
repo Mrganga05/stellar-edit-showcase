@@ -20,7 +20,7 @@ import {
   Save,
   Sparkles,
   Layers,
-  X
+  X,
 } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
@@ -37,7 +37,9 @@ function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [usernameInput, setUsernameInput] = useState("");
   const [passwordInput, setPasswordInput] = useState("");
-  const [activeTab, setActiveTab] = useState<"contact" | "sample" | "portfolio" | "hero">("contact");
+  const [activeTab, setActiveTab] = useState<"contact" | "sample" | "portfolio" | "hero">(
+    "contact",
+  );
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -168,7 +170,11 @@ function AdminPage() {
     });
   }
 
-  async function updateStatus(table: "contact_requests" | "sample_edit_requests", id: string, newStatus: string) {
+  async function updateStatus(
+    table: "contact_requests" | "sample_edit_requests",
+    id: string,
+    newStatus: string,
+  ) {
     try {
       const { error } = await supabase
         .from(table)
@@ -192,10 +198,7 @@ function AdminPage() {
     }
 
     try {
-      const { error } = await supabase
-        .from(table)
-        .delete()
-        .eq("id", id);
+      const { error } = await supabase.from(table).delete().eq("id", id);
 
       if (error) throw error;
       toast.success("Request deleted successfully");
@@ -245,7 +248,7 @@ function AdminPage() {
   async function handleSaveProject(e: React.FormEvent) {
     e.preventDefault();
     setSavingProject(true);
-    
+
     // Parse newline-separated values
     const techniquesArr = projTechniques
       .split("\n")
@@ -273,7 +276,7 @@ function AdminPage() {
       sortOrder: Number(projSortOrder),
       isPublished: projIsPublished,
       serviceId: projServiceId || null,
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     };
 
     try {
@@ -293,7 +296,7 @@ function AdminPage() {
         if (error) throw error;
         toast.success("New portfolio project added successfully");
       }
-      
+
       setIsProjectModalOpen(false);
       fetchData();
     } catch (err: any) {
@@ -307,15 +310,14 @@ function AdminPage() {
   }
 
   async function deletePortfolioProject(id: string) {
-    if (!confirm("Are you sure you want to delete this portfolio project? This action is permanent.")) {
+    if (
+      !confirm("Are you sure you want to delete this portfolio project? This action is permanent.")
+    ) {
       return;
     }
 
     try {
-      const { error } = await supabase
-        .from("portfolio_projects")
-        .delete()
-        .eq("id", id);
+      const { error } = await supabase.from("portfolio_projects").delete().eq("id", id);
 
       if (error) throw error;
       toast.success("Portfolio project deleted successfully");
@@ -339,24 +341,22 @@ function AdminPage() {
           .update({
             headline: heroHeadline,
             subheadline: heroSubheadline,
-            updatedAt: new Date().toISOString()
+            updatedAt: new Date().toISOString(),
           })
           .eq("id", heroRowId);
 
         if (error) throw error;
         toast.success("Hero settings updated successfully");
       } else {
-        const { error } = await supabase
-          .from("hero_settings")
-          .insert([
-            {
-              id: 'h1e73e6a-72ef-4d6d-88f5-bfa33dbb48c1',
-              headline: heroHeadline,
-              subheadline: heroSubheadline,
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString()
-            }
-          ]);
+        const { error } = await supabase.from("hero_settings").insert([
+          {
+            id: "h1e73e6a-72ef-4d6d-88f5-bfa33dbb48c1",
+            headline: heroHeadline,
+            subheadline: heroSubheadline,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          },
+        ]);
 
         if (error) throw error;
         toast.success("Hero settings created successfully");
@@ -373,23 +373,26 @@ function AdminPage() {
   }
 
   // Filtered queries
-  const filteredContacts = contacts.filter((c) =>
-    c.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    c.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    c.projectType?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    c.details?.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredContacts = contacts.filter(
+    (c) =>
+      c.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      c.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      c.projectType?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      c.details?.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  const filteredSamples = samples.filter((s) =>
-    s.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    s.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    s.message?.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredSamples = samples.filter(
+    (s) =>
+      s.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      s.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      s.message?.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  const filteredProjects = portfolioProjects.filter((p) =>
-    p.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    p.description?.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredProjects = portfolioProjects.filter(
+    (p) =>
+      p.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.description?.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   if (!isAuthenticated) {
@@ -413,7 +416,9 @@ function AdminPage() {
 
           <form onSubmit={handleLogin} className="mt-8 space-y-4">
             <div>
-              <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5">Admin Username</label>
+              <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5">
+                Admin Username
+              </label>
               <div className="relative">
                 <User className="absolute left-4 top-3.5 size-4 text-muted-foreground" />
                 <input
@@ -428,7 +433,9 @@ function AdminPage() {
             </div>
 
             <div>
-              <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5">Security Password</label>
+              <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5">
+                Security Password
+              </label>
               <div className="relative">
                 <Lock className="absolute left-4 top-3.5 size-4 text-muted-foreground" />
                 <input
@@ -451,7 +458,10 @@ function AdminPage() {
           </form>
 
           <div className="mt-6 text-center">
-            <Link to="/" className="text-xs text-muted-foreground hover:text-electric transition-colors">
+            <Link
+              to="/"
+              className="text-xs text-muted-foreground hover:text-electric transition-colors"
+            >
               ← Return to homepage
             </Link>
           </div>
@@ -462,10 +472,22 @@ function AdminPage() {
 
   // Define tab headers configuration
   const tabConfig = {
-    contact: { title: "Project Inquiries", desc: "Manage client submissions stored directly on Supabase." },
-    sample: { title: "Free Sample Requests", desc: "Manage client free sample submissions stored on Supabase." },
-    portfolio: { title: "Featured Work Manager", desc: "Manage the portfolio projects shown on the homepage (9:16 aspect ratio edits)." },
-    hero: { title: "Hero Section Editor", desc: "Update the main Headline and Subheadline of the homepage." }
+    contact: {
+      title: "Project Inquiries",
+      desc: "Manage client submissions stored directly on Supabase.",
+    },
+    sample: {
+      title: "Free Sample Requests",
+      desc: "Manage client free sample submissions stored on Supabase.",
+    },
+    portfolio: {
+      title: "Featured Work Manager",
+      desc: "Manage the portfolio projects shown on the homepage (9:16 aspect ratio edits).",
+    },
+    hero: {
+      title: "Hero Section Editor",
+      desc: "Update the main Headline and Subheadline of the homepage.",
+    },
   };
 
   return (
@@ -475,7 +497,10 @@ function AdminPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-6">
             <Link to="/" className="font-logo text-xl tracking-widest text-white/90">
-              RAQ<span className="text-gradient-brand">VINE</span> <span className="font-sans text-xs text-muted-foreground uppercase tracking-[0.22em] ml-2">Console</span>
+              RAQ<span className="text-gradient-brand">VINE</span>{" "}
+              <span className="font-sans text-xs text-muted-foreground uppercase tracking-[0.22em] ml-2">
+                Console
+              </span>
             </Link>
             <nav className="hidden md:flex gap-4">
               <button
@@ -521,7 +546,6 @@ function AdminPage() {
 
       {/* Main Body */}
       <div className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col gap-6">
-
         {/* Mobile Tab Nav */}
         <div className="flex gap-2 md:hidden overflow-x-auto pb-2 border-b border-white/5 scrollbar-none">
           <button
@@ -553,12 +577,8 @@ function AdminPage() {
         {/* Dashboard Title & Controls */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="font-display text-4xl">
-              {tabConfig[activeTab].title}
-            </h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              {tabConfig[activeTab].desc}
-            </p>
+            <h1 className="font-display text-4xl">{tabConfig[activeTab].title}</h1>
+            <p className="text-sm text-muted-foreground mt-1">{tabConfig[activeTab].desc}</p>
           </div>
 
           <div className="flex gap-2 items-center">
@@ -601,18 +621,24 @@ function AdminPage() {
         {loading ? (
           <div className="space-y-4">
             {Array.from({ length: 4 }).map((_, i) => (
-              <div key={i} className="h-24 animate-pulse rounded-2xl bg-surface/50 border border-white/5" />
+              <div
+                key={i}
+                className="h-24 animate-pulse rounded-2xl bg-surface/50 border border-white/5"
+              />
             ))}
           </div>
         ) : (
           <div className="flex-1">
-            {activeTab === "contact" && (
-              filteredContacts.length === 0 ? (
+            {activeTab === "contact" &&
+              (filteredContacts.length === 0 ? (
                 <EmptyState icon={Inbox} text="No project inquiries found" />
               ) : (
                 <div className="grid gap-4">
                   {filteredContacts.map((c) => (
-                    <div key={c.id} className="rounded-2xl border border-white/8 bg-surface/40 p-5 flex flex-col gap-4 md:flex-row md:items-start md:justify-between transition-colors hover:border-white/15">
+                    <div
+                      key={c.id}
+                      className="rounded-2xl border border-white/8 bg-surface/40 p-5 flex flex-col gap-4 md:flex-row md:items-start md:justify-between transition-colors hover:border-white/15"
+                    >
                       <div className="space-y-3">
                         <div className="flex flex-wrap items-center gap-2">
                           <span className="font-semibold text-lg text-foreground">{c.name}</span>
@@ -627,7 +653,9 @@ function AdminPage() {
                         <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
                           <div className="flex items-center gap-1.5">
                             <Clock className="size-3.5 text-electric" />
-                            <span>Timeline: <strong>{c.timeline}</strong></span>
+                            <span>
+                              Timeline: <strong>{c.timeline}</strong>
+                            </span>
                           </div>
                           <div>
                             Submitted: <strong>{new Date(c.createdAt).toLocaleString()}</strong>
@@ -638,7 +666,9 @@ function AdminPage() {
                       <div className="flex items-center gap-3 self-end md:self-start pt-2 md:pt-0">
                         {/* Status Select */}
                         <div className="flex items-center gap-2">
-                          <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Status:</span>
+                          <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                            Status:
+                          </span>
                           <select
                             value={c.status}
                             onChange={(e) => updateStatus("contact_requests", c.id, e.target.value)}
@@ -662,16 +692,18 @@ function AdminPage() {
                     </div>
                   ))}
                 </div>
-              )
-            )}
+              ))}
 
-            {activeTab === "sample" && (
-              filteredSamples.length === 0 ? (
+            {activeTab === "sample" &&
+              (filteredSamples.length === 0 ? (
                 <EmptyState icon={Video} text="No sample edit requests found" />
               ) : (
                 <div className="grid gap-4">
                   {filteredSamples.map((s) => (
-                    <div key={s.id} className="rounded-2xl border border-white/8 bg-surface/40 p-5 flex flex-col gap-4 md:flex-row md:items-start md:justify-between transition-colors hover:border-white/15">
+                    <div
+                      key={s.id}
+                      className="rounded-2xl border border-white/8 bg-surface/40 p-5 flex flex-col gap-4 md:flex-row md:items-start md:justify-between transition-colors hover:border-white/15"
+                    >
                       <div className="space-y-3">
                         <div className="flex flex-wrap items-center gap-2">
                           <span className="font-semibold text-lg text-foreground">{s.name}</span>
@@ -689,7 +721,9 @@ function AdminPage() {
                             <Video className="size-3.5" />
                             Open Footage Link <ChevronRight className="size-3" />
                           </a>
-                          <span className="ml-2 text-xs text-muted-foreground break-all">{s.footageLink}</span>
+                          <span className="ml-2 text-xs text-muted-foreground break-all">
+                            {s.footageLink}
+                          </span>
                         </div>
 
                         <p className="text-sm text-foreground/80 leading-relaxed max-w-3xl whitespace-pre-wrap">
@@ -704,10 +738,14 @@ function AdminPage() {
                       <div className="flex items-center gap-3 self-end md:self-start pt-2 md:pt-0">
                         {/* Status Select */}
                         <div className="flex items-center gap-2">
-                          <span className="text-[10px] uppercase tracking-wider text-muted-foreground">Status:</span>
+                          <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                            Status:
+                          </span>
                           <select
                             value={s.status}
-                            onChange={(e) => updateStatus("sample_edit_requests", s.id, e.target.value)}
+                            onChange={(e) =>
+                              updateStatus("sample_edit_requests", s.id, e.target.value)
+                            }
                             className="bg-black/40 border border-white/10 rounded-lg text-xs text-foreground px-2.5 py-1.5 focus:outline-none focus:border-electric"
                           >
                             <option value="new">New</option>
@@ -729,18 +767,24 @@ function AdminPage() {
                     </div>
                   ))}
                 </div>
-              )
-            )}
+              ))}
 
-            {activeTab === "portfolio" && (
-              filteredProjects.length === 0 ? (
+            {activeTab === "portfolio" &&
+              (filteredProjects.length === 0 ? (
                 <EmptyState icon={Video} text="No portfolio projects found" />
               ) : (
                 <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                   {filteredProjects.map((p) => (
-                    <div key={p.id} className="relative rounded-2xl border border-white/8 bg-surface/40 overflow-hidden flex flex-col group hover:border-white/15 transition-colors">
+                    <div
+                      key={p.id}
+                      className="relative rounded-2xl border border-white/8 bg-surface/40 overflow-hidden flex flex-col group hover:border-white/15 transition-colors"
+                    >
                       <div className="aspect-[9/16] relative bg-black">
-                        <img src={p.thumbnail} alt={p.title} className="absolute inset-0 size-full object-cover opacity-60" />
+                        <img
+                          src={p.thumbnail}
+                          alt={p.title}
+                          className="absolute inset-0 size-full object-cover opacity-60"
+                        />
                         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
                         <div className="absolute top-3 left-3">
                           <span className="inline-flex items-center gap-1.5 rounded-full glass px-2.5 py-0.5 text-[9px] uppercase tracking-[0.18em] text-foreground/80">
@@ -755,12 +799,18 @@ function AdminPage() {
                           </div>
                         )}
                         <div className="absolute bottom-3 left-3 right-3">
-                          <h3 className="font-display text-lg leading-tight text-white">{p.title}</h3>
-                          <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-1">{p.description}</p>
+                          <h3 className="font-display text-lg leading-tight text-white">
+                            {p.title}
+                          </h3>
+                          <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-1">
+                            {p.description}
+                          </p>
                         </div>
                       </div>
                       <div className="p-3 flex items-center justify-between border-t border-white/5 bg-black/40 mt-auto">
-                        <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Order: {p.sortOrder}</span>
+                        <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
+                          Order: {p.sortOrder}
+                        </span>
                         <div className="flex gap-2">
                           <button
                             onClick={() => openEditProjectModal(p)}
@@ -781,8 +831,7 @@ function AdminPage() {
                     </div>
                   ))}
                 </div>
-              )
-            )}
+              ))}
 
             {activeTab === "hero" && (
               <div className="max-w-3xl rounded-2xl border border-white/8 bg-surface/40 p-6 space-y-6">
@@ -807,7 +856,14 @@ function AdminPage() {
                       placeholder="Edits That Hold Attention And Drive Results."
                     />
                     <p className="text-[10px] text-muted-foreground mt-1.5 leading-relaxed">
-                      💡 Tip: Use <code className="text-electric font-semibold">&lt;span class="font-display italic font-normal text-gradient-brand"&gt;styled text&lt;/span&gt;</code> for the custom cyan-purple italic highlight, and <code className="text-electric font-semibold">&lt;br/&gt;</code> to force a line break.
+                      💡 Tip: Use{" "}
+                      <code className="text-electric font-semibold">
+                        &lt;span class="font-display italic font-normal
+                        text-gradient-brand"&gt;styled text&lt;/span&gt;
+                      </code>{" "}
+                      for the custom cyan-purple italic highlight, and{" "}
+                      <code className="text-electric font-semibold">&lt;br/&gt;</code> to force a
+                      line break.
                     </p>
                   </div>
 
@@ -858,10 +914,15 @@ function AdminPage() {
               {editingProject ? "Edit Portfolio Project" : "Add Portfolio Project"}
             </h2>
 
-            <form onSubmit={handleSaveProject} className="space-y-4 max-h-[75vh] overflow-y-auto pr-2">
+            <form
+              onSubmit={handleSaveProject}
+              className="space-y-4 max-h-[75vh] overflow-y-auto pr-2"
+            >
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5">Project Title</label>
+                  <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5">
+                    Project Title
+                  </label>
                   <input
                     required
                     type="text"
@@ -872,7 +933,9 @@ function AdminPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5">Category</label>
+                  <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5">
+                    Category
+                  </label>
                   <input
                     required
                     type="text"
@@ -886,7 +949,9 @@ function AdminPage() {
 
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
-                  <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5">Thumbnail Image URL</label>
+                  <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5">
+                    Thumbnail Image URL
+                  </label>
                   <input
                     required
                     type="url"
@@ -897,7 +962,9 @@ function AdminPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5">Video URL</label>
+                  <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5">
+                    Video URL
+                  </label>
                   <input
                     required
                     type="url"
@@ -910,7 +977,9 @@ function AdminPage() {
               </div>
 
               <div>
-                <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5">Short Card Description</label>
+                <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5">
+                  Short Card Description
+                </label>
                 <input
                   required
                   type="text"
@@ -922,7 +991,9 @@ function AdminPage() {
               </div>
 
               <div>
-                <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5">Overview / Details (Popup)</label>
+                <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5">
+                  Overview / Details (Popup)
+                </label>
                 <textarea
                   required
                   value={projOverview}
@@ -935,7 +1006,9 @@ function AdminPage() {
 
               <div className="grid gap-4 sm:grid-cols-3">
                 <div>
-                  <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5">Techniques (One per line)</label>
+                  <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5">
+                    Techniques (One per line)
+                  </label>
                   <textarea
                     value={projTechniques}
                     onChange={(e) => setProjTechniques(e.target.value)}
@@ -945,7 +1018,9 @@ function AdminPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5">Results (One per line)</label>
+                  <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5">
+                    Results (One per line)
+                  </label>
                   <textarea
                     value={projResults}
                     onChange={(e) => setProjResults(e.target.value)}
@@ -955,7 +1030,9 @@ function AdminPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5">Tools (One per line)</label>
+                  <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5">
+                    Tools (One per line)
+                  </label>
                   <textarea
                     value={projTools}
                     onChange={(e) => setProjTools(e.target.value)}
@@ -968,7 +1045,9 @@ function AdminPage() {
 
               <div className="grid gap-4 sm:grid-cols-3 items-center pt-2">
                 <div>
-                  <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5">Sort Order</label>
+                  <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5">
+                    Sort Order
+                  </label>
                   <input
                     type="number"
                     value={projSortOrder}
@@ -978,7 +1057,9 @@ function AdminPage() {
                 </div>
 
                 <div>
-                  <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5">Link to Service</label>
+                  <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5">
+                    Link to Service
+                  </label>
                   <select
                     value={projServiceId}
                     onChange={(e) => setProjServiceId(e.target.value)}
@@ -986,7 +1067,9 @@ function AdminPage() {
                   >
                     <option value="">None / Unlinked</option>
                     {services.map((s) => (
-                      <option key={s.id} value={s.id}>{s.title}</option>
+                      <option key={s.id} value={s.id}>
+                        {s.title}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -999,7 +1082,12 @@ function AdminPage() {
                     onChange={(e) => setProjIsPublished(e.target.checked)}
                     className="size-4 rounded border-white/10 bg-white/[0.03] text-electric focus:ring-electric"
                   />
-                  <label htmlFor="isPublished" className="text-xs uppercase tracking-wider text-muted-foreground select-none cursor-pointer">Published</label>
+                  <label
+                    htmlFor="isPublished"
+                    className="text-xs uppercase tracking-wider text-muted-foreground select-none cursor-pointer"
+                  >
+                    Published
+                  </label>
                 </div>
               </div>
 

@@ -84,7 +84,12 @@ export const faqInputSchema = z.object({
 export const contactCreateSchema = z.object({
   serviceId: z.string().uuid().nullable().optional(),
   name: z.string().trim().min(2).max(120),
-  email: z.string().trim().email().max(254).transform((value) => value.toLowerCase()),
+  email: z
+    .string()
+    .trim()
+    .email()
+    .max(254)
+    .transform((value) => value.toLowerCase()),
   projectType: z.enum([
     "YouTube Long-form",
     "Shorts / Reels",
@@ -107,16 +112,19 @@ export const contactUpdateSchema = z
 
 export const sampleRequestCreateSchema = z.object({
   name: z.string().trim().min(2).max(120),
-  email: z.string().trim().email().max(254).transform((value) => value.toLowerCase()),
+  email: z
+    .string()
+    .trim()
+    .email()
+    .max(254)
+    .transform((value) => value.toLowerCase()),
   footageLink: httpUrl,
   message: z.string().trim().min(10).max(3000),
 });
 
 export const sampleRequestUpdateSchema = z
   .object({
-    status: z
-      .enum(["new", "reviewing", "in_progress", "completed", "rejected"])
-      .optional(),
+    status: z.enum(["new", "reviewing", "in_progress", "completed", "rejected"]).optional(),
     adminNotes: z.string().trim().max(5000).optional(),
   })
   .refine((value) => Object.keys(value).length > 0, "At least one field is required");
@@ -132,4 +140,3 @@ export type ContactCreateInput = z.infer<typeof contactCreateSchema>;
 export type ContactUpdateInput = z.infer<typeof contactUpdateSchema>;
 export type SampleRequestCreateInput = z.infer<typeof sampleRequestCreateSchema>;
 export type SampleRequestUpdateInput = z.infer<typeof sampleRequestUpdateSchema>;
-

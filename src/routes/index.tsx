@@ -37,7 +37,7 @@ export const Route = createFileRoute("/")({
 
 function LandingPage() {
   return (
-    <main className="relative min-h-screen overflow-x-clip bg-background text-foreground">
+    <main className="relative min-h-screen overflow-x-clip bg-[#050810] text-foreground">
       <Nav />
       <Hero />
       <TrustBar />
@@ -56,4 +56,3 @@ function LandingPage() {
     </main>
   );
 }
-

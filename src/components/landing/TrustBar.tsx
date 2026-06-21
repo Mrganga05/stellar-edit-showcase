@@ -1,8 +1,16 @@
 import { Zap, Sparkles, RotateCw, Globe2 } from "lucide-react";
 
 const clients = [
-  "YouTube Creators", "Brands", "Agencies", "Startups", "Businesses",
-  "Coaches", "Podcasters", "E-commerce", "SaaS", "Real Estate",
+  "YouTube Creators",
+  "Brands",
+  "Agencies",
+  "Startups",
+  "Businesses",
+  "Coaches",
+  "Podcasters",
+  "E-commerce",
+  "SaaS",
+  "Real Estate",
 ];
 
 const badges = [
@@ -22,7 +30,10 @@ export function TrustBar() {
       <div className="group relative mt-6 overflow-hidden [mask-image:linear-gradient(90deg,transparent,#000_10%,#000_90%,transparent)]">
         <div className="flex w-max gap-12 animate-marquee group-hover:[animation-play-state:paused]">
           {row.map((c, i) => (
-            <div key={i} className="font-display text-2xl text-foreground/40 transition-colors hover:text-foreground sm:text-3xl">
+            <div
+              key={i}
+              className="font-display text-2xl text-foreground/40 transition-colors hover:text-foreground sm:text-3xl"
+            >
               {c}
             </div>
           ))}

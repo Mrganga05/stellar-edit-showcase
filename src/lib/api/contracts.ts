@@ -112,4 +112,3 @@ export type ApiFailure = {
 };
 
 export type ApiResponse<T> = ApiSuccess<T> | ApiFailure;
-

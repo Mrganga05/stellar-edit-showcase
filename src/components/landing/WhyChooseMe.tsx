@@ -1,4 +1,13 @@
-import { Clock, RefreshCw, MessageSquare, Sparkles, Eye, Layers, Palette, Monitor } from "lucide-react";
+import {
+  Clock,
+  RefreshCw,
+  MessageSquare,
+  Sparkles,
+  Eye,
+  Layers,
+  Palette,
+  Monitor,
+} from "lucide-react";
 import { SectionHeading, Reveal } from "./primitives";
 
 const items = [
@@ -17,7 +26,11 @@ export function WhyChooseMe() {
     <section className="relative mx-auto max-w-7xl px-5 py-28 sm:px-8 sm:py-36">
       <SectionHeading
         eyebrow="Why Clients Choose Me"
-        title={<>Built for the <span className="text-gradient-brand">top 1%</span>.</>}
+        title={
+          <>
+            Built for the <span className="text-gradient-brand">top 1%</span>.
+          </>
+        }
       />
       <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {items.map((it, i) => (

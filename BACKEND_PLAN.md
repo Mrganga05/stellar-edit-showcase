@@ -179,4 +179,3 @@ Error response:
 - Add rate limiting and bot protection to public form endpoints before launch.
 - Use an external managed database when deploying more than one server instance.
 - Add object storage and signed uploads before accepting direct media files.
-

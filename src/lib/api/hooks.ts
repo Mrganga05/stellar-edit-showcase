@@ -40,4 +40,3 @@ export function useFaqs() {
     staleTime: 60_000,
   });
 }
-

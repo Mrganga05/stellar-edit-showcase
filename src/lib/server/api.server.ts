@@ -21,12 +21,7 @@ export function jsonSuccess<T>(data: T, status = 200) {
   return Response.json({ success: true, data } as ApiSuccess<T>, { status });
 }
 
-export function jsonFailure(
-  status: number,
-  code: string,
-  message: string,
-  details?: unknown,
-) {
+export function jsonFailure(status: number, code: string, message: string, details?: unknown) {
   const body: ApiFailure = {
     success: false,
     error: { code, message, ...(details === undefined ? {} : { details }) },
@@ -89,8 +84,7 @@ export function isAdmin(request: Request): boolean {
     const expectedBuffer = Buffer.from(expected);
     const actualBuffer = Buffer.from(actual);
     return (
-      expectedBuffer.length === actualBuffer.length &&
-      timingSafeEqual(expectedBuffer, actualBuffer)
+      expectedBuffer.length === actualBuffer.length && timingSafeEqual(expectedBuffer, actualBuffer)
     );
   } catch {
     return false;
@@ -111,4 +105,3 @@ export async function handleApi(action: () => Promise<Response> | Response) {
     return jsonFailure(500, "INTERNAL_ERROR", "An unexpected server error occurred");
   }
 }
-

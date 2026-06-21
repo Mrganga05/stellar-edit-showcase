@@ -1,51 +1,205 @@
-import { motion, AnimatePresence, useScroll, useTransform, useMotionValue } from "motion/react";
-import { ArrowRight, Sparkles, Play, X, TrendingUp, Zap, Target, Award, RotateCcw, Sliders, Download, Layers, Volume2, Check } from "lucide-react";
+import {
+  motion,
+  AnimatePresence,
+  useScroll,
+  useTransform,
+  useMotionValue,
+  useInView,
+  useSpring,
+} from "motion/react";
+import {
+  ArrowRight,
+  Play,
+  X,
+  TrendingUp,
+  Zap,
+  Target,
+  RotateCcw,
+  Sliders,
+  Download,
+  Layers,
+  Volume2,
+  Eye,
+  Briefcase,
+  Users,
+  Star,
+  RotateCw,
+} from "lucide-react";
 import { useRef, useState, useEffect } from "react";
 import { HERO_VIDEO } from "@/lib/portfolio-data";
 import { supabase } from "@/lib/supabase";
-import heroEditorImg from "@/assets/hero-editor.jpg";
+
+// Video timeline thumbnails from assets
+import p1 from "@/assets/portfolio/p1.jpg";
+import p2 from "@/assets/portfolio/p2.jpg";
+import p3 from "@/assets/portfolio/p3.jpg";
+import p4 from "@/assets/portfolio/p4.jpg";
+import p5 from "@/assets/portfolio/p5.jpg";
+import carRacingImg from "@/assets/hero_car_racing.png";
+
+const timelineThumbnails = [p1, p2, p3, p4, p5];
+
+
+// Ease-out smooth animated counter for stats cards
+function AnimatedCounter({ value }: { value: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const isInView = useInView(ref, { once: true, amount: 0.2 });
+  const num = parseInt(value.replace(/[^0-9]/g, ""));
+  const suffix = value.replace(/[0-9]/g, "");
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    if (!isInView) return;
+    let startTime: number | null = null;
+    const duration = 2000; // 2s smooth animation
+
+    const animate = (timestamp: number) => {
+      if (!startTime) startTime = timestamp;
+      const elapsed = timestamp - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+      // Ease out cubic
+      const progressCubic = 1 - Math.pow(1 - progress, 3);
+      setCount(Math.floor(progressCubic * num));
+
+      if (progress < 1) {
+        requestAnimationFrame(animate);
+      }
+    };
+
+    requestAnimationFrame(animate);
+  }, [num, isInView]);
+
+  return (
+    <span
+      ref={ref}
+      className="font-sans text-3xl lg:text-[40px] font-extrabold leading-none tracking-tight text-white"
+    >
+      {count}
+      {suffix}
+    </span>
+  );
+}
+
+// Reusable premium spring-loaded Magnetic Button Wrapper
+function MagneticButton({
+  children,
+  className,
+  style,
+  onClick,
+  href,
+}: {
+  children: React.ReactNode;
+  className?: string;
+  style?: React.CSSProperties;
+  onClick?: () => void;
+  href?: string;
+}) {
+  const ref = useRef<HTMLAnchorElement & HTMLButtonElement>(null);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!ref.current) return;
+    const { clientX, clientY } = e;
+    const { left, top, width, height } = ref.current.getBoundingClientRect();
+    const x = clientX - (left + width / 2);
+    const y = clientY - (top + height / 2);
+    // Limit range to max 8px for subtle magnetic pull
+    setPosition({ x: x * 0.22, y: y * 0.22 });
+  };
+
+  const handleMouseLeave = () => {
+    setPosition({ x: 0, y: 0 });
+  };
+
+  if (href) {
+    return (
+      <motion.a
+        ref={ref as any}
+        href={href}
+        animate={{ x: position.x, y: position.y }}
+        transition={{ type: "spring", stiffness: 150, damping: 15, mass: 0.1 }}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+        className={className}
+        style={style}
+      >
+        {children}
+      </motion.a>
+    );
+  }
+
+  return (
+    <motion.button
+      ref={ref as any}
+      onClick={onClick}
+      animate={{ x: position.x, y: position.y }}
+      transition={{ type: "spring", stiffness: 150, damping: 15, mass: 0.1 }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      className={className}
+      style={style}
+    >
+      {children}
+    </motion.button>
+  );
+}
 
 export function Hero() {
   const [showreelOpen, setShowreelOpen] = useState(false);
   const [heroData, setHeroData] = useState({
-    headline: 'High-End Video Editing<br/>That Scales Your <span class="text-gradient-brand font-display italic font-normal">Views, Retention, & Revenue.</span>',
+    headline:
+      'High-End Video Editing<br/>That Scales Your<br/><span class="text-gradient-brand font-display italic font-normal">Views, Retention, &amp; Revenue.</span>',
     subheadline:
-      "Raqvine transforms raw footage into cinematic, high-retention content built to move audiences, scale channels, and grow ambitious brands worldwide.",
+      "We transform raw footage into cinematic, high-retention content that grows your audience, strengthens your brand, and drives real business results.",
   });
 
-  // Color Grading States
-  const [sat, setSat] = useState(125);
-  const [contrast, setContrast] = useState(115);
-  const [exposure, setExposure] = useState(105);
-  const [tint, setTint] = useState(0);
-
-  // Before vs After comparison slider position (percentage 0 - 100)
+  // Draggable comparison slider position (percentage 0 - 100)
   const [sliderPos, setSliderPos] = useState(50);
+  const [isHovered, setIsHovered] = useState(false);
   const splitContainerRef = useRef<HTMLDivElement>(null);
 
-  // Timeline States
-  const [playProgress, setPlayProgress] = useState(0);
-  const [videoDuration, setVideoDuration] = useState(0);
-  const [videoCurrentTime, setVideoCurrentTime] = useState(0);
+  // Video playback loaded detection (forces fallback if not loaded/playing yet)
+  const [videoLoaded, setVideoLoaded] = useState(false);
 
-  // Live Waveform Heights (animated when video plays)
-  const [audioHeights, setAudioHeights] = useState<number[]>(new Array(24).fill(12));
+  // Playback Control States
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [isMuted, setIsMuted] = useState(true);
+  const [playProgress, setPlayProgress] = useState(40); // default around 00:06
+  const [videoDuration, setVideoDuration] = useState(15);
+  const [videoCurrentTime, setVideoCurrentTime] = useState(6);
 
-  // Export Simulator States
-  const [isExporting, setIsExporting] = useState(false);
-  const [exportProgress, setExportProgress] = useState(0);
+  // Audio Waveform Heights
+  const [audioHeights, setAudioHeights] = useState<number[]>(new Array(16).fill(6));
+
+  // Export Progress State
+  const [exportProgress, setExportProgress] = useState(87);
+  const [isExporting, setIsExporting] = useState(true);
   const [exportCompleted, setExportCompleted] = useState(false);
 
   // Video Refs
   const rawVideoRef = useRef<HTMLVideoElement>(null);
   const gradedVideoRef = useRef<HTMLVideoElement>(null);
 
-  // Parallax Motion Values
+  // Parallax Motion Values with premium smooth springs
   const xVal = useMotionValue(0);
   const yVal = useMotionValue(0);
-  const rotateX = useTransform(yVal, [-350, 350], [8, -8]);
-  const rotateY = useTransform(xVal, [-350, 350], [-8, 8]);
+  const springConfig = { damping: 25, stiffness: 120, mass: 0.5 };
+  const xSpring = useSpring(xVal, springConfig);
+  const ySpring = useSpring(yVal, springConfig);
+  const rotateX = useTransform(ySpring, [-350, 350], [5, -5]);
+  const rotateY = useTransform(xSpring, [-350, 350], [-5, 5]);
 
+  // Subtle Mouse Glow Follower coordinates
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  const handleGlobalMouseMove = (e: React.MouseEvent) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    mouseX.set(e.clientX - rect.left);
+    mouseY.set(e.clientY - rect.top);
+  };
+
+  // Load headline data
   useEffect(() => {
     async function loadHero() {
       try {
@@ -56,7 +210,17 @@ export function Hero() {
           .limit(1)
           .maybeSingle();
         if (data) {
-          setHeroData({ headline: data.headline, subheadline: data.subheadline });
+          let formattedHeadline = data.headline;
+          if (
+            formattedHeadline.includes("That Scales Your ") &&
+            !formattedHeadline.includes("That Scales Your<br/>")
+          ) {
+            formattedHeadline = formattedHeadline.replace(
+              "That Scales Your ",
+              "That Scales Your<br/>",
+            );
+          }
+          setHeroData({ headline: formattedHeadline, subheadline: data.subheadline });
         }
       } catch (err) {
         console.error("Failed to load hero settings", err);
@@ -72,58 +236,104 @@ export function Hero() {
         if (Math.abs(rawVideoRef.current.currentTime - gradedVideoRef.current.currentTime) > 0.08) {
           gradedVideoRef.current.currentTime = rawVideoRef.current.currentTime;
         }
-        // Match play states
         if (rawVideoRef.current.paused !== gradedVideoRef.current.paused) {
           if (rawVideoRef.current.paused) {
             gradedVideoRef.current.pause();
+            setIsPlaying(false);
           } else {
-            gradedVideoRef.current.play().catch(() => {});
+            gradedVideoRef.current.play().catch(() => { });
+            setIsPlaying(true);
           }
         }
+        rawVideoRef.current.muted = isMuted;
+        gradedVideoRef.current.muted = isMuted;
       }
     };
-    const interval = setInterval(syncVideos, 250);
+    const interval = setInterval(syncVideos, 150);
     return () => clearInterval(interval);
-  }, []);
+  }, [isMuted]);
 
-  // Animate Waveform and sync playhead progress
+  // Video Playback & Waveform loop (with a fallback simulation timer so it always moves, even if blocked by autoplay)
   useEffect(() => {
     let frameId: number;
-    const updateTimeTracking = () => {
-      if (rawVideoRef.current) {
-        const current = rawVideoRef.current.currentTime;
-        const duration = rawVideoRef.current.duration || 1;
-        setVideoCurrentTime(current);
-        setPlayProgress((current / duration) * 100);
+    let lastTime = performance.now();
 
-        // Waveform bounce mapping
-        if (!rawVideoRef.current.paused) {
-          setAudioHeights(prev =>
-            prev.map(() => Math.floor(Math.random() * 26) + 4)
-          );
+    const updateTimeTracking = (now: number) => {
+      const activeVideo = rawVideoRef.current;
+      if (activeVideo) {
+        if (!activeVideo.paused) {
+          const current = activeVideo.currentTime;
+          const duration = activeVideo.duration || 15;
+          setVideoCurrentTime(current);
+          setVideoDuration(duration);
+          setPlayProgress((current / duration) * 100);
+          setIsPlaying(true);
+
+          setAudioHeights((prev) => prev.map(() => Math.floor(Math.random() * 15) + 3));
+        } else if (isPlaying) {
+          const delta = (now - lastTime) / 1000;
+          setVideoCurrentTime((prev) => {
+            let next = prev + delta;
+            if (next >= videoDuration) {
+              next = 0;
+            }
+            return next;
+          });
+          setPlayProgress((videoCurrentTime / videoDuration) * 100);
+
+          setAudioHeights((prev) => prev.map(() => Math.floor(Math.random() * 15) + 3));
         } else {
-          setAudioHeights(prev => prev.map(h => Math.max(3, h - 1.5)));
+          setAudioHeights((prev) => prev.map((h) => Math.max(3, h - 1.5)));
         }
       }
+      lastTime = now;
       frameId = requestAnimationFrame(updateTimeTracking);
     };
+
     frameId = requestAnimationFrame(updateTimeTracking);
     return () => cancelAnimationFrame(frameId);
-  }, []);
+  }, [isPlaying, videoDuration, videoCurrentTime]);
+
+  // Sweep-and-pause oscillation loop for comparison slider when user is not actively hovering
+  useEffect(() => {
+    if (isHovered) return;
+    let start: number | null = null;
+    let frameId: number;
+    const animate = (timestamp: number) => {
+      if (!start) start = timestamp;
+      const progress = timestamp - start;
+      const timeInCycle = progress % 6000;
+      let currentPos = 50;
+      if (timeInCycle < 1200) {
+        currentPos = 25;
+      } else if (timeInCycle < 3000) {
+        const t = (timeInCycle - 1200) / 1800; // 0 to 1
+        const ease = t * t * (3 - 2 * t); // smoothstep ease
+        currentPos = 25 + ease * 50; // 25 to 75
+      } else if (timeInCycle < 4200) {
+        currentPos = 75;
+      } else {
+        const t = (timeInCycle - 4200) / 1800; // 0 to 1
+        const ease = t * t * (3 - 2 * t); // smoothstep ease
+        currentPos = 75 - ease * 50; // 75 to 25
+      }
+      setSliderPos(currentPos);
+      frameId = requestAnimationFrame(animate);
+    };
+    frameId = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(frameId);
+  }, [isHovered]);
+
+  // Export simulator loop disabled to match progress spec (static 87%)
 
   const handleTimeUpdate = () => {
-    if (rawVideoRef.current) {
-      setVideoCurrentTime(rawVideoRef.current.currentTime);
-    }
+    if (rawVideoRef.current) setVideoCurrentTime(rawVideoRef.current.currentTime);
   };
 
   const handleLoadedMetadata = () => {
-    if (rawVideoRef.current) {
-      setVideoDuration(rawVideoRef.current.duration);
-    }
+    if (rawVideoRef.current) setVideoDuration(rawVideoRef.current.duration);
   };
 
-  // Compare split-screen slider calculations
   const handleSliderMove = (clientX: number) => {
     if (!splitContainerRef.current) return;
     const rect = splitContainerRef.current.getBoundingClientRect();
@@ -133,28 +343,63 @@ export function Hero() {
   };
 
   const handleMouseMoveSlider = (e: React.MouseEvent) => {
-    // Only drag or hover based on split container boundaries
-    if (e.buttons === 1 || e.type === "mousemove") {
-      handleSliderMove(e.clientX);
-    }
+    if (e.buttons === 1) handleSliderMove(e.clientX);
   };
 
   const handleTouchMoveSlider = (e: React.TouchEvent) => {
-    if (e.touches[0]) {
-      handleSliderMove(e.touches[0].clientX);
+    if (e.touches[0]) handleSliderMove(e.touches[0].clientX);
+  };
+
+  const togglePlay = () => {
+    if (rawVideoRef.current) {
+      if (rawVideoRef.current.paused) {
+        rawVideoRef.current.play().catch(() => { });
+        gradedVideoRef.current?.play().catch(() => { });
+        setIsPlaying(true);
+      } else {
+        rawVideoRef.current.pause();
+        gradedVideoRef.current?.pause();
+        setIsPlaying(false);
+      }
+    } else {
+      setIsPlaying(!isPlaying);
     }
   };
 
-  // Parallax effects on workspace block
+  const handleReload = () => {
+    if (rawVideoRef.current) {
+      rawVideoRef.current.currentTime = 0;
+      if (gradedVideoRef.current) gradedVideoRef.current.currentTime = 0;
+    }
+    setVideoCurrentTime(0);
+  };
+
+  const handleScrub = (e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const percentage = Math.max(0, Math.min(100, (clickX / rect.width) * 100));
+    if (rawVideoRef.current) {
+      const newTime = (percentage / 100) * videoDuration;
+      rawVideoRef.current.currentTime = newTime;
+      if (gradedVideoRef.current) gradedVideoRef.current.currentTime = newTime;
+      setPlayProgress(percentage);
+    } else {
+      setPlayProgress(percentage);
+      setVideoCurrentTime((percentage / 100) * videoDuration);
+    }
+  };
+
+  const formatTime = (time: number) => {
+    const sec = Math.floor(time % 60);
+    const min = Math.floor(time / 60);
+    return `${min}:${sec < 10 ? "0" : ""}${sec}`;
+  };
+
   const handleParallaxMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const el = e.currentTarget;
     const rect = el.getBoundingClientRect();
-    const width = rect.width;
-    const height = rect.height;
-    const mouseX = e.clientX - rect.left - width / 2;
-    const mouseY = e.clientY - rect.top - height / 2;
-    xVal.set(mouseX);
-    yVal.set(mouseY);
+    xVal.set(e.clientX - rect.left - rect.width / 2);
+    yVal.set(e.clientY - rect.top - rect.height / 2);
   };
 
   const handleParallaxLeave = () => {
@@ -162,545 +407,614 @@ export function Hero() {
     yVal.set(0);
   };
 
-  // Export Simulator Trigger
-  const handleExportSimulate = () => {
-    if (isExporting) return;
-    setIsExporting(true);
-    setExportProgress(0);
-    setExportCompleted(false);
-  };
-
-  useEffect(() => {
-    if (isExporting) {
-      const renderInterval = setInterval(() => {
-        setExportProgress(prev => {
-          if (prev >= 100) {
-            clearInterval(renderInterval);
-            setExportCompleted(true);
-            setTimeout(() => {
-              setIsExporting(false);
-              setExportCompleted(false);
-            }, 3000);
-            return 100;
-          }
-          return prev + 5;
-        });
-      }, 100);
-      return () => clearInterval(renderInterval);
-    }
-  }, [isExporting]);
-
-  const resetGrading = () => {
-    setSat(125);
-    setContrast(115);
-    setExposure(105);
-    setTint(0);
-  };
-
-  // Format time display (0:00)
-  const formatTime = (time: number) => {
-    const sec = Math.floor(time % 60);
-    const min = Math.floor(time / 60);
-    return `${min}:${sec < 10 ? "0" : ""}${sec}`;
-  };
-
-  const gradedFilter = `saturate(${sat}%) contrast(${contrast}%) brightness(${exposure}%) hue-rotate(${tint}deg)`;
-
+  const gradedFilter = "saturate(130%) contrast(110%) brightness(102%) hue-rotate(-1deg)";
   const scrollRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: scrollRef, offset: ["start start", "end start"] });
-  const y = useTransform(scrollYProgress, [0, 1], [0, 60]);
-  const opacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
 
   return (
-    <section ref={scrollRef} id="top" className="relative min-h-[100svh] w-full overflow-hidden bg-[#050508] flex flex-col justify-between">
-      
-      {/* ── HIGH-END CINEMATIC AMBIENCE LAYER ── */}
-      <div className="pointer-events-none absolute inset-0 z-0">
-        <div className="hero-orb hero-orb-cyan opacity-40 mix-blend-screen scale-125 filter blur-[150px]" />
-        <div className="hero-orb hero-orb-violet opacity-35 mix-blend-screen scale-125 filter blur-[150px]" />
-        
-        {/* Soft volumetric top/bottom vignette gradients */}
-        <div className="absolute inset-x-0 bottom-0 h-96 bg-gradient-to-t from-[#050508] via-[#050508]/80 to-transparent" />
-        <div className="absolute inset-x-0 top-0 h-48 bg-gradient-to-b from-[#050508] to-transparent" />
-        
-        {/* Moving light ray accentuation */}
-        <div className="absolute top-[-10%] left-[20%] w-[35%] h-[60%] bg-gradient-to-br from-[#00D4FF]/8 to-transparent rotate-12 blur-[100px] animate-pulse" style={{ animationDuration: "10s" }} />
-      </div>
+    <section
+      ref={scrollRef}
+      id="top"
+      onMouseMove={handleGlobalMouseMove}
+      className="relative min-h-screen w-full flex flex-col pt-[64px] pb-16 lg:pb-24"
+      style={{ backgroundColor: "#050810" }}
+    >
 
-      {/* ── AMBIENT HERO BACKGROUND VIDEO ── */}
-      <video
-        className="absolute inset-0 size-full object-cover opacity-12 mix-blend-luminosity select-none pointer-events-none"
-        src={HERO_VIDEO}
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload="metadata"
+      {/* Film Grain overlay */}
+      <div
+        className="absolute inset-0 pointer-events-none opacity-[0.018] z-15"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+        }}
       />
 
+      {/* Vignette Overlay */}
+      <div className="absolute inset-0 pointer-events-none vignette z-10" />
+
       {/* Grid overlay for digital alignment */}
-      <div className="hero-grid absolute inset-0 opacity-[0.04] pointer-events-none" />
+      <div className="hero-grid absolute inset-0 opacity-[0.015] pointer-events-none" />
 
       {/* ── MAIN HERO LAYOUT CONTAINER ── */}
-      <div className="relative z-10 mx-auto w-full max-w-[1440px] px-5 pt-28 pb-10 sm:px-8 lg:px-12 flex-grow flex items-center">
-        <div className="grid w-full grid-cols-1 gap-14 lg:grid-cols-[1.1fr_1.35fr] lg:gap-10 items-center">
-          
-          {/* ── LEFT SIDE: EDITORIAL & BRAND CONTENT ── */}
-          <div className="text-center lg:text-left flex flex-col items-center lg:items-start justify-center">
-            
-            {/* Announcement badge */}
-            <motion.div
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/8 bg-white/[0.03] px-4 py-2 text-[10px] uppercase tracking-[0.24em] text-foreground/80 backdrop-blur-md"
-            >
-              <Sparkles className="size-3 text-[#00D4FF] animate-pulse" />
-              <span>Premium Post-Production Studio</span>
-              <span className="h-3 w-px bg-white/10" />
-              <span className="text-[#00D4FF] font-semibold" style={{ textShadow: "0 0 10px rgba(0,212,255,0.4)" }}>Booking Q3</span>
-            </motion.div>
+      <div className="relative z-10 mx-auto w-full max-w-[1320px] px-6 md:px-8 pt-4 lg:pt-6 pb-4 lg:pb-5 flex-grow flex flex-col justify-center">
+        <div className="grid w-full grid-cols-1 lg:grid-cols-[44%_52%] items-center gap-x-[4%] gap-y-6">
+          {/* ── LEFT SIDE: BRAND & COPY ── */}
+          <div className="relative text-left flex flex-col items-start justify-start pt-0">
+            {/* Top Badge */}
+            <div className="relative inline-flex items-center gap-2 rounded-full p-[1px] mb-4 lg:mb-5 select-none bg-gradient-to-r from-[#22d3ee] to-[#a855f7] shadow-[0_4px_12px_rgba(34,211,238,0.1)]">
+              <div className="flex items-center gap-2 rounded-full bg-[#050810]/95 px-[18px] py-[8px]">
+                <span className="text-[#22d3ee] text-[13px] font-bold">✦</span>
+                <span className="text-[13px] font-sans font-semibold uppercase tracking-wider text-[#a5f3fc]">
+                  Premium Video Editing Studio
+                </span>
+              </div>
+            </div>
 
             {/* Editorial Headline */}
-            <motion.h1
-              initial={{ opacity: 0, y: 25 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.1, ease: [0.19, 1, 0.22, 1] }}
-              className="font-display text-[46px] leading-[0.96] tracking-[-0.03em] sm:text-7xl lg:text-[76px] xl:text-[84px] text-white"
-              dangerouslySetInnerHTML={{ __html: heroData.headline }}
-            />
+            <div className="flex flex-col items-start">
+              <motion.h1
+                initial={{ opacity: 0, y: 28 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.75, ease: [0.19, 1, 0.22, 1] }}
+                className="font-serif text-[32px] sm:text-[38px] lg:text-[44px] leading-[1.12] tracking-[-0.01em] text-white font-medium text-left max-w-[620px]"
+              >
+                <span className="block sm:inline whitespace-normal sm:whitespace-nowrap">High-End Video Editing</span><br />
+                <span className="block sm:inline whitespace-normal sm:whitespace-nowrap">That Scales Your</span><br />
+                <span className="animate-gradient-text font-serif italic font-medium block sm:inline-block whitespace-normal sm:whitespace-nowrap">
+                  Views, Retention, &amp; Revenue.
+                </span>
+              </motion.h1>
+
+              {/* Accent bar */}
+              <div className="h-[3px] w-[70px] bg-gradient-to-r from-[#22d3ee] to-[#a855f7] rounded-full mt-2.5 lg:mt-3" />
+            </div>
 
             {/* Supporting Copy */}
             <motion.p
-              initial={{ opacity: 0, y: 15 }}
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.2 }}
-              className="mx-auto mt-7 max-w-lg text-sm leading-relaxed text-muted-foreground/90 sm:text-base lg:mx-0 font-sans tracking-wide"
+              transition={{ duration: 0.7, delay: 0.12 }}
+              className="mt-4 lg:mt-5 max-w-[560px] text-[15px] sm:text-[16px] leading-[1.6] text-[#a1a1aa] text-left font-sans tracking-normal mb-6 lg:mb-8"
             >
               {heroData.subheadline}
             </motion.p>
 
-            {/* Primary conversion CTA */}
+            {/* CTA Buttons */}
             <motion.div
-              initial={{ opacity: 0, y: 15 }}
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.3 }}
-              className="mt-9 flex flex-col items-center sm:flex-row gap-4 sm:justify-center lg:justify-start w-full sm:w-auto"
+              transition={{ duration: 0.7, delay: 0.22 }}
+              className="flex flex-wrap gap-3.5 items-center justify-start z-20"
             >
-              <a
+              <MagneticButton
                 href="#contact"
-                className="group relative inline-flex w-full items-center justify-center gap-3.5 overflow-hidden rounded-full px-9 py-5 text-xs font-black uppercase tracking-widest text-white transition-all duration-350 hover:scale-[1.03] active:scale-[0.98] sm:w-auto shadow-2xl"
+                className="group relative inline-flex items-center justify-center gap-2.5 rounded-full px-9 h-[54px] text-[14px] lg:text-[15px] font-bold uppercase tracking-wider text-white transition-all duration-300 active:scale-[0.98] cursor-pointer shadow-[0_0_20px_rgba(34,211,238,0.2),0_0_20px_rgba(168,85,247,0.15)]"
                 style={{
-                  background: "linear-gradient(135deg, #00D4FF 0%, #8B5CF6 100%)",
-                  boxShadow: "0 10px 40px -10px rgba(0,212,255,0.4), 0 4px 20px -5px rgba(139,92,246,0.3)"
+                  background:
+                    "linear-gradient(135deg, #22d3ee 0%, #3b82f6 50%, #a855f7 100%)",
                 }}
               >
-                <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style={{ background: "linear-gradient(135deg, #00b8db 0%, #7c3aed 100%)" }} />
-                <span className="relative flex items-center gap-2">
-                  <span>Book A Strategy Call</span>
-                  <ArrowRight className="size-4 transition-transform duration-300 group-hover:translate-x-1" />
+                <span className="relative flex items-center gap-2.5">
+                  <span>BOOK A STRATEGY CALL</span>
+                  <ArrowRight className="size-4.5 transition-transform duration-300 group-hover:translate-x-0.5" />
                 </span>
-              </a>
+              </MagneticButton>
             </motion.div>
 
-            {/* Premium Client proof (Avatars) */}
+            {/* Feature Mini-Cards */}
             <motion.div
-              initial={{ opacity: 0, y: 15 }}
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.4 }}
-              className="mt-10 flex flex-col sm:flex-row items-center gap-3.5"
+              transition={{ duration: 0.7, delay: 0.32 }}
+              className="mt-6 lg:mt-8 grid grid-cols-2 lg:grid-cols-4 gap-4 w-full"
             >
-              <div className="flex -space-x-2.5">
-                {[
-                  "bg-gradient-to-tr from-cyan-500 to-blue-600",
-                  "bg-gradient-to-tr from-purple-500 to-indigo-600",
-                  "bg-gradient-to-tr from-pink-500 to-rose-600",
-                  "bg-gradient-to-tr from-amber-500 to-orange-600"
-                ].map((grad, i) => (
+              {[
+                { title: "High Retention", subtitle: "Editing", icon: TrendingUp, color: "text-[#22d3ee]" },
+                { title: "Scroll-Stopping", subtitle: "Visuals", icon: Zap, color: "text-[#fbbf24]" },
+                { title: "Platform-Native", subtitle: "Optimization", icon: Target, color: "text-[#10b981]" },
+                { title: "Revenue-Driven", subtitle: "Storytelling", icon: Star, color: "text-[#a855f7]" },
+              ].map((item, index) => {
+                const IconComponent = item.icon;
+                return (
                   <div
-                    key={i}
-                    className={`size-8 rounded-full border border-black/80 ${grad} flex items-center justify-center text-[7px] font-black text-white shadow-lg`}
+                    key={index}
+                    className="group/card relative flex flex-col items-start rounded-[14px] border border-white/[0.08] bg-white/[0.03] p-5 lg:p-6 transition-all duration-300 hover:border-white/20 hover:bg-white/[0.05] hover:-translate-y-0.5 select-none w-full"
                   >
-                    {String.fromCharCode(65 + i)}
+                    <IconComponent className={`size-[22px] lg:size-[26px] ${item.color} mb-3`} />
+                    <span className="text-[14px] lg:text-[15px] font-bold text-white tracking-tight leading-tight">
+                      {item.title}
+                    </span>
+                    <span className="text-[11px] lg:text-[12px] text-[#a1a1aa] leading-tight mt-1">
+                      {item.subtitle}
+                    </span>
                   </div>
-                ))}
-              </div>
-              <div className="text-left">
-                <div className="text-xs font-bold text-white/90">Trusted by 50M+ Creator Audiences</div>
-                <div className="text-[10px] text-muted-foreground/80 tracking-wide font-medium mt-0.5">Scale, retention, and production-native conversions.</div>
-              </div>
+                );
+              })}
             </motion.div>
-
           </div>
 
           {/* ── RIGHT SIDE: INTERACTIVE PORTFOLIO & WORKSPACE DASHBOARD ── */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.96 }}
+            initial={{ opacity: 0, scale: 0.97 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
+            transition={{ duration: 0.85, delay: 0.18, ease: [0.16, 1, 0.3, 1] }}
             onMouseMove={handleParallaxMove}
             onMouseLeave={handleParallaxLeave}
             style={{ rotateX, rotateY, transformStyle: "preserve-3d", perspective: 1000 }}
-            className="w-full relative select-none"
+            className="w-full relative flex flex-col"
           >
-            {/* Ambient luxury backdrop glow */}
-            <div
-              className="absolute -inset-10 rounded-[44px] opacity-40 group-hover:opacity-60 transition-opacity duration-700 pointer-events-none"
-              style={{
-                background: "radial-gradient(circle at 50% 50%, rgba(0, 212, 255, 0.22), rgba(139, 92, 246, 0.16), transparent 70%)",
-                filter: "blur(45px)",
-              }}
-            />
 
             {/* ── Main macOS Studio Dashboard Mockup ── */}
             <div
-              className="relative overflow-hidden rounded-[26px] border border-white/10 bg-black/75 p-3.5 shadow-[0_50px_100px_-30px_rgba(0,0,0,0.95)] backdrop-blur-2xl"
-              style={{ transform: "translateZ(10px)", transformStyle: "preserve-3d" }}
+              className="relative overflow-hidden rounded-[12px] border border-white/10 bg-[#07070b]/98 shadow-[0_0_40px_rgba(34,211,238,0.15),0_30px_60px_rgba(0,0,0,0.8)] backdrop-blur-2xl"
+              style={{
+                transform: "translateZ(10px)",
+                transformStyle: "preserve-3d",
+                backgroundImage:
+                  "linear-gradient(to bottom, rgba(255,255,255,0.02) 0%, transparent 100%)",
+              }}
             >
-              
-              {/* Window Header Toolbar */}
-              <div className="flex items-center justify-between pb-3.5 border-b border-white/6 mb-3">
-                <div className="flex items-center gap-1.5">
-                  <span className="size-3 rounded-full bg-rose-500/80" />
-                  <span className="size-3 rounded-full bg-amber-500/80" />
-                  <span className="size-3 rounded-full bg-emerald-500/80" />
-                  <span className="text-[10px] font-bold text-muted-foreground/60 tracking-wider ml-2 select-none uppercase">RAQVINE_STUDIO_V4.2</span>
+              {/* Window Header Toolbar (36px tall) */}
+              <div className="flex items-center justify-between px-5 h-[36px] border-b border-white/[0.08] select-none">
+                <div className="flex items-center gap-2">
+                  <span className="size-[10px] rounded-full bg-[#ff5f56]" />
+                  <span className="size-[10px] rounded-full bg-[#ffbd2e]" />
+                  <span className="size-[10px] rounded-full bg-[#27c93f]" />
+                  <span className="text-[13px] font-medium text-[#a1a1aa] tracking-wide ml-4 uppercase font-sans">
+                    RAQVINE_STUDIO_V4.2
+                  </span>
                 </div>
-                
-                {/* Status indicator */}
-                <div className="flex items-center gap-1.5 rounded-full bg-white/[0.03] px-3 py-1 border border-white/5">
-                  <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-400">GPU ACCELERATED</span>
+                <div className="flex items-center gap-1.5 rounded-full bg-black/50 px-2.5 py-0.5 border border-emerald-500/10">
+                  <span className="size-1.5 rounded-full bg-[#10b981] shadow-[0_0_8px_rgba(16,185,129,0.8)] animate-pulse" />
+                  <span className="text-[11px] font-semibold tracking-wider text-[#10b981]">
+                    GPU ACCELERATED
+                  </span>
                 </div>
               </div>
 
-              {/* Grid split pane: Video player & Controls */}
-              <div className="grid grid-cols-1 md:grid-cols-[1.5fr_1fr] gap-3">
-                
-                {/* ── VIDEO SCREEN / COMPARISON SPLIT SLIDER ── */}
-                <div
-                  ref={splitContainerRef}
-                  onMouseMove={handleMouseMoveSlider}
-                  onTouchMove={handleTouchMoveSlider}
-                  className="relative aspect-video rounded-xl overflow-hidden border border-white/8 bg-black cursor-ew-resize group"
-                >
-                  
-                  {/* Graded/Edited Footage (Standard) */}
-                  <video
-                    ref={gradedVideoRef}
-                    src={HERO_VIDEO}
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    className="absolute inset-0 size-full object-cover pointer-events-none"
-                    style={{ filter: gradedFilter }}
-                  />
-
-                  {/* RAW Footage (Clipped overlay) */}
-                  <video
-                    ref={rawVideoRef}
-                    src={HERO_VIDEO}
-                    autoPlay
-                    muted
-                    loop
-                    playsInline
-                    onTimeUpdate={handleTimeUpdate}
-                    onLoadedMetadata={handleLoadedMetadata}
-                    className="absolute inset-0 size-full object-cover pointer-events-none"
-                    style={{
-                      clipPath: `polygon(0 0, ${sliderPos}% 0, ${sliderPos}% 100%, 0 100%)`,
-                      filter: "grayscale(0.7) contrast(0.8) brightness(1.1)",
-                      mixBlendMode: "normal"
-                    }}
-                  />
-
-                  {/* Slider line separator */}
+              {/* ── VERTICAL STACK OF THREE PANELS ── */}
+              <div className="flex flex-col gap-2 p-2.5 select-none">
+                {/* ── PANEL 1: VIDEO SCREEN / COMPARISON SPLIT SLIDER ── */}
+                <div className="flex flex-col rounded-[12px] overflow-hidden border border-white/[0.05] bg-[#040406]/60">
                   <div
-                    className="absolute top-0 bottom-0 w-0.5 bg-[#00D4FF] z-20 pointer-events-none shadow-[0_0_15px_rgba(0,212,255,0.8)]"
-                    style={{ left: `${sliderPos}%` }}
+                    ref={splitContainerRef}
+                    onMouseEnter={() => setIsHovered(true)}
+                    onMouseLeave={() => setIsHovered(false)}
+                    onTouchStart={() => setIsHovered(true)}
+                    onMouseMove={handleMouseMoveSlider}
+                    onTouchMove={handleTouchMoveSlider}
+                    className="relative aspect-video max-h-[290px] overflow-hidden cursor-ew-resize"
                   >
-                    <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 bg-black/90 text-white border border-[#00D4FF]/50 rounded-full size-7 flex items-center justify-center shadow-lg text-[9px] font-black pointer-events-none">
-                      ↔
+                    {/* Soft screen glass reflection overlay */}
+                    <div className="absolute inset-0 pointer-events-none bg-gradient-to-tr from-transparent via-white/[0.015] to-transparent z-25" />
+
+                    {/* FALLBACK IMAGES */}
+                    <img
+                      src={carRacingImg}
+                      className="absolute inset-0 size-full object-cover pointer-events-none select-none transition-opacity duration-500"
+                      style={{
+                        filter: gradedFilter,
+                        opacity: videoLoaded ? 0.35 : 1,
+                      }}
+                      alt="Cinematic Graded"
+                    />
+                    <img
+                      src={carRacingImg}
+                      className="absolute inset-0 size-full object-cover pointer-events-none select-none transition-opacity duration-500"
+                      style={{
+                        clipPath: `polygon(0 0, ${sliderPos}% 0, ${sliderPos}% 100%, 0 100%)`,
+                        filter: "grayscale(0.65) contrast(0.85) brightness(1.1) saturate(75%)",
+                        opacity: videoLoaded ? 0.35 : 1,
+                      }}
+                      alt="Raw ungraded"
+                    />
+
+                    {/* Graded / Edited footage */}
+                    <video
+                      ref={gradedVideoRef}
+                      src={HERO_VIDEO}
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                      onPlay={() => setVideoLoaded(true)}
+                      onPlaying={() => setVideoLoaded(true)}
+                      onCanPlay={() => setVideoLoaded(true)}
+                      className="absolute inset-0 size-full object-cover pointer-events-none transition-opacity duration-500"
+                      style={{
+                        filter: gradedFilter,
+                        opacity: videoLoaded ? 1 : 0,
+                      }}
+                    />
+
+                    {/* RAW footage (left clip) */}
+                    <video
+                      ref={rawVideoRef}
+                      src={HERO_VIDEO}
+                      autoPlay
+                      muted
+                      loop
+                      playsInline
+                      onTimeUpdate={handleTimeUpdate}
+                      onLoadedMetadata={handleLoadedMetadata}
+                      className="absolute inset-0 size-full object-cover pointer-events-none transition-opacity duration-500"
+                      style={{
+                        clipPath: `polygon(0 0, ${sliderPos}% 0, ${sliderPos}% 100%, 0 100%)`,
+                        filter: "grayscale(0.65) contrast(0.85) brightness(1.1) saturate(75%)",
+                        opacity: videoLoaded ? 1 : 0,
+                      }}
+                    />
+
+                    {/* Slider divider line */}
+                    <div
+                      className="absolute top-0 bottom-0 w-[1.5px] bg-[#22d3ee] z-20 pointer-events-none"
+                      style={{
+                        left: `${sliderPos}%`,
+                        boxShadow: "0 0 10px rgba(34,211,238,0.8)",
+                      }}
+                    >
+                      <div className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 bg-[#08080c]/90 border border-white/10 rounded-full size-6 flex items-center justify-center text-[7px] text-white shadow-lg pointer-events-none select-none">
+                        ↔
+                      </div>
+                    </div>
+
+                    {/* Before / After labels */}
+                    <div className="absolute top-3.5 left-3.5 z-30 pointer-events-none rounded-full bg-[#050508]/60 border border-white/5 px-2.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.15em] text-[#a1a1aa] select-none">
+                      BEFORE
+                    </div>
+                    <div className="absolute top-3.5 right-3.5 z-30 pointer-events-none rounded-full bg-[#22d3ee]/10 border border-[#22d3ee]/25 px-2.5 py-0.5 text-[8px] font-semibold uppercase tracking-[0.15em] text-[#22d3ee] select-none">
+                      AFTER
                     </div>
                   </div>
 
-                  {/* Visual labels overlay */}
-                  <div className="absolute top-3 left-3 z-30 pointer-events-none rounded bg-black/60 px-2 py-0.5 text-[8px] font-black uppercase tracking-widest text-white/70 border border-white/5">
-                    RAW LOG
-                  </div>
-                  <div className="absolute top-3 right-3 z-30 pointer-events-none rounded bg-[#00D4FF]/20 px-2 py-0.5 text-[8px] font-black uppercase tracking-widest text-[#00D4FF] border border-[#00D4FF]/25 backdrop-blur-sm">
-                    GRADED
-                  </div>
-
-                  {/* Render Simulator Progress Bar Overlay */}
-                  <AnimatePresence>
-                    {isExporting && (
-                      <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="absolute inset-0 z-40 bg-black/85 flex flex-col items-center justify-center p-5 backdrop-blur-sm"
-                      >
-                        <div className="w-full max-w-[240px]">
-                          <div className="flex justify-between items-center mb-2">
-                            <span className="text-[9px] font-extrabold uppercase tracking-wider text-muted-foreground">
-                              {exportCompleted ? "RENDER COMPLETE" : "COMPILING VIDEOS..."}
-                            </span>
-                            <span className="text-[10px] font-black text-white">{exportProgress}%</span>
-                          </div>
-                          
-                          <div className="w-full h-1.5 bg-white/5 rounded-full overflow-hidden border border-white/10">
-                            <motion.div
-                              className="h-full bg-gradient-to-r from-[#00D4FF] to-[#8B5CF6]"
-                              style={{ width: `${exportProgress}%` }}
-                            />
-                          </div>
-
-                          <div className="mt-3 text-[8px] font-bold text-white/40 text-center tracking-wide">
-                            {exportCompleted
-                              ? "ProRes 422 HQ Exported Successfully"
-                              : `Processing frames: ${Math.floor(exportProgress * 6)} / 600`}
-                          </div>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-
-                </div>
-
-                {/* ── COLOR GRADING & MASTER CONTROLS PANEL ── */}
-                <div className="rounded-xl border border-white/6 bg-white/[0.02] p-3 flex flex-col justify-between">
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] font-bold tracking-widest text-white/90 flex items-center gap-1.5 uppercase">
-                        <Sliders className="size-3.5 text-[#00D4FF]" /> COLOR GRADE
-                      </span>
+                  {/* Video play controls bar (36px tall) */}
+                  <div className="flex items-center justify-between px-4 h-[36px] bg-[#07070b] border-t border-white/[0.08] select-none text-[12px] text-[#a1a1aa]/90">
+                    {/* Left Controls */}
+                    <div className="flex items-center gap-4">
                       <button
-                        onClick={resetGrading}
-                        className="text-[9px] font-extrabold tracking-widest text-muted-foreground hover:text-white flex items-center gap-1 transition-colors uppercase"
-                        title="Reset Grading Sliders"
+                        onClick={togglePlay}
+                        className="hover:text-white transition-colors cursor-pointer text-[#22d3ee]"
+                        title={isPlaying ? "Pause" : "Play"}
                       >
-                        <RotateCcw className="size-3" /> RESET
+                        {isPlaying ? (
+                          <svg
+                            className="size-[14px]"
+                            fill="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+                          </svg>
+                        ) : (
+                          <Play className="size-[14px] fill-[#22d3ee]/25 animate-pulse" />
+                        )}
                       </button>
-                    </div>
-
-                    {/* Saturation */}
-                    <div className="space-y-1.5">
-                      <div className="flex justify-between text-[9px] font-bold uppercase text-muted-foreground tracking-wide">
-                        <span>Saturation</span>
-                        <span className="text-[#00D4FF]">{sat}%</span>
+                      <button
+                        onClick={handleReload}
+                        className="hover:text-white transition-colors cursor-pointer"
+                        title="Step Back"
+                      >
+                        <svg className="size-[14px] fill-current" viewBox="0 0 24 24">
+                          <path d="M6 6h2v12H6zm3 6 8.5 6V6z" />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={() => { }}
+                        className="hover:text-white transition-colors cursor-pointer"
+                        title="Step Forward"
+                      >
+                        <svg className="size-[14px] fill-current" viewBox="0 0 24 24">
+                          <path d="M6 6v12l8.5-6zm9 0h2v12h-2z" />
+                        </svg>
+                      </button>
+                      <div className="flex items-center gap-2">
+                        <button
+                          onClick={() => setIsMuted((prev) => !prev)}
+                          className="hover:text-white transition-colors cursor-pointer"
+                          title={isMuted ? "Unmute" : "Mute"}
+                        >
+                          <Volume2 className={`size-[14px] ${!isMuted ? "text-[#22d3ee]" : ""}`} />
+                        </button>
+                        {/* Audio Volume Bar representation */}
+                        <div className="flex items-end gap-[1.5px] h-2">
+                          {[4, 6, 8, 5].map((h, i) => (
+                            <span
+                              key={i}
+                              className="w-[1.5px] bg-[#22d3ee]/60 rounded-t"
+                              style={{ height: `${h}px` }}
+                            />
+                          ))}
+                        </div>
                       </div>
-                      <input
-                        type="range"
-                        min="50"
-                        max="200"
-                        value={sat}
-                        onChange={e => setSat(Number(e.target.value))}
-                        className="w-full accent-[#00D4FF]"
-                      />
                     </div>
 
-                    {/* Contrast */}
-                    <div className="space-y-1.5">
-                      <div className="flex justify-between text-[9px] font-bold uppercase text-muted-foreground tracking-wide">
-                        <span>Contrast</span>
-                        <span className="text-[#00D4FF]">{contrast}%</span>
-                      </div>
-                      <input
-                        type="range"
-                        min="50"
-                        max="180"
-                        value={contrast}
-                        onChange={e => setContrast(Number(e.target.value))}
-                        className="w-full accent-[#00D4FF]"
-                      />
-                    </div>
-
-                    {/* Exposure */}
-                    <div className="space-y-1.5">
-                      <div className="flex justify-between text-[9px] font-bold uppercase text-muted-foreground tracking-wide">
-                        <span>Exposure</span>
-                        <span className="text-[#00D4FF]">{exposure}%</span>
-                      </div>
-                      <input
-                        type="range"
-                        min="70"
-                        max="150"
-                        value={exposure}
-                        onChange={e => setExposure(Number(e.target.value))}
-                        className="w-full accent-[#00D4FF]"
-                      />
-                    </div>
-
-                    {/* Tint (Hue) */}
-                    <div className="space-y-1.5">
-                      <div className="flex justify-between text-[9px] font-bold uppercase text-muted-foreground tracking-wide">
-                        <span>Color Tint</span>
-                        <span className="text-[#00D4FF]">{tint}°</span>
-                      </div>
-                      <input
-                        type="range"
-                        min="-90"
-                        max="90"
-                        value={tint}
-                        onChange={e => setTint(Number(e.target.value))}
-                        className="w-full accent-[#8B5CF6]"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Render simulated button */}
-                  <button
-                    onClick={handleExportSimulate}
-                    disabled={isExporting}
-                    className="w-full mt-4 flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-[#00D4FF]/12 to-[#8B5CF6]/12 border border-[#00D4FF]/25 hover:border-[#00D4FF]/45 text-white/90 hover:text-white py-2.5 text-[10px] font-black uppercase tracking-widest transition-all duration-300 disabled:opacity-50"
-                  >
-                    {isExporting ? (
-                      <>
-                        <span className="size-2.5 rounded-full border border-white/20 border-t-white animate-spin" />
-                        <span>Rendering...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Download className="size-3 text-[#00D4FF]" />
-                        <span>Simulate Export</span>
-                      </>
-                    )}
-                  </button>
-
-                </div>
-
-              </div>
-
-              {/* ── TIMELINE TRACK PANEL & WAVEFORMS ── */}
-              <div className="mt-4 rounded-xl border border-white/6 bg-white/[0.01] p-3">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2 text-[9px] font-bold text-muted-foreground uppercase tracking-widest">
-                    <Layers className="size-3.5 text-[#8B5CF6]" /> SEQUENCER TIMELINE
-                  </div>
-                  
-                  {/* Waveform / Play time sync */}
-                  <div className="flex items-center gap-3">
-                    {/* Live Waveform visual animation */}
-                    <div className="flex items-end gap-[1.5px] h-4 select-none px-2 py-0.5 rounded bg-black/30 border border-white/5">
-                      {audioHeights.map((h, i) => (
-                        <span
-                          key={i}
-                          className="w-[1.5px] rounded-t bg-cyan-400"
-                          style={{
-                            height: `${h}px`,
-                            opacity: 0.35 + (i % 3) * 0.2,
-                            transition: "height 0.08s ease-out"
-                          }}
-                        />
-                      ))}
-                    </div>
-
-                    <div className="text-[9px] font-black text-white/80 tracking-widest font-mono">
+                    {/* Middle: Time display */}
+                    <div className="font-mono text-[12px] text-[#a1a1aa]/80 tracking-wider">
                       {formatTime(videoCurrentTime)} / {formatTime(videoDuration)}
                     </div>
+
+                    {/* Right Controls */}
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-1 bg-white/5 border border-white/10 px-2 py-0.5 rounded text-[11px] font-bold text-[#a1a1aa]">
+                        <span>16:9</span>
+                        <span className="text-[8px] font-sans">▼</span>
+                      </div>
+                      <button className="hover:text-white transition-colors cursor-pointer">
+                        <svg
+                          className="size-[14px]"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75v4.5m0-4.5h-4.5m4.5 0L15 9m5.25 11.25v-4.5m0 4.5h-4.5m4.5 0L15 15"
+                          />
+                        </svg>
+                      </button>
+                    </div>
                   </div>
                 </div>
 
-                {/* Tracks container block */}
-                <div className="relative space-y-2 border-t border-white/6 pt-3 select-none">
-                  
-                  {/* Current playhead vertical marker line */}
-                  <div
-                    className="absolute top-0 bottom-0 w-0.5 bg-[#00D4FF] z-20 pointer-events-none shadow-[0_0_8px_rgba(0,212,255,0.7)]"
-                    style={{ left: `${playProgress}%` }}
-                  >
-                    <div className="absolute top-0 -translate-x-1/2 size-2 rounded-full bg-[#00D4FF]" />
+                {/* ── PANEL 2: TIMELINE (16px gap mt-4) ── */}
+                <div className="rounded-[12px] border border-white/10 bg-[#07070b]/60 p-[12px] flex flex-col mt-4">
+                  {/* Header */}
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="text-[12px] font-bold text-white/50 uppercase tracking-wider font-sans">
+                      Timeline
+                    </div>
+                    {/* Zoom control */}
+                    <div className="flex items-center gap-2 bg-white/[0.01] border border-white/[0.05] px-2.5 py-0.5 rounded-full select-none text-white/30 text-[10px]">
+                      <svg
+                        className="size-3 text-[#a1a1aa]"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                        />
+                      </svg>
+                      <div className="w-12 h-[2px] bg-white/10 relative rounded-full">
+                        <div
+                          className="absolute top-1/2 -translate-y-1/2 left-[60%] size-1.5 rounded-full bg-[#22d3ee]"
+                          style={{ boxShadow: "0 0 6px #22d3ee" }}
+                        />
+                      </div>
+                      <span className="font-bold text-[10px] text-white/50">+</span>
+                    </div>
                   </div>
 
-                  {/* V1 Block */}
-                  <div className="relative h-6 rounded bg-purple-500/10 border border-purple-500/20 flex items-center px-3 overflow-hidden text-[9px] font-bold text-purple-400">
-                    <div className="absolute inset-y-0 left-0 bg-purple-500/20" style={{ width: `${playProgress}%` }} />
-                    <span className="relative z-10">V1: Showreel_Color_Grade_A.mov</span>
-                  </div>
+                  {/* Ruler & Tracks */}
+                  <div className="relative">
+                    {/* Time ruler */}
+                    <div
+                      onClick={handleScrub}
+                      className="relative h-4 border-t border-white/[0.06] cursor-pointer select-none font-mono text-[10px] text-[#a1a1aa]/50 flex justify-between px-1 items-end pb-1"
+                    >
+                      {[
+                        "00:00",
+                        "00:02",
+                        "00:04",
+                        "00:06",
+                        "00:08",
+                        "00:10",
+                        "00:12",
+                        "00:14",
+                        "00:16",
+                      ].map((t) => (
+                        <span key={t}>{t}</span>
+                      ))}
 
-                  {/* FX Block */}
-                  <div className="relative h-6 rounded bg-amber-500/10 border border-amber-500/20 flex items-center px-3 overflow-hidden text-[9px] font-bold text-amber-400">
-                    <div className="absolute inset-y-0 left-[20%] w-[35%] bg-amber-500/20" />
-                    <span className="relative z-10 ml-[20%]">FX: Whip Pan Transition</span>
-                  </div>
+                      {/* Playhead */}
+                      <div
+                        className="absolute top-0 bottom-[-92px] w-[1.5px] z-20 pointer-events-none"
+                        style={{
+                          left: `${playProgress}%`,
+                          background: "#22d3ee",
+                          boxShadow: "0 0 6px rgba(34,211,238,0.8)",
+                        }}
+                      >
+                        <div className="absolute top-0 -translate-x-1/2 -mt-1.5 bg-[#22d3ee] text-black text-[6.5px] font-black px-1 py-0.5 rounded-sm flex items-center justify-center shadow-lg pointer-events-none">
+                          {formatTime(videoCurrentTime)}
+                        </div>
+                      </div>
+                    </div>
 
-                  {/* A1 Block */}
-                  <div className="relative h-6 rounded bg-cyan-500/10 border border-cyan-500/20 flex items-center px-3 overflow-hidden text-[9px] font-bold text-cyan-400">
-                    <div className="absolute inset-y-0 left-0 bg-cyan-500/20" style={{ width: `${playProgress}%` }} />
-                    <span className="relative z-10">A1: Cinematic Foley Mix (Stereo)</span>
-                  </div>
+                    {/* Sequencer Track Rows (6px gaps space-y-[6px]) */}
+                    <div className="space-y-[6px] relative z-10 select-none mt-1.5 text-[11px] font-bold">
+                      {/* Track 1: Video clips (24px height) */}
+                      <div className="flex items-center gap-2.5 h-[24px]">
+                        <div className="shrink-0 w-[84px] text-[10px] text-[#a1a1aa]/50 uppercase tracking-wider font-sans font-bold">
+                          Video Clips
+                        </div>
+                        <div className="relative flex-1 h-full flex gap-0.5 rounded bg-black/40 border border-white/[0.04] p-0.5 items-stretch overflow-hidden">
+                          {timelineThumbnails.map((thumb, i) => (
+                            <div key={i} className="flex-1 rounded-[2px] overflow-hidden relative">
+                              <img
+                                src={thumb}
+                                className="size-full object-cover opacity-50"
+                                alt=""
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
 
+                      {/* Track 2: Audio waveform (24px height) */}
+                      <div className="flex items-center gap-2.5 h-[24px]">
+                        <div className="shrink-0 w-[84px] text-[10px] text-[#a1a1aa]/50 uppercase tracking-wider font-sans font-bold">
+                          Audio Waveform
+                        </div>
+                        <div className="relative flex-1 h-full rounded bg-[#0d9488]/5 border border-[#0d9488]/10 overflow-hidden">
+                          <svg
+                            className="absolute inset-0 size-full pointer-events-none"
+                            preserveAspectRatio="none"
+                            viewBox="0 0 200 20"
+                          >
+                            <defs>
+                              <linearGradient id="waveform-grad" x1="0" y1="0" x2="1" y2="0">
+                                <stop offset="0%" stopColor="#0d9488" stopOpacity={0.15} />
+                                <stop
+                                  offset={`${playProgress}%`}
+                                  stopColor="#10b981"
+                                  stopOpacity={0.8}
+                                />
+                                <stop offset="100%" stopColor="#0d9488" stopOpacity={0.15} />
+                              </linearGradient>
+                            </defs>
+                            <path
+                              d="M0,10 C10,5 15,15 20,8 C25,2 30,18 35,10 C40,4 45,16 50,10 C55,4 60,16 65,10 C70,2 75,18 80,10 C85,5 90,15 95,8 C100,2 105,18 110,10 C115,4 120,16 125,10 C130,4 135,16 140,10 C145,2 150,18 155,10 C160,5 165,15 170,8 C175,2 180,18 185,10 C190,4 195,16 200,10 L200,20 L0,20 Z"
+                              fill="url(#waveform-grad)"
+                            />
+                            <path
+                              d="M0,10 C10,5 15,15 20,8 C25,2 30,18 35,10 C40,4 45,16 50,10 C55,4 60,16 65,10 C70,2 75,18 80,10 C85,5 90,15 95,8 C100,2 105,18 110,10 C115,4 120,16 125,10 C130,4 135,16 140,10 C145,2 150,18 155,10 C160,5 165,15 170,8 C175,2 180,18 185,10 C190,4 195,16 200,10"
+                              stroke="#0d9488"
+                              strokeOpacity={0.8}
+                              strokeWidth="1"
+                              fill="none"
+                            />
+                          </svg>
+                        </div>
+                      </div>
+
+                      {/* Track 3: Motion Graphics (24px height) */}
+                      <div className="flex items-center gap-2.5 h-[24px]">
+                        <div className="shrink-0 w-[84px] text-[10px] text-[#a1a1aa]/50 uppercase tracking-wider font-sans font-bold">
+                          Motion Graphics
+                        </div>
+                        <div className="relative flex-1 h-full rounded bg-purple-950/10 border border-purple-500/10 overflow-hidden flex items-center px-4 gap-2">
+                          <div className="h-2.5 rounded bg-[#a855f7]/20 border border-[#a855f7]/40 w-1/3 flex items-center justify-around px-1 relative">
+                            {/* Dot markers */}
+                            <span className="size-1.5 rounded-full bg-[#a855f7] shadow-[0_0_6px_rgba(168,85,247,0.8)]" />
+                            <span className="size-1.5 rounded-full bg-[#a855f7] shadow-[0_0_6px_rgba(168,85,247,0.8)]" />
+                          </div>
+                          <div className="h-2.5 rounded bg-[#a855f7]/20 border border-[#a855f7]/40 w-1/2 flex items-center justify-around px-1 relative">
+                            <span className="size-1.5 rounded-full bg-[#a855f7] shadow-[0_0_6px_rgba(168,85,247,0.8)]" />
+                            <span className="size-1.5 rounded-full bg-[#a855f7] shadow-[0_0_6px_rgba(168,85,247,0.8)]" />
+                            <span className="size-1.5 rounded-full bg-[#a855f7] shadow-[0_0_6px_rgba(168,85,247,0.8)]" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
 
+                {/* ── PANEL 3: EXPORT QUEUE (12px gap mt-3) ── */}
+                <div className="rounded-[12px] border border-white/10 bg-[#07070b]/60 p-[12px] flex items-center justify-between gap-4 mt-3">
+                  {/* Left Column: Progress Bar */}
+                  <div className="flex-1 flex flex-col gap-2">
+                    <div className="flex items-center gap-1.5 text-[12px] font-bold text-white/50 uppercase tracking-wider font-sans">
+                      <span>↑</span> Export Queue
+                    </div>
+                    <div className="flex flex-col gap-1 bg-black/40 border border-white/[0.03] p-2.5 rounded-lg">
+                      <div className="flex items-center justify-between text-[13px] font-bold">
+                        <span className="text-white/70">Final Edit – 4K Ultra HD</span>
+                        <span className="text-[#22d3ee] font-mono">87%</span>
+                      </div>
+                      {/* Linear progress bar */}
+                      <div className="w-full h-[5px] rounded-full bg-white/5 overflow-hidden">
+                        <div
+                          className="h-full rounded-full bg-gradient-to-r from-[#22d3ee] to-[#a855f7]"
+                          style={{ width: "87%" }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Column: Status Card */}
+                  <div className="w-[110px] p-2 flex flex-col items-center justify-center rounded-[8px] border border-white/10 bg-white/[0.01]">
+                    <span className="text-[18px] font-extrabold text-[#22d3ee] leading-none">
+                      4K
+                    </span>
+                    <span className="text-[10px] font-bold text-[#a1a1aa]/60 tracking-wider mt-1">
+                      EXPORTING...
+                    </span>
+                    <span className="text-[10px] text-[#a1a1aa]/60 font-semibold mt-0.5">
+                      Estimated: 00:18
+                    </span>
+                  </div>
+                </div>
               </div>
-
             </div>
-
-            {/* ── FLOATING ANALYTICS WIDGET CARD ── */}
-            <motion.div
-              animate={{ y: [0, -6, 0] }}
-              transition={{ duration: 4.5, repeat: Infinity, ease: "easeInOut" }}
-              className="absolute -right-8 -bottom-4 z-30 hidden sm:block rounded-xl border border-white/8 bg-black/90 px-4 py-3 shadow-2xl backdrop-blur-md text-left"
-              style={{ willChange: "transform" }}
-            >
-              <div className="text-[8px] font-bold text-muted-foreground uppercase tracking-widest">RENDER SPEED</div>
-              <div className="mt-1 flex items-baseline gap-1.5">
-                <span className="text-xl font-black text-emerald-400">2.1s</span>
-                <span className="text-[7px] text-[#00D4FF] font-bold uppercase tracking-wide">PRORES 422 HQ</span>
-              </div>
-            </motion.div>
-
           </motion.div>
-
         </div>
-      </div>
 
-      {/* ── BOTTOM MATRIX: 4 PREMIUM STATS CARDS & CLIENT LOGOS ── */}
-      <div className="relative z-10 mx-auto w-full max-w-[1440px] px-5 pb-16 sm:px-8 lg:px-12">
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4 border-t border-white/6 pt-8">
-          {[
-            { val: "50M+", label: "Views Generated" },
-            { val: "500+", label: "Projects Delivered" },
-            { val: "100+", label: "Happy Clients" },
-            { val: "98%", label: "Client Satisfaction" },
-          ].map(({ val, label }) => (
-            <div
-              key={label}
-              className="relative overflow-hidden rounded-2xl border border-white/5 bg-white/[0.01] p-5 backdrop-blur-md transition-all duration-300 hover:border-white/10 hover:bg-white/[0.03] text-center lg:text-left"
-            >
+        {/* ── BOTTOM STATS ROW & LOGOS (32px gap mt-8) ── */}
+        <div className="w-full mt-5 lg:mt-6 flex flex-col gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 border-t border-white/[0.08] pt-4 lg:pt-5">
+            {[
+              {
+                val: "50M+",
+                label: "Views Generated",
+                color: "#22d3ee",
+                borderStyle: "border-[#22d3ee]/30 text-[#22d3ee]",
+                icon: Eye,
+              },
+              {
+                val: "500+",
+                label: "Projects Delivered",
+                color: "#fbbf24",
+                borderStyle: "border-[#fbbf24]/30 text-[#fbbf24]",
+                icon: Briefcase,
+              },
+              {
+                val: "100+",
+                label: "Happy Clients",
+                color: "#a855f7",
+                borderStyle: "border-[#a855f7]/30 text-[#a855f7]",
+                icon: Users,
+              },
+              {
+                val: "98%",
+                label: "Client Satisfaction",
+                color: "#a855f7",
+                borderStyle: "border-[#a855f7]/30 text-[#a855f7]",
+                icon: Star,
+              },
+            ].map(({ val, label, color, borderStyle, icon: Icon }) => (
               <div
-                className="font-display text-3xl sm:text-4xl font-black tracking-tight"
-                style={{
-                  background: "linear-gradient(135deg, #fff 40%, #00D4FF 100%)",
-                  WebkitBackgroundClip: "text",
-                  WebkitTextFillColor: "transparent"
-                }}
+                key={label}
+                className="group relative flex flex-row items-center gap-3 lg:gap-4 rounded-[12px] border border-white/[0.08] bg-white/[0.03] p-4 lg:p-5 transition-all duration-300 hover:border-white/20 hover:bg-white/[0.05] hover:-translate-y-1 hover:shadow-lg overflow-hidden cursor-pointer w-full"
+                style={{ backdropFilter: "blur(20px)" }}
               >
-                {val}
-              </div>
-              <div className="mt-2 text-[9px] uppercase tracking-[0.2em] text-muted-foreground/70 font-extrabold">{label}</div>
-            </div>
-          ))}
-        </div>
+                {/* Glass sheen reflection overlay */}
+                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.015] to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
 
-        {/* Client Logos Section */}
-        <div className="mt-10 flex flex-col items-center justify-between gap-6 border-t border-white/5 pt-8 sm:flex-row">
-          <span className="text-[9px] font-extrabold uppercase tracking-[0.25em] text-muted-foreground/50">
-            Trusted by creators & global brands:
-          </span>
-          <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4 opacity-35 text-[10px] font-black uppercase tracking-[0.24em] text-white">
-            <span className="hover:opacity-100 hover:text-[#00D4FF] transition-all duration-300 cursor-default">NEXUS MEDIA</span>
-            <span className="hover:opacity-100 hover:text-[#8B5CF6] transition-all duration-300 cursor-default">VORTEX CLIPS</span>
-            <span className="hover:opacity-100 hover:text-[#00D4FF] transition-all duration-300 cursor-default">AURA LAB</span>
-            <span className="hover:opacity-100 hover:text-[#8B5CF6] transition-all duration-300 cursor-default">APEX DIGITAL</span>
-            <span className="hover:opacity-100 hover:text-[#00D4FF] transition-all duration-300 cursor-default">ECLIPSE HQ</span>
+                {/* Icon circle (40px) */}
+                <div className={`relative shrink-0 size-10 rounded-full border-2 ${borderStyle} flex items-center justify-center bg-[#050810]/40 transition-colors`}>
+                  <Icon
+                    className="size-5 transition-transform duration-500 group-hover:scale-110"
+                    strokeWidth={2}
+                  />
+                </div>
+                <div className="flex flex-col text-left">
+                  <span className="font-sans text-[28px] lg:text-[32px] font-extrabold leading-none tracking-tight text-white">
+                    {val}
+                  </span>
+                  <span className="text-[11px] lg:text-[12px] text-[#a1a1aa] font-bold uppercase tracking-wider mt-1.5 leading-tight font-sans">
+                    {label}
+                  </span>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* ── IMMERSIVE SHOWREEL POPUP MODAL ── */}
+      {/* Scroll indicator */}
+      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-1 opacity-25 select-none pointer-events-none">
+        <span className="text-[8px] font-bold uppercase tracking-wider text-[#a1a1aa]/30 font-sans">
+          Scroll
+        </span>
+        <div className="w-4 h-7 rounded-full border border-white/10 flex items-start justify-center p-0.5">
+          <div className="w-0.5 h-1 rounded-full bg-[#22d3ee] hero-scroll-dot" />
+        </div>
+      </div>
+
+      {/* ── SHOWREEL MODAL ── */}
       <AnimatePresence>
         {showreelOpen && (
           <motion.div
@@ -708,20 +1022,21 @@ export function Hero() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4 backdrop-blur-md"
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4"
+            style={{ backdropFilter: "blur(12px)" }}
             onClick={() => setShowreelOpen(false)}
           >
             <motion.div
-              initial={{ opacity: 0, scale: 0.96, y: 16 }}
+              initial={{ opacity: 0, scale: 0.95, y: 16 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.96, y: 16 }}
+              exit={{ opacity: 0, scale: 0.95, y: 16 }}
               transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
               onClick={(e) => e.stopPropagation()}
-              className="relative aspect-video w-full max-w-5xl overflow-hidden rounded-3xl border border-white/10 bg-black shadow-[0_0_60px_rgba(0,0,0,0.9)]"
+              className="relative aspect-video w-full max-w-5xl overflow-hidden rounded-3xl border border-white/10 bg-black shadow-[0_0_80px_rgba(0,0,0,0.95)]"
             >
               <button
                 onClick={() => setShowreelOpen(false)}
-                className="absolute right-4 top-4 z-50 grid size-10 place-items-center rounded-full border border-white/10 bg-black/50 text-white transition-colors hover:bg-white/10"
+                className="absolute right-4 top-4 z-50 grid size-10 place-items-center rounded-full border border-white/10 bg-black/50 text-white transition-colors hover:bg-white/10 cursor-pointer"
                 aria-label="Close modal"
               >
                 <X className="size-5" />
@@ -731,7 +1046,6 @@ export function Hero() {
           </motion.div>
         )}
       </AnimatePresence>
-
     </section>
   );
 }

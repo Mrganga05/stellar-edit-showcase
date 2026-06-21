@@ -19,10 +19,16 @@ export function Footer() {
             </p>
             <div className="mt-6 flex gap-2">
               {[
-                { icon: Instagram, href: "https://www.instagram.com/raqvine?igsh=cXIxcHN1Y215OTh5" },
+                {
+                  icon: Instagram,
+                  href: "https://www.instagram.com/raqvine?igsh=cXIxcHN1Y215OTh5",
+                },
                 { icon: Youtube, href: "https://youtube.com/@move_with_raghu?si=SqOo7Lgrlm2CVDJZ" },
-                { icon: Linkedin, href: "https://www.linkedin.com/in/raghu-sai-59a207382?utm_source=share_via&utm_content=profile&utm_medium=member_android" },
-                { icon: MessageCircle, href: "https://wa.me/919160851678" }
+                {
+                  icon: Linkedin,
+                  href: "https://www.linkedin.com/in/raghu-sai-59a207382?utm_source=share_via&utm_content=profile&utm_medium=member_android",
+                },
+                { icon: MessageCircle, href: "https://wa.me/919160851678" },
               ].map((social, i) => (
                 <a
                   key={i}
@@ -42,7 +48,7 @@ export function Footer() {
               { label: "Portfolio", href: "#work" },
               { label: "About", href: "#about" },
               { label: "Process", href: "#process" },
-              { label: "Results", href: "#results" }
+              { label: "Results", href: "#results" },
             ]}
           />
           <FooterCol
@@ -51,16 +57,22 @@ export function Footer() {
               { label: "YouTube", href: "#services" },
               { label: "Shorts & Reels", href: "#services" },
               { label: "Podcast", href: "#services" },
-              { label: "Commercial", href: "#services" }
+              { label: "Commercial", href: "#services" },
             ]}
           />
           <FooterCol
             title="Contact"
             links={[
               { label: "WhatsApp", href: "https://wa.me/919160851678" },
-              { label: "Instagram", href: "https://www.instagram.com/raqvine?igsh=cXIxcHN1Y215OTh5" },
-              { label: "LinkedIn", href: "https://www.linkedin.com/in/raghu-sai-59a207382?utm_source=share_via&utm_content=profile&utm_medium=member_android" },
-              { label: "Email", href: "mailto:hello@raqvine.studio" }
+              {
+                label: "Instagram",
+                href: "https://www.instagram.com/raqvine?igsh=cXIxcHN1Y215OTh5",
+              },
+              {
+                label: "LinkedIn",
+                href: "https://www.linkedin.com/in/raghu-sai-59a207382?utm_source=share_via&utm_content=profile&utm_medium=member_android",
+              },
+              { label: "Email", href: "mailto:hello@raqvine.studio" },
             ]}
           />
         </div>
@@ -69,7 +81,9 @@ export function Footer() {
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
             <span>© {new Date().getFullYear()} Raqvine Studio. All rights reserved.</span>
             <span className="hidden sm:inline text-white/10">•</span>
-            <a href="/admin" className="hover:text-foreground transition-colors">Admin Console</a>
+            <a href="/admin" className="hover:text-foreground transition-colors">
+              Admin Console
+            </a>
           </div>
           <a
             href="#top"

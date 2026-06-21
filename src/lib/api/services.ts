@@ -38,63 +38,39 @@ async function handleSupabaseResponse<T>(promise: any): Promise<T> {
 export const portfolioApi = {
   list: () =>
     handleSupabaseResponse<PortfolioProject[]>(
-      supabase
-        .from("portfolio_projects")
-        .select("*")
-        .eq("isPublished", true)
-        .order("sortOrder")
+      supabase.from("portfolio_projects").select("*").eq("isPublished", true).order("sortOrder"),
     ),
   get: (id: string) =>
     handleSupabaseResponse<PortfolioProject>(
-      supabase
-        .from("portfolio_projects")
-        .select("*")
-        .eq("id", id)
-        .single()
+      supabase.from("portfolio_projects").select("*").eq("id", id).single(),
     ),
 };
 
 export const comparisonApi = {
   list: () =>
     handleSupabaseResponse<BeforeAfterProject[]>(
-      supabase
-        .from("before_after_projects")
-        .select("*")
-        .eq("isPublished", true)
-        .order("sortOrder")
+      supabase.from("before_after_projects").select("*").eq("isPublished", true).order("sortOrder"),
     ),
 };
 
 export const testimonialApi = {
   list: () =>
     handleSupabaseResponse<Testimonial[]>(
-      supabase
-        .from("testimonials")
-        .select("*")
-        .eq("isPublished", true)
-        .order("sortOrder")
+      supabase.from("testimonials").select("*").eq("isPublished", true).order("sortOrder"),
     ),
 };
 
 export const serviceApi = {
   list: () =>
     handleSupabaseResponse<Service[]>(
-      supabase
-        .from("services")
-        .select("*")
-        .eq("isActive", true)
-        .order("sortOrder")
+      supabase.from("services").select("*").eq("isActive", true).order("sortOrder"),
     ),
 };
 
 export const faqApi = {
   list: () =>
     handleSupabaseResponse<Faq[]>(
-      supabase
-        .from("faq")
-        .select("*")
-        .eq("isPublished", true)
-        .order("sortOrder")
+      supabase.from("faq").select("*").eq("isPublished", true).order("sortOrder"),
     ),
 };
 
@@ -115,7 +91,7 @@ export const contactApi = {
           },
         ])
         .select()
-        .single()
+        .single(),
     ),
 };
 
@@ -133,8 +109,6 @@ export const sampleRequestApi = {
           },
         ])
         .select()
-        .single()
+        .single(),
     ),
 };
-
-
