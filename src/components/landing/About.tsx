@@ -1,118 +1,545 @@
-import { Reveal, SectionHeading } from "./primitives";
-import { Calendar, MapPin, Film, Video, Users } from "lucide-react";
+import { useRef, useState, useEffect } from "react";
+import { motion, useMotionValue, useSpring, useInView, animate } from "motion/react";
+import { cn } from "@/lib/utils";
+import {
+  Zap,
+  TrendingUp,
+  Rocket,
+  Instagram,
+  Youtube,
+  Sparkles,
+  Scissors,
+  Box,
+  ArrowUpRight
+} from "lucide-react";
+import editorProfile from "@/assets/editor-profile.jpg";
+import a1 from "@/assets/avatars/a1.jpg";
+import a2 from "@/assets/avatars/a2.jpg";
+import a3 from "@/assets/avatars/a3.jpg";
+import a4 from "@/assets/avatars/a4.jpg";
+import a5 from "@/assets/avatars/a5.jpg";
+
+// Reusable Count-Up Counter
+const Counter = ({
+  to,
+  duration = 2,
+  suffix = "",
+  decimals = 0
+}: {
+  to: number;
+  duration?: number;
+  suffix?: string;
+  decimals?: number;
+}) => {
+  const nodeRef = useRef<HTMLSpanElement>(null);
+  const inView = useInView(nodeRef, { once: true, margin: "-100px" });
+
+  useEffect(() => {
+    if (!inView) return;
+    const node = nodeRef.current;
+    if (!node) return;
+
+    const controls = animate(0, to, {
+      duration: duration,
+      ease: [0.16, 1, 0.3, 1], // easeOutExpo
+      onUpdate(value) {
+        node.textContent = value.toFixed(decimals) + suffix;
+      },
+    });
+
+    return () => controls.stop();
+  }, [inView, to, duration, suffix, decimals]);
+
+  return <span ref={nodeRef} className="font-space font-bold">0{suffix}</span>;
+};
+
+// SVG Sparkline / Mini Wave Visualizer
+const Sparkline = ({ color = "#18B6FF" }) => {
+  return (
+    <svg className="w-16 h-6 mt-1.5 opacity-60 transition-opacity duration-300 hover:opacity-100" viewBox="0 0 60 20" fill="none">
+      <motion.path
+        initial={{ pathLength: 0 }}
+        whileInView={{ pathLength: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 1.5, ease: "easeInOut" }}
+        d="M0,15 Q10,3 20,13 T40,6 T60,11"
+        stroke={color}
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+};
+
+// Staggered Title words (3 lines exactly, compact size)
+const StaggeredTitle = () => {
+  const containerVars = {
+    hidden: {},
+    visible: {
+      transition: {
+        staggerChildren: 0.08,
+      },
+    },
+  };
+
+  const wordVars = {
+    hidden: { opacity: 0, y: 25 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.7,
+        ease: [0.215, 0.610, 0.355, 1], // easeOutCubic
+      },
+    },
+  };
+
+  return (
+    <motion.h2
+      variants={containerVars}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-100px" }}
+      className="text-[34px] sm:text-[44px] lg:text-[48px] xl:text-[54px] font-black leading-[1.05] tracking-[-0.04em] text-[#F9FAFB] mt-4 mb-5 flex flex-col font-sans select-none"
+    >
+      <span className="block py-1 relative">
+        <motion.span variants={wordVars} className="inline-block mr-[0.2em] font-extrabold bg-gradient-to-b from-white via-white to-[#A3A3C2] bg-clip-text text-transparent">
+          Meet
+        </motion.span>
+        <motion.span variants={wordVars} className="inline-block mr-[0.2em] font-extrabold bg-gradient-to-b from-white via-white to-[#A3A3C2] bg-clip-text text-transparent">
+          The
+        </motion.span>
+        <motion.span
+          variants={wordVars}
+          className="inline-block mr-[0.05em] pr-[0.15em] font-playfair font-bold italic bg-gradient-to-r from-[#FF2E93] via-[#FF8A00] to-[#FFD600] bg-clip-text text-transparent filter drop-shadow-[0_2px_15px_rgba(255,46,147,0.35)] hover:scale-105 transition-transform duration-350"
+        >
+          Editor
+        </motion.span>
+      </span>
+
+      <span className="block py-1 relative">
+        <motion.span variants={wordVars} className="inline-block mr-[0.2em] font-extrabold bg-gradient-to-b from-white via-white to-[#A3A3C2] bg-clip-text text-transparent">
+          Behind
+        </motion.span>
+        <motion.span
+          variants={wordVars}
+          className="inline-block mr-[0.1em] pr-[0.15em] font-playfair font-bold italic bg-gradient-to-r from-[#00F5D4] via-[#00D4FF] to-[#0072FF] bg-clip-text text-transparent filter drop-shadow-[0_2px_20px_rgba(0,212,255,0.4)] relative group cursor-default"
+        >
+          Viral
+          <motion.span
+            animate={{ rotate: 360 }}
+            transition={{ repeat: Infinity, duration: 8, ease: "linear" }}
+            className="absolute -top-2 -right-3 text-[12px] text-[#00D4FF] opacity-80 group-hover:opacity-100 group-hover:scale-125 transition-all duration-300 pointer-events-none font-sans filter drop-shadow-[0_0_8px_rgba(0,212,255,0.6)]"
+          >
+            ✦
+          </motion.span>
+        </motion.span>
+      </span>
+
+      <span className="block py-1 relative">
+        <motion.span variants={wordVars} className="inline-block mr-[0.2em] font-extrabold bg-gradient-to-b from-white via-white to-[#A3A3C2] bg-clip-text text-transparent">
+          Content
+        </motion.span>
+        <motion.span variants={wordVars} className="inline-block mr-[0.2em] font-extrabold bg-gradient-to-b from-white via-white to-[#A3A3C2] bg-clip-text text-transparent">
+          That
+        </motion.span>
+        <motion.span
+          variants={wordVars}
+          className="inline-block mr-[0.05em] pr-[0.15em] font-playfair font-bold italic bg-gradient-to-r from-[#8B5CF6] via-[#D946EF] to-[#FF007F] bg-clip-text text-transparent filter drop-shadow-[0_2px_20px_rgba(217,70,239,0.4)]"
+        >
+          Converts.
+        </motion.span>
+      </span>
+    </motion.h2>
+  );
+};
+
+// Premium Compact Feature Card
+interface FeatureCardProps {
+  title: string;
+  desc: string;
+  icon: React.ReactNode;
+  delay?: number;
+}
+
+const FeatureCard = ({ title, desc, icon, delay = 0 }: FeatureCardProps) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20, scale: 0.98 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay }}
+      className="group relative overflow-hidden rounded-[22px] border border-white/[0.08] bg-white/[0.03] p-[18px] xl:p-[20px] backdrop-blur-md flex flex-col justify-between lg:h-[140px] transition-all duration-[450ms] ease-out hover:border-[#18B6FF]/40 hover:-translate-y-1.5 hover:shadow-[0_10px_25px_rgba(24,182,255,0.06)]"
+    >
+      <div className="absolute inset-0 bg-gradient-to-br from-[#18B6FF]/0 to-[#18B6FF]/[0.03] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+
+      <div className="flex items-center gap-3">
+        {/* Icon wrapper */}
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white/[0.03] border border-white/10 text-[#9CA3AF] transition-all duration-500 group-hover:scale-110 group-hover:text-[#18B6FF] group-hover:border-[#18B6FF]/30 group-hover:shadow-[0_0_12px_rgba(24,182,255,0.15)]">
+          {icon}
+        </div>
+        <h4 className="text-sm font-semibold text-[#F9FAFB] group-hover:text-[#18B6FF] transition-colors duration-300">
+          {title}
+        </h4>
+      </div>
+      <p className="text-[11.5px] text-[#9CA3AF] leading-[150%] group-hover:text-white/80 transition-colors duration-300">
+        {desc}
+      </p>
+    </motion.div>
+  );
+};
+
+// Floating Badge Component (Stable, no floating animation)
+const FloatingBadge = ({
+  text,
+  icon,
+  className
+}: {
+  text: string;
+  icon?: React.ReactNode;
+  className?: string;
+}) => {
+  return (
+    <div
+      className={cn(
+        "rounded-full border border-white/[0.08] bg-[#050608]/60 px-3 py-1.5 text-xs font-semibold text-white/80 backdrop-blur-md shadow-md cursor-default hover:border-[#18B6FF]/20 hover:text-white transition-all duration-300 flex items-center gap-1.5 whitespace-nowrap",
+        className
+      )}
+    >
+      {icon}
+      {text}
+    </div>
+  );
+};
+
+// Background Particle Dot
+const Particle = ({ delay = 0, x = 0, y = 0 }: { delay?: number; x?: number; y?: number }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0.1, y: 0 }}
+      animate={{
+        opacity: [0.1, 0.4, 0.1],
+        y: [0, -30, 0],
+        x: [0, 15, 0],
+      }}
+      transition={{
+        duration: 8 + Math.random() * 4,
+        repeat: Infinity,
+        ease: "easeInOut",
+        delay: delay,
+      }}
+      className="absolute size-1 rounded-full bg-[#18B6FF] pointer-events-none"
+      style={{ left: `${x}%`, top: `${y}%` }}
+    />
+  );
+};
 
 export function About() {
+  const sectionRef = useRef<HTMLDivElement>(null);
+
+  // Parallax Springs
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+  const springMouseX = useSpring(mouseX, { stiffness: 80, damping: 25 });
+  const springMouseY = useSpring(mouseY, { stiffness: 80, damping: 25 });
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!sectionRef.current) return;
+    const rect = sectionRef.current.getBoundingClientRect();
+    const relX = (e.clientX - rect.left) / rect.width - 0.5;
+    const relY = (e.clientY - rect.top) / rect.height - 0.5;
+
+    mouseX.set(relX * 45); // Shifts elements up to 45px
+    mouseY.set(relY * 45);
+  };
+
+  const timelineEvents = [
+    { year: "2020", text: "Started editing." },
+    { year: "2022", text: "Worked with creators." },
+    { year: "2024", text: "Built premium studio." },
+    { year: "Today", text: "Helping brands scale through high-performing content." },
+  ];
+
   return (
-    <section id="about" className="relative mx-auto max-w-7xl px-5 py-28 sm:px-8 sm:py-36">
-      <SectionHeading
-        eyebrow="About the Studio"
-        title={
-          <>
-            Behind the <span className="text-gradient-brand">scenes</span>.
-          </>
-        }
-        subtitle="Raqvine is a premium boutique video editing studio specializing in high-impact narrative and retention-first digital content."
-      />
+    <section
+      id="about"
+      ref={sectionRef}
+      onMouseMove={handleMouseMove}
+      className="relative w-full overflow-hidden bg-[#050608] py-20 lg:py-0 lg:h-screen lg:max-h-[1080px] flex items-center justify-center"
+    >
+      {/* Background radial/mesh ambient lights (interactive parallax) */}
+      <motion.div
+        style={{ x: springMouseX, y: springMouseY }}
+        className="absolute inset-0 overflow-hidden pointer-events-none z-0"
+      >
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(24,182,255,0.035)_0%,rgba(139,92,246,0.025)_40%,transparent_75%)]" />
 
-      <div className="mt-16 grid gap-12 lg:grid-cols-[1fr_480px]">
-        {/* Biography & Approach */}
-        <Reveal>
-          <div className="space-y-8 text-left">
-            <h3 className="font-display text-3xl leading-tight sm:text-4xl text-foreground">
-              We translate raw vision into visual impact.
-            </h3>
+        {/* Soft Ambient lighting orbs */}
+        <div className="absolute top-1/4 left-1/4 size-[550px] rounded-full bg-[#18B6FF]/3 opacity-20 blur-[130px]" />
+        <div className="absolute bottom-1/4 right-1/4 size-[600px] rounded-full bg-[#8B5CF6]/3 opacity-15 blur-[140px]" />
+      </motion.div>
 
-            <p className="text-base leading-relaxed text-muted-foreground sm:text-lg">
-              Raqvine was founded on a simple philosophy: in the digital landscape, attention is the
-              ultimate currency. We do not just assemble clips on a timeline; we meticulously design
-              the viewer's emotional journey. By combining cinematic color grading, punchy sound
-              design, and retention-first pacing, we help creators and brands stand out in a
-              saturated feed.
-            </p>
+      {/* Grid overlay */}
+      <div className="absolute inset-0 about-grid opacity-25 pointer-events-none z-0" />
 
-            <p className="text-base leading-relaxed text-muted-foreground sm:text-lg">
-              Whether you are an established creator seeking to scale your channel or a premium
-              brand looking to launch a cinematic commercial campaign, we provide bespoke, elite
-              post-production services.
-            </p>
+      {/* Noise overlay */}
+      <div className="absolute inset-0 about-noise pointer-events-none z-0" />
 
-            {/* Core Values grid */}
-            <div className="grid gap-6 sm:grid-cols-2 pt-4">
-              <div className="flex gap-4">
-                <div className="grid size-12 shrink-0 place-items-center rounded-xl bg-electric/10 text-electric">
-                  <Film className="size-5" />
+      {/* Background floating particles */}
+      <div className="absolute inset-0 pointer-events-none z-0">
+        <Particle x={8} y={15} delay={0} />
+        <Particle x={85} y={18} delay={1.5} />
+        <Particle x={42} y={52} delay={2.8} />
+        <Particle x={20} y={72} delay={0.8} />
+        <Particle x={80} y={85} delay={2} />
+        <Particle x={62} y={32} delay={1.2} />
+      </div>
+
+      <div className="relative mx-auto w-full max-w-[1440px] px-6 sm:px-12 lg:px-[70px] py-4 lg:py-[90px] grid grid-cols-12 gap-8 lg:gap-[48px] items-stretch h-full z-20 lg:-translate-y-12">
+
+        {/* LEFT COLUMN (7 columns of 12) */}
+        <div className="col-span-12 lg:col-span-7 flex flex-col justify-between h-full space-y-10 lg:space-y-0 text-left">
+
+          {/* Top Badge & Heading group */}
+          <div className="flex flex-col">
+            {/* About Badge */}
+            <motion.div
+              initial={{ opacity: 0, y: 15 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              className="h-[42px] rounded-full border border-white/[0.08] bg-white/[0.04] px-[18px] flex items-center gap-2 self-start backdrop-blur-md hover:border-[#18B6FF]/30 hover:shadow-[0_0_15px_rgba(24,182,255,0.15)] transition-all duration-300 cursor-default"
+            >
+              <span className="size-1.5 rounded-full bg-[#18B6FF] animate-pulse" />
+              <span className="font-sans font-medium text-[13px] uppercase tracking-[3px] text-white/80">ABOUT THE EDITOR</span>
+            </motion.div>
+
+            {/* Title */}
+            <StaggeredTitle />
+          </div>
+
+          {/* 3 Premium Feature Cards */}
+          <div className="grid gap-5 sm:grid-cols-3">
+            <FeatureCard
+              title="Hook First"
+              desc="Every edit is engineered to capture attention within the first three seconds."
+              icon={<Zap className="size-4" />}
+              delay={0.1}
+            />
+            <FeatureCard
+              title="Retention Focus"
+              desc="Pacing, storytelling and motion designed for maximum watch time."
+              icon={<TrendingUp className="size-4" />}
+              delay={0.2}
+            />
+            <FeatureCard
+              title="Business Results"
+              desc="Transforming content into followers, customers and revenue."
+              icon={<Rocket className="size-4" />}
+              delay={0.3}
+            />
+          </div>
+
+          {/* Statistics Strip */}
+          <div className="h-auto lg:h-[80px] w-full rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-md flex flex-col sm:flex-row items-center justify-around divide-y sm:divide-y-0 sm:divide-x divide-white/[0.08] px-4 py-3 sm:py-0 gap-y-3 sm:gap-y-0">
+            <div className="flex-1 w-full flex flex-col items-center justify-center text-center">
+              <span className="font-space font-bold text-[30px] xl:text-[36px] leading-none text-[#F9FAFB]"><Counter to={50} suffix="M+" /></span>
+              <span className="font-sans uppercase text-[10px] tracking-[2px] text-[#9CA3AF] mt-1.5">Views Generated</span>
+            </div>
+            <div className="flex-1 w-full flex flex-col items-center justify-center text-center sm:pl-2">
+              <span className="font-space font-bold text-[30px] xl:text-[36px] leading-none text-[#F9FAFB]"><Counter to={100} suffix="+" /></span>
+              <span className="font-sans uppercase text-[10px] tracking-[2px] text-[#9CA3AF] mt-1.5">Creators Edited</span>
+            </div>
+            <div className="flex-1 w-full flex flex-col items-center justify-center text-center sm:pl-2">
+              <span className="font-space font-bold text-[30px] xl:text-[36px] leading-none text-[#F9FAFB]"><Counter to={98} suffix="%" /></span>
+              <span className="font-sans uppercase text-[10px] tracking-[2px] text-[#9CA3AF] mt-1.5">Client Satisfaction</span>
+            </div>
+            <div className="flex-1 w-full flex flex-col items-center justify-center text-center sm:pl-2">
+              <span className="font-space font-bold text-[30px] xl:text-[36px] leading-none text-[#F9FAFB]"><Counter to={5} suffix="+" /></span>
+              <span className="font-sans uppercase text-[10px] tracking-[2px] text-[#9CA3AF] mt-1.5">Years Experience</span>
+            </div>
+          </div>
+
+          {/* Timeline & CTA Block Side-by-Side (bottom group) */}
+          <div className="flex flex-col sm:flex-row gap-6 items-stretch">
+
+            {/* Timeline (40% width on desktop) */}
+            <div className="w-full sm:w-[40%] flex flex-col justify-center space-y-4 pr-2">
+              <h5 className="text-[10px] font-bold uppercase tracking-[2px] text-[#9CA3AF]">THE JOURNEY</h5>
+
+              <div className="relative pl-2">
+                {/* Vertical Indicator Line */}
+                <div className="absolute left-[7px] top-2 bottom-2 w-[1.5px] bg-white/5">
+                  <motion.div
+                    initial={{ height: 0 }}
+                    whileInView={{ height: "100%" }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 1.5, ease: "easeInOut" }}
+                    className="w-full bg-gradient-to-b from-[#18B6FF] to-[#8B5CF6]"
+                  />
                 </div>
-                <div>
-                  <h4 className="font-medium text-foreground">Cinema Grade</h4>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Every video receives bespoke cinematic color science and premium grading.
-                  </p>
-                </div>
-              </div>
 
-              <div className="flex gap-4">
-                <div className="grid size-12 shrink-0 place-items-center rounded-xl bg-violet-glow/10 text-violet-glow">
-                  <Video className="size-5" />
-                </div>
-                <div>
-                  <h4 className="font-medium text-foreground">Retention-First</h4>
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    Paced, hook-first storytelling engineered to keep viewers engaged to the end.
-                  </p>
+                {/* Nodes */}
+                <div className="space-y-4">
+                  {timelineEvents.map((event, idx) => (
+                    <motion.div
+                      key={idx}
+                      initial={{ opacity: 0, x: -10 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.5, delay: idx * 0.15 }}
+                      className="relative pl-7 text-[13px]"
+                    >
+                      {/* Circle node dot */}
+                      <div className="absolute left-0 top-[3px] size-3.5 rounded-full bg-[#050608] border-[1.5px] border-[#18B6FF] flex items-center justify-center shadow-[0_0_8px_rgba(24,182,255,0.4)]">
+                        <div className="size-1 rounded-full bg-[#18B6FF]" />
+                      </div>
+                      <span className="font-space font-bold text-[#18B6FF] mr-2 tracking-wider text-xs">{event.year}</span>
+                      <span className="text-[#9CA3AF] leading-relaxed">{event.text}</span>
+                    </motion.div>
+                  ))}
                 </div>
               </div>
             </div>
+
+            {/* CTA Card (60% width on desktop) */}
+            <div className="w-full sm:w-[60%] rounded-[30px] border border-white/[0.08] bg-white/[0.03] p-6 xl:p-8 backdrop-blur-md flex flex-col justify-between space-y-5">
+              <div className="space-y-2">
+                <span className="text-[10px] font-bold uppercase tracking-[2px] text-[#18B6FF]">READY TO COLLABORATE?</span>
+                <h4 className="font-playfair text-xl xl:text-2xl font-bold text-[#F9FAFB] leading-tight">
+                  Ready To Create Your Next Viral Video?
+                </h4>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3">
+                <motion.button
+                  whileHover={{ scale: 1.03 }}
+                  className="group relative inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#8B5CF6] to-[#18B6FF] px-6 py-3 text-xs xl:text-sm font-semibold text-white transition-all duration-300 hover:shadow-[0_0_30px_rgba(139,92,246,0.4)] cursor-pointer"
+                >
+                  Book Strategy Call
+                  <ArrowUpRight className="size-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                </motion.button>
+
+                <motion.button
+                  whileHover={{ scale: 1.03 }}
+                  className="group relative inline-flex items-center justify-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-6 py-3 text-xs xl:text-sm font-semibold text-white backdrop-blur-md transition-all duration-300 hover:border-[#18B6FF]/40 hover:shadow-[0_0_20px_rgba(24,182,255,0.15)] cursor-pointer"
+                >
+                  View Portfolio
+                </motion.button>
+              </div>
+
+              {/* Avatar Group Trust Badge */}
+              <div className="flex items-center gap-3 pt-2.5 border-t border-white/[0.05]">
+                <div className="flex items-center -space-x-1.5">
+                  {[a1, a2, a3, a4, a5].map((avatar, idx) => (
+                    <img
+                      key={idx}
+                      src={avatar}
+                      alt="Creator avatar"
+                      className="size-6.5 rounded-full border border-[#050608] object-cover"
+                    />
+                  ))}
+                </div>
+                <span className="text-[11px] text-[#9CA3AF] font-medium leading-none">
+                  Trusted by 100+ creators worldwide.
+                </span>
+              </div>
+            </div>
+
           </div>
-        </Reveal>
 
-        {/* Right column: Image placeholder and profile card */}
-        <Reveal delay={0.15}>
-          <div className="relative">
-            {/* Background glow effects */}
-            <div className="absolute -inset-1 rounded-[2.5rem] bg-gradient-to-br from-electric/30 to-violet-glow/30 opacity-50 blur-xl" />
+        </div>
 
-            <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-surface p-3 shadow-2xl">
-              {/* Placeholder Image */}
-              <div className="aspect-[4/3] w-full overflow-hidden rounded-2xl bg-white/[0.02]">
+        {/* RIGHT COLUMN (5 columns of 12) */}
+        <div className="col-span-12 lg:col-span-5 flex flex-col justify-between h-full space-y-8 lg:space-y-0 items-center">
+
+          <div className="relative w-full max-w-[330px] xl:max-w-[360px] flex flex-col h-full justify-between">
+
+            {/* Top Badges (Visible on Desktop/Tablet) */}
+            <div className="hidden sm:flex flex-col gap-2.5 items-center lg:items-end w-full mb-6 shrink-0">
+              <div className="flex flex-wrap gap-2.5 justify-center lg:justify-end">
+                <FloatingBadge text="Instagram" icon={<Instagram className="size-3 text-[#E1306C]" />} />
+                <FloatingBadge text="YouTube Shorts" icon={<Youtube className="size-3 text-[#FF0000]" />} />
+                <FloatingBadge text="TikTok" icon={<Sparkles className="size-3 text-white" />} />
+                <FloatingBadge text="Premiere Pro" icon={<Scissors className="size-3 text-[#00D4FF]" />} />
+              </div>
+              <div className="flex flex-wrap gap-2.5 justify-center lg:justify-end">
+                <FloatingBadge text="After Effects" icon={<Sparkles className="size-3 text-[#9999FF]" />} />
+                <FloatingBadge text="DaVinci Resolve" icon={<Box className="size-3 text-[#FF9933]" />} />
+                <FloatingBadge text="CapCut" icon={<Scissors className="size-3 text-[#00D4FF]" />} />
+                <FloatingBadge text="Motion Graphics" icon={<Box className="size-3 text-[#8B5CF6]" />} />
+              </div>
+            </div>
+
+            {/* Layered Profile Card Container (Stable, no floating/hover scaling) */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+              className="group relative flex flex-col rounded-[34px] border border-white/[0.08] bg-white/[0.03] backdrop-blur-xl shadow-[0_20px_50px_rgba(24,182,255,0.1)] hover:shadow-[0_25px_65px_rgba(24,182,255,0.2)] overflow-hidden animate-border-beam w-full aspect-[2/3] shrink-0 transition-shadow duration-500"
+            >
+              {/* Cinematic spotlight behind editor head */}
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(24,182,255,0.2)_0%,rgba(139,92,246,0.1)_40%,transparent_70%)] opacity-80 pointer-events-none z-10" />
+
+              {/* Main Portrait Image (Full show, no cropping, luxury border) */}
+              <div className="relative w-full h-full overflow-hidden rounded-[34px] bg-[#050608]">
                 <img
-                  src="https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?q=80&w=800"
-                  alt="About Raqvine Studio"
-                  className="size-full object-cover opacity-85 transition-transform duration-700 hover:scale-[1.03]"
+                  src={editorProfile}
+                  alt="RAQVINE Editor Profile"
+                  className="w-full h-full object-cover object-center opacity-95 pointer-events-none select-none"
                 />
-              </div>
 
-              {/* Bio Details */}
-              <div className="p-5 text-left">
-                <div className="flex items-center justify-between border-b border-white/10 pb-4">
-                  <div>
-                    <span className="text-[10px] uppercase tracking-[0.24em] text-muted-foreground">
-                      Lead Editor & Director
-                    </span>
-                    <h4 className="font-display text-2xl text-foreground mt-0.5">Raqvine</h4>
-                  </div>
-                  <span className="inline-flex items-center gap-1.5 rounded-full glass px-2.5 py-1 text-[10px] uppercase tracking-[0.18em] text-electric">
-                    Active
-                  </span>
-                </div>
+                {/* Subtle card reflection shine */}
+                <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/[0.03] to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-20" />
 
-                <ul className="mt-4 space-y-3 text-sm text-muted-foreground">
-                  <li className="flex items-center gap-3">
-                    <MapPin className="size-4 text-electric shrink-0" />
-                    <span>Worldwide / Remote Operations</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <Calendar className="size-4 text-electric shrink-0" />
-                    <span>Established 2020</span>
-                  </li>
-                  <li className="flex items-center gap-3">
-                    <Users className="size-4 text-electric shrink-0" />
-                    <span>Serving 100+ Creators & Brands</span>
-                  </li>
-                </ul>
+                {/* Inner border highlighted on hover */}
+                <div className="absolute inset-0 rounded-[34px] border border-white/[0.05] group-hover:border-[#18B6FF]/30 transition-colors duration-500 pointer-events-none z-30" />
               </div>
-            </div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="mt-6 flex items-center justify-between rounded-2xl border border-white/[0.08] bg-white/[0.03] px-2 py-3.5 text-xs text-[#9CA3AF] backdrop-blur-md shadow-md shrink-0 w-full"
+            >
+              <div className="flex-1 min-w-[70px] text-center px-1 flex flex-col items-center">
+                <span className="font-space font-bold text-white text-base">
+                  <Counter to={50} suffix="M+" />
+                </span>
+                <span className="text-[9px] text-[#9CA3AF] uppercase tracking-wider mt-0.5 font-medium font-sans">Views</span>
+                <Sparkline color="#18B6FF" />
+              </div>
+              <div className="h-10 w-px bg-white/[0.08] hidden sm:block" />
+              <div className="flex-1 min-w-[70px] text-center px-1 flex flex-col items-center">
+                <span className="font-space font-bold text-white text-base">
+                  <Counter to={100} suffix="+" />
+                </span>
+                <span className="text-[9px] text-[#9CA3AF] uppercase tracking-wider mt-0.5 font-medium font-sans">Clients</span>
+                <Sparkline color="#8B5CF6" />
+              </div>
+              <div className="h-10 w-px bg-white/[0.08] hidden sm:block" />
+              <div className="flex-1 min-w-[70px] text-center px-1 flex flex-col items-center">
+                <span className="font-space font-bold text-white text-base">
+                  <Counter to={4.9} decimals={1} suffix="★" />
+                </span>
+                <span className="text-[9px] text-[#9CA3AF] uppercase tracking-wider mt-0.5 font-medium font-sans">Rating</span>
+                <Sparkline color="#18B6FF" />
+              </div>
+              <div className="h-10 w-px bg-white/[0.08] hidden sm:block" />
+              <div className="flex-1 min-w-[70px] text-center px-1 flex flex-col items-center">
+                <span className="font-space font-bold text-white text-[11px] xl:text-xs">Worldwide</span>
+                <span className="text-[9px] text-[#9CA3AF] uppercase tracking-wider mt-0.5 font-medium font-sans">Global Reach</span>
+                <Sparkline color="#8B5CF6" />
+              </div>
+            </motion.div>
+
           </div>
-        </Reveal>
+
+        </div>
+
       </div>
     </section>
   );

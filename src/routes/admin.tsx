@@ -72,6 +72,8 @@ function AdminPage() {
   const [projSortOrder, setProjSortOrder] = useState<number>(0);
   const [projIsPublished, setProjIsPublished] = useState(true);
   const [projServiceId, setProjServiceId] = useState("");
+  const [projClientName, setProjClientName] = useState("");
+  const [projMetric, setProjMetric] = useState("");
 
   useEffect(() => {
     const authStatus = sessionStorage.getItem("is_raqvine_admin");
@@ -225,6 +227,8 @@ function AdminPage() {
     setProjSortOrder(portfolioProjects.length);
     setProjIsPublished(true);
     setProjServiceId(services[0]?.id || "");
+    setProjClientName("");
+    setProjMetric("");
     setIsProjectModalOpen(true);
   }
 
@@ -242,6 +246,8 @@ function AdminPage() {
     setProjSortOrder(project.sortOrder || 0);
     setProjIsPublished(project.isPublished !== false);
     setProjServiceId(project.serviceId || "");
+    setProjClientName(project.clientName || "");
+    setProjMetric(project.metric || "");
     setIsProjectModalOpen(true);
   }
 
@@ -277,6 +283,8 @@ function AdminPage() {
       isPublished: projIsPublished,
       serviceId: projServiceId || null,
       updatedAt: new Date().toISOString(),
+      clientName: projClientName,
+      metric: projMetric,
     };
 
     try {
@@ -786,19 +794,29 @@ function AdminPage() {
                           className="absolute inset-0 size-full object-cover opacity-60"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
-                        <div className="absolute top-3 left-3">
+                        <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none z-10">
                           <span className="inline-flex items-center gap-1.5 rounded-full glass px-2.5 py-0.5 text-[9px] uppercase tracking-[0.18em] text-foreground/80">
                             {p.category}
                           </span>
-                        </div>
-                        {!p.isPublished && (
-                          <div className="absolute top-3 right-3">
-                            <span className="inline-flex items-center rounded-full bg-red-500/10 border border-red-500/25 px-2 py-0.5 text-[9px] font-medium text-red-400">
-                              Draft
-                            </span>
+                          <div className="flex gap-1.5">
+                            {!p.isPublished && (
+                              <span className="inline-flex items-center rounded-full bg-red-500/10 border border-red-500/25 px-2 py-0.5 text-[9px] font-medium text-red-400">
+                                Draft
+                              </span>
+                            )}
+                            {p.metric && (
+                              <span className="inline-flex items-center rounded-full bg-electric/25 border border-electric/40 px-2 py-0.5 text-[9px] font-bold text-electric">
+                                {p.metric}
+                              </span>
+                            )}
                           </div>
-                        )}
-                        <div className="absolute bottom-3 left-3 right-3">
+                        </div>
+                        <div className="absolute bottom-3 left-3 right-3 z-10">
+                          {p.clientName && (
+                            <span className="text-[9px] font-bold uppercase tracking-wider text-electric block mb-0.5">
+                              {p.clientName}
+                            </span>
+                          )}
                           <h3 className="font-display text-lg leading-tight text-white">
                             {p.title}
                           </h3>
@@ -942,6 +960,33 @@ function AdminPage() {
                     value={projCategory}
                     onChange={(e) => setProjCategory(e.target.value)}
                     placeholder="e.g. YouTube Shorts"
+                    className="w-full rounded-xl border border-white/10 bg-white/[0.03] p-3 text-sm text-foreground focus:border-electric focus:outline-none focus:ring-1 focus:ring-electric/30 transition"
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5">
+                    Client / Creator Name
+                  </label>
+                  <input
+                    type="text"
+                    value={projClientName}
+                    onChange={(e) => setProjClientName(e.target.value)}
+                    placeholder="e.g. Marcus Lane"
+                    className="w-full rounded-xl border border-white/10 bg-white/[0.03] p-3 text-sm text-foreground focus:border-electric focus:outline-none focus:ring-1 focus:ring-electric/30 transition"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5">
+                    Primary Metric (Highlight Badge)
+                  </label>
+                  <input
+                    type="text"
+                    value={projMetric}
+                    onChange={(e) => setProjMetric(e.target.value)}
+                    placeholder="e.g. 12M+ Views"
                     className="w-full rounded-xl border border-white/10 bg-white/[0.03] p-3 text-sm text-foreground focus:border-electric focus:outline-none focus:ring-1 focus:ring-electric/30 transition"
                   />
                 </div>

@@ -9,6 +9,10 @@ import { usePortfolioProjects } from "@/lib/api/hooks";
 function Card({ p, onOpen }: { p: Project; onOpen: () => void }) {
   const [hover, setHover] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  // Extract key metric from results if metric field is not set
+  const displayMetric = p.metric || (p.results && p.results[0]) || "";
+
   return (
     <button
       onClick={onOpen}
@@ -21,7 +25,7 @@ function Card({ p, onOpen }: { p: Project; onOpen: () => void }) {
         videoRef.current?.pause();
         if (videoRef.current) videoRef.current.currentTime = 0;
       }}
-      className="group relative aspect-[9/16] w-full overflow-hidden rounded-2xl border border-white/8 bg-surface text-left transition-transform duration-500 hover:scale-[1.015] hover:border-white/20"
+      className="group relative aspect-[9/16] w-full overflow-hidden rounded-2xl border border-white/8 bg-surface text-left transition-all duration-500 hover:scale-[1.03] hover:border-electric/40 hover:shadow-[0_0_25px_rgba(0,212,255,0.15)] focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/50"
     >
       <img
         src={p.thumb}
@@ -46,18 +50,46 @@ function Card({ p, onOpen }: { p: Project; onOpen: () => void }) {
           hover ? "opacity-100" : "opacity-0",
         )}
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
-      <div className="absolute left-4 top-4">
-        <span className="inline-flex items-center gap-1.5 rounded-full glass px-2.5 py-1 text-[10px] uppercase tracking-[0.18em] text-foreground/85">
+
+      {/* Background gradient shadow */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/45 to-transparent transition-opacity duration-300 group-hover:from-black/100" />
+
+      {/* Top badges bar */}
+      <div className="absolute inset-x-0 top-0 p-4 flex items-center justify-between z-10">
+        {/* Category */}
+        <span className="inline-flex items-center gap-1.5 rounded-full glass px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.15em] text-white/90">
           {p.category}
         </span>
+
+        {/* Metric */}
+        {displayMetric && (
+          <span className="inline-flex items-center justify-center rounded-full bg-electric/15 border border-electric/30 px-3 py-1 text-[9px] font-bold tracking-wider text-electric shadow-[0_0_12px_rgba(0,212,255,0.2)]">
+            {displayMetric}
+          </span>
+        )}
       </div>
-      <div className="absolute right-4 top-4 grid size-10 place-items-center rounded-full glass-strong opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-        <Play className="size-4 fill-current" />
+
+      {/* Center play button on hover */}
+      <div className="absolute inset-0 grid place-items-center pointer-events-none z-10">
+        <div className="grid size-12 place-items-center rounded-full bg-black/60 text-white border border-white/20 opacity-0 scale-75 blur-xs transition-all duration-300 group-hover:opacity-100 group-hover:scale-100 group-hover:blur-none group-hover:bg-electric group-hover:text-background group-hover:border-electric shadow-[0_0_15px_rgba(0,212,255,0.4)]">
+          <Play className="size-5 fill-current ml-0.5" />
+        </div>
       </div>
-      <div className="absolute inset-x-0 bottom-0 p-5">
-        <h3 className="font-display text-xl leading-tight sm:text-2xl">{p.title}</h3>
-        <p className="mt-1 text-sm text-muted-foreground line-clamp-1">{p.description}</p>
+
+      {/* Bottom information */}
+      <div className="absolute inset-x-0 bottom-0 p-5 z-10 flex flex-col justify-end">
+        {/* Client handle/name */}
+        {p.clientName && (
+          <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-electric mb-1.5">
+            {p.clientName}
+          </span>
+        )}
+        <h3 className="font-display text-xl sm:text-2xl leading-tight text-white group-hover:text-electric transition-colors duration-300">
+          {p.title}
+        </h3>
+        <p className="mt-1 text-xs text-white/60 line-clamp-1 group-hover:text-white/80 transition-colors duration-300">
+          {p.description}
+        </p>
       </div>
     </button>
   );
@@ -80,6 +112,8 @@ export function Portfolio() {
           techniques: p.techniques,
           results: p.results,
           tools: p.tools,
+          clientName: p.clientName || "",
+          metric: p.metric || "",
         }))
       : mockProjects;
 
@@ -94,16 +128,16 @@ export function Portfolio() {
         }
         subtitle="A selection of recent work across long-form, shorts, commercial and cinematic editing."
       />
-      <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mt-14 grid gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {isLoading && !dbProjects
-          ? Array.from({ length: 6 }).map((_, i) => (
+          ? Array.from({ length: 8 }).map((_, i) => (
               <div
                 key={i}
                 className="aspect-[9/16] w-full animate-pulse rounded-2xl bg-surface/50 border border-white/5"
               />
             ))
           : projectsToRender.map((p, i) => (
-              <Reveal key={p.id} delay={(i % 3) * 0.05}>
+              <Reveal key={p.id} delay={(i % 4) * 0.05}>
                 <Card p={p} onOpen={() => setOpen(p)} />
               </Reveal>
             ))}
@@ -124,34 +158,47 @@ export function Portfolio() {
               exit={{ opacity: 0, scale: 0.96, y: 20 }}
               transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
               onClick={(e) => e.stopPropagation()}
-              className="relative grid max-h-[92vh] w-full max-w-md grid-rows-[auto_1fr] overflow-hidden rounded-3xl glass-strong"
+              className="relative grid w-full max-w-md md:max-w-4xl h-[90vh] md:h-[80vh] grid-cols-1 md:grid-cols-[1.15fr_1fr] grid-rows-[auto_1fr] md:grid-rows-1 overflow-hidden rounded-3xl glass-strong border border-white/10 shadow-2xl"
             >
               <button
                 onClick={() => setOpen(null)}
-                className="absolute right-4 top-4 z-50 grid size-10 place-items-center rounded-full bg-black/40 text-white backdrop-blur-md transition-colors hover:bg-white/10"
+                className="absolute right-4 top-4 z-50 grid size-9 place-items-center rounded-full bg-black/60 text-white/80 border border-white/10 hover:text-white hover:bg-white/10 transition backdrop-blur-md shadow-lg"
+                title="Close dialog"
               >
-                <X className="size-5" />
+                <X className="size-4.5" />
               </button>
-              <video
-                src={open.video}
-                controls
-                autoPlay
-                className="aspect-[9/16] max-h-[55vh] w-full bg-black object-cover"
-              />
-              <div className="space-y-6 overflow-y-auto p-6">
-                <div>
-                  <span className="text-[10px] uppercase tracking-[0.2em] text-electric">
-                    {open.category}
-                  </span>
-                  <h3 className="mt-2 font-display text-2xl leading-tight">{open.title}</h3>
-                  <p className="mt-2.5 text-xs text-muted-foreground leading-relaxed">
-                    {open.overview}
-                  </p>
-                </div>
-                <div className="space-y-4 border-t border-white/5 pt-4">
-                  <Detail label="Techniques" items={open.techniques} />
-                  <Detail label="Results" items={open.results} />
-                  <Detail label="Tools" items={open.tools} />
+
+              {/* Left Column: Video Player Container */}
+              <div className="relative w-full h-[45vh] md:h-full bg-black overflow-hidden flex items-center justify-center">
+                <video src={open.video} controls autoPlay className="w-full h-full object-cover" />
+              </div>
+
+              {/* Right Column: Project Details Panel */}
+              <div className="flex flex-col h-[45vh] md:h-full overflow-y-auto p-6 md:p-8 bg-[#090b11]/75 backdrop-blur-md border-t md:border-t-0 md:border-l border-white/5">
+                <div className="space-y-6">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      {open.clientName && (
+                        <span className="text-[10px] uppercase tracking-[0.2em] text-electric font-bold">
+                          {open.clientName}
+                        </span>
+                      )}
+                      {open.clientName && <span className="text-white/20">•</span>}
+                      <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-semibold">
+                        {open.category}
+                      </span>
+                    </div>
+                    <h3 className="mt-2 font-display text-2xl md:text-3xl leading-tight text-white">
+                      {open.title}
+                    </h3>
+                    <p className="mt-3 text-xs text-white/60 leading-relaxed">{open.overview}</p>
+                  </div>
+
+                  <div className="space-y-4 border-t border-white/5 pt-5">
+                    <Detail label="Techniques" items={open.techniques} />
+                    <Detail label="Results" items={open.results} />
+                    <Detail label="Tools" items={open.tools} />
+                  </div>
                 </div>
               </div>
             </motion.div>

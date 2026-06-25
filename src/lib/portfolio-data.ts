@@ -41,6 +41,8 @@ export type Project = {
   techniques: string[];
   results: string[];
   tools: string[];
+  clientName?: string;
+  metric?: string;
 };
 
 export const projects: Project[] = [
@@ -60,6 +62,8 @@ export const projects: Project[] = [
       "3.4M views in 30 days",
     ],
     tools: ["Premiere Pro", "After Effects", "DaVinci Resolve"],
+    clientName: "Marcus Lane",
+    metric: "3.4M Views",
   },
   {
     id: "p2",
@@ -73,6 +77,8 @@ export const projects: Project[] = [
     techniques: ["Hook stacking", "Beat-synced cuts", "Whip transitions", "Kinetic text"],
     results: ["12M+ views across set", "4.1% avg engagement", "+220K subscribers"],
     tools: ["Premiere Pro", "After Effects"],
+    clientName: "Lane Media",
+    metric: "12M+ Views",
   },
   {
     id: "p3",
@@ -85,6 +91,8 @@ export const projects: Project[] = [
     techniques: ["Match cuts", "Typography animation", "Film grain", "LUT grading"],
     results: ["8.7M reach", "+412% follower growth in 60d"],
     tools: ["Premiere Pro", "After Effects", "Photoshop"],
+    clientName: "Studio Halo",
+    metric: "8.7M Reach",
   },
   {
     id: "p4",
@@ -96,7 +104,9 @@ export const projects: Project[] = [
     overview: "Full multi-cam podcast edit with broadcast-grade audio cleanup and chapter design.",
     techniques: ["Multi-cam switching", "Noise reduction", "Chapter markers", "Lower thirds"],
     results: ["Top 50 Business podcast", "Avg 42min listen time"],
-    tools: ["Premiere Pro", "iZotope RX", "Audition"],
+    tools: ["Premium Pro", "iZotope RX", "Audition"],
+    clientName: "Founders Pod",
+    metric: "Avg 42m",
   },
   {
     id: "p5",
@@ -109,6 +119,8 @@ export const projects: Project[] = [
     techniques: ["Macro coverage", "Color grading", "Sound design", "Logo reveal"],
     results: ["+58% landing-page conversion", "Featured in 3 industry publications"],
     tools: ["DaVinci Resolve", "After Effects"],
+    clientName: "Heritage Watch",
+    metric: "+58% CVR",
   },
   {
     id: "p6",
@@ -121,6 +133,8 @@ export const projects: Project[] = [
     techniques: ["Drone integration", "Twilight grade", "Stabilization", "Ambient mix"],
     results: ["Sold in 11 days", "3x avg agent listing views"],
     tools: ["Premiere Pro", "DaVinci Resolve"],
+    clientName: "Klein Arch",
+    metric: "Sold in 11d",
   },
   {
     id: "p7",
@@ -133,6 +147,8 @@ export const projects: Project[] = [
     techniques: ["Beat sync", "Glitch VFX", "Killfeed compositing", "Speed ramps"],
     results: ["2.1M YouTube views", "Trending #14 Gaming"],
     tools: ["After Effects", "Premiere Pro"],
+    clientName: "Velo Gaming",
+    metric: "2.1M Views",
   },
   {
     id: "p8",
@@ -145,6 +161,8 @@ export const projects: Project[] = [
     techniques: ["Vow narration weave", "Color grading", "Slow-mo recovery", "Score-led cut"],
     results: ["Client referral chain of 9 bookings"],
     tools: ["DaVinci Resolve", "Premiere Pro"],
+    clientName: "The Smiths",
+    metric: "9 Bookings",
   },
   {
     id: "p9",
@@ -157,6 +175,8 @@ export const projects: Project[] = [
     techniques: ["Anamorphic grade", "Atmospheric sound", "Long dissolves", "Narrative arc"],
     results: ["Vimeo Staff Pick", "180K organic plays"],
     tools: ["DaVinci Resolve", "Premiere Pro"],
+    clientName: "Vimeo Staff",
+    metric: "180K Plays",
   },
 ];
 

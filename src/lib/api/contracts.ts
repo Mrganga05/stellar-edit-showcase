@@ -14,6 +14,8 @@ export type PortfolioProject = {
   isPublished: boolean;
   createdAt: string;
   updatedAt: string;
+  clientName?: string;
+  metric?: string;
 };
 
 export type BeforeAfterProject = {

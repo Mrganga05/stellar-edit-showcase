@@ -39,7 +39,6 @@ import carRacingImg from "@/assets/hero_car_racing.png";
 
 const timelineThumbnails = [p1, p2, p3, p4, p5];
 
-
 // Ease-out smooth animated counter for stats cards
 function AnimatedCounter({ value }: { value: string }) {
   const ref = useRef<HTMLSpanElement>(null);
@@ -158,9 +157,6 @@ export function Hero() {
   const [isHovered, setIsHovered] = useState(false);
   const splitContainerRef = useRef<HTMLDivElement>(null);
 
-  // Video playback loaded detection (forces fallback if not loaded/playing yet)
-  const [videoLoaded, setVideoLoaded] = useState(false);
-
   // Playback Control States
   const [isPlaying, setIsPlaying] = useState(true);
   const [isMuted, setIsMuted] = useState(true);
@@ -175,10 +171,6 @@ export function Hero() {
   const [exportProgress, setExportProgress] = useState(87);
   const [isExporting, setIsExporting] = useState(true);
   const [exportCompleted, setExportCompleted] = useState(false);
-
-  // Video Refs
-  const rawVideoRef = useRef<HTMLVideoElement>(null);
-  const gradedVideoRef = useRef<HTMLVideoElement>(null);
 
   // Parallax Motion Values with premium smooth springs
   const xVal = useMotionValue(0);
@@ -229,62 +221,25 @@ export function Hero() {
     loadHero();
   }, []);
 
-  // Sync dual videos
-  useEffect(() => {
-    const syncVideos = () => {
-      if (rawVideoRef.current && gradedVideoRef.current) {
-        if (Math.abs(rawVideoRef.current.currentTime - gradedVideoRef.current.currentTime) > 0.08) {
-          gradedVideoRef.current.currentTime = rawVideoRef.current.currentTime;
-        }
-        if (rawVideoRef.current.paused !== gradedVideoRef.current.paused) {
-          if (rawVideoRef.current.paused) {
-            gradedVideoRef.current.pause();
-            setIsPlaying(false);
-          } else {
-            gradedVideoRef.current.play().catch(() => { });
-            setIsPlaying(true);
-          }
-        }
-        rawVideoRef.current.muted = isMuted;
-        gradedVideoRef.current.muted = isMuted;
-      }
-    };
-    const interval = setInterval(syncVideos, 150);
-    return () => clearInterval(interval);
-  }, [isMuted]);
-
   // Video Playback & Waveform loop (with a fallback simulation timer so it always moves, even if blocked by autoplay)
   useEffect(() => {
     let frameId: number;
     let lastTime = performance.now();
 
     const updateTimeTracking = (now: number) => {
-      const activeVideo = rawVideoRef.current;
-      if (activeVideo) {
-        if (!activeVideo.paused) {
-          const current = activeVideo.currentTime;
-          const duration = activeVideo.duration || 15;
-          setVideoCurrentTime(current);
-          setVideoDuration(duration);
-          setPlayProgress((current / duration) * 100);
-          setIsPlaying(true);
-
-          setAudioHeights((prev) => prev.map(() => Math.floor(Math.random() * 15) + 3));
-        } else if (isPlaying) {
-          const delta = (now - lastTime) / 1000;
-          setVideoCurrentTime((prev) => {
-            let next = prev + delta;
-            if (next >= videoDuration) {
-              next = 0;
-            }
-            return next;
-          });
-          setPlayProgress((videoCurrentTime / videoDuration) * 100);
-
-          setAudioHeights((prev) => prev.map(() => Math.floor(Math.random() * 15) + 3));
-        } else {
-          setAudioHeights((prev) => prev.map((h) => Math.max(3, h - 1.5)));
-        }
+      if (isPlaying) {
+        const delta = (now - lastTime) / 1000;
+        setVideoCurrentTime((prev) => {
+          let next = prev + delta;
+          if (next >= videoDuration) {
+            next = 0;
+          }
+          return next;
+        });
+        setPlayProgress((videoCurrentTime / videoDuration) * 100);
+        setAudioHeights((prev) => prev.map(() => Math.floor(Math.random() * 15) + 3));
+      } else {
+        setAudioHeights((prev) => prev.map((h) => Math.max(3, h - 1.5)));
       }
       lastTime = now;
       frameId = requestAnimationFrame(updateTimeTracking);
@@ -326,14 +281,6 @@ export function Hero() {
 
   // Export simulator loop disabled to match progress spec (static 87%)
 
-  const handleTimeUpdate = () => {
-    if (rawVideoRef.current) setVideoCurrentTime(rawVideoRef.current.currentTime);
-  };
-
-  const handleLoadedMetadata = () => {
-    if (rawVideoRef.current) setVideoDuration(rawVideoRef.current.duration);
-  };
-
   const handleSliderMove = (clientX: number) => {
     if (!splitContainerRef.current) return;
     const rect = splitContainerRef.current.getBoundingClientRect();
@@ -351,26 +298,10 @@ export function Hero() {
   };
 
   const togglePlay = () => {
-    if (rawVideoRef.current) {
-      if (rawVideoRef.current.paused) {
-        rawVideoRef.current.play().catch(() => { });
-        gradedVideoRef.current?.play().catch(() => { });
-        setIsPlaying(true);
-      } else {
-        rawVideoRef.current.pause();
-        gradedVideoRef.current?.pause();
-        setIsPlaying(false);
-      }
-    } else {
-      setIsPlaying(!isPlaying);
-    }
+    setIsPlaying(!isPlaying);
   };
 
   const handleReload = () => {
-    if (rawVideoRef.current) {
-      rawVideoRef.current.currentTime = 0;
-      if (gradedVideoRef.current) gradedVideoRef.current.currentTime = 0;
-    }
     setVideoCurrentTime(0);
   };
 
@@ -378,15 +309,8 @@ export function Hero() {
     const rect = e.currentTarget.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
     const percentage = Math.max(0, Math.min(100, (clickX / rect.width) * 100));
-    if (rawVideoRef.current) {
-      const newTime = (percentage / 100) * videoDuration;
-      rawVideoRef.current.currentTime = newTime;
-      if (gradedVideoRef.current) gradedVideoRef.current.currentTime = newTime;
-      setPlayProgress(percentage);
-    } else {
-      setPlayProgress(percentage);
-      setVideoCurrentTime((percentage / 100) * videoDuration);
-    }
+    setPlayProgress(percentage);
+    setVideoCurrentTime((percentage / 100) * videoDuration);
   };
 
   const formatTime = (time: number) => {
@@ -418,7 +342,6 @@ export function Hero() {
       className="relative min-h-screen w-full flex flex-col pt-[64px] pb-16 lg:pb-24"
       style={{ backgroundColor: "#050810" }}
     >
-
       {/* Film Grain overlay */}
       <div
         className="absolute inset-0 pointer-events-none opacity-[0.018] z-15"
@@ -439,7 +362,7 @@ export function Hero() {
           {/* ── LEFT SIDE: BRAND & COPY ── */}
           <div className="relative text-left flex flex-col items-start justify-start pt-0">
             {/* Top Badge */}
-            <div className="relative inline-flex items-center gap-2 rounded-full p-[1px] mb-4 lg:mb-5 select-none bg-gradient-to-r from-[#22d3ee] to-[#a855f7] shadow-[0_4px_12px_rgba(34,211,238,0.1)]">
+            <div className="relative inline-flex items-center gap-2 rounded-full p-[1px] mb-4 lg:mb-6 select-none bg-gradient-to-r from-[#22d3ee]/80 to-[#a855f7]/80 shadow-[0_4px_20px_rgba(34,211,238,0.15)]">
               <div className="flex items-center gap-2 rounded-full bg-[#050810]/95 px-[18px] py-[8px]">
                 <span className="text-[#22d3ee] text-[13px] font-bold">✦</span>
                 <span className="text-[13px] font-sans font-semibold uppercase tracking-wider text-[#a5f3fc]">
@@ -456,15 +379,21 @@ export function Hero() {
                 transition={{ duration: 0.75, ease: [0.19, 1, 0.22, 1] }}
                 className="font-serif text-[32px] sm:text-[38px] lg:text-[44px] leading-[1.12] tracking-[-0.01em] text-white font-medium text-left max-w-[620px]"
               >
-                <span className="block sm:inline whitespace-normal sm:whitespace-nowrap">High-End Video Editing</span><br />
-                <span className="block sm:inline whitespace-normal sm:whitespace-nowrap">That Scales Your</span><br />
+                <span className="block sm:inline whitespace-normal sm:whitespace-nowrap">
+                  High-End Video Editing
+                </span>
+                <br />
+                <span className="block sm:inline whitespace-normal sm:whitespace-nowrap">
+                  That Scales Your
+                </span>
+                <br />
                 <span className="animate-gradient-text font-serif italic font-medium block sm:inline-block whitespace-normal sm:whitespace-nowrap">
                   Views, Retention, &amp; Revenue.
                 </span>
               </motion.h1>
 
               {/* Accent bar */}
-              <div className="h-[3px] w-[70px] bg-gradient-to-r from-[#22d3ee] to-[#a855f7] rounded-full mt-2.5 lg:mt-3" />
+              <div className="h-[4px] w-[140px] bg-gradient-to-r from-[#22d3ee] to-[#a855f7] rounded-full mt-3 lg:mt-5" />
             </div>
 
             {/* Supporting Copy */}
@@ -472,7 +401,7 @@ export function Hero() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.12 }}
-              className="mt-4 lg:mt-5 max-w-[560px] text-[15px] sm:text-[16px] leading-[1.6] text-[#a1a1aa] text-left font-sans tracking-normal mb-6 lg:mb-8"
+              className="mt-4 lg:mt-6 max-w-[640px] text-[16px] sm:text-[18px] lg:text-[20px] leading-[1.7] text-[#a1a1aa] text-left font-sans tracking-normal mb-8 lg:mb-10"
             >
               {heroData.subheadline}
             </motion.p>
@@ -488,8 +417,7 @@ export function Hero() {
                 href="#contact"
                 className="group relative inline-flex items-center justify-center gap-2.5 rounded-full px-9 h-[54px] text-[14px] lg:text-[15px] font-bold uppercase tracking-wider text-white transition-all duration-300 active:scale-[0.98] cursor-pointer shadow-[0_0_20px_rgba(34,211,238,0.2),0_0_20px_rgba(168,85,247,0.15)]"
                 style={{
-                  background:
-                    "linear-gradient(135deg, #22d3ee 0%, #3b82f6 50%, #a855f7 100%)",
+                  background: "linear-gradient(135deg, #22d3ee 0%, #3b82f6 50%, #a855f7 100%)",
                 }}
               >
                 <span className="relative flex items-center gap-2.5">
@@ -504,13 +432,33 @@ export function Hero() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.32 }}
-              className="mt-6 lg:mt-8 grid grid-cols-2 lg:grid-cols-4 gap-4 w-full"
+              className="mt-8 lg:mt-10 grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5 w-full"
             >
               {[
-                { title: "High Retention", subtitle: "Editing", icon: TrendingUp, color: "text-[#22d3ee]" },
-                { title: "Scroll-Stopping", subtitle: "Visuals", icon: Zap, color: "text-[#fbbf24]" },
-                { title: "Platform-Native", subtitle: "Optimization", icon: Target, color: "text-[#10b981]" },
-                { title: "Revenue-Driven", subtitle: "Storytelling", icon: Star, color: "text-[#a855f7]" },
+                {
+                  title: "High Retention",
+                  subtitle: "Editing",
+                  icon: TrendingUp,
+                  color: "text-[#22d3ee]",
+                },
+                {
+                  title: "Scroll-Stopping",
+                  subtitle: "Visuals",
+                  icon: Zap,
+                  color: "text-[#fbbf24]",
+                },
+                {
+                  title: "Platform-Native",
+                  subtitle: "Optimization",
+                  icon: Target,
+                  color: "text-[#10b981]",
+                },
+                {
+                  title: "Revenue-Driven",
+                  subtitle: "Storytelling",
+                  icon: Star,
+                  color: "text-[#a855f7]",
+                },
               ].map((item, index) => {
                 const IconComponent = item.icon;
                 return (
@@ -539,8 +487,10 @@ export function Hero() {
             onMouseMove={handleParallaxMove}
             onMouseLeave={handleParallaxLeave}
             style={{ rotateX, rotateY, transformStyle: "preserve-3d", perspective: 1000 }}
-            className="w-full relative flex flex-col"
+            className="w-full relative flex flex-col group/dashboard"
           >
+            {/* Premium Glow effect behind dashboard */}
+            <div className="absolute -inset-8 bg-gradient-to-tr from-[#22d3ee]/20 via-[#a855f7]/15 to-[#3b82f6]/20 blur-3xl rounded-full opacity-60 transition-opacity duration-700 group-hover/dashboard:opacity-80 -z-10" />
 
             {/* ── Main macOS Studio Dashboard Mockup ── */}
             <div
@@ -581,19 +531,16 @@ export function Hero() {
                     onTouchStart={() => setIsHovered(true)}
                     onMouseMove={handleMouseMoveSlider}
                     onTouchMove={handleTouchMoveSlider}
-                    className="relative aspect-video max-h-[290px] overflow-hidden cursor-ew-resize"
+                    className="relative w-full aspect-[16/9] max-h-[320px] overflow-hidden cursor-ew-resize rounded-t-[10px]"
                   >
                     {/* Soft screen glass reflection overlay */}
                     <div className="absolute inset-0 pointer-events-none bg-gradient-to-tr from-transparent via-white/[0.015] to-transparent z-25" />
 
-                    {/* FALLBACK IMAGES */}
+                    {/* FULL FRAME IMAGES */}
                     <img
                       src={carRacingImg}
                       className="absolute inset-0 size-full object-cover pointer-events-none select-none transition-opacity duration-500"
-                      style={{
-                        filter: gradedFilter,
-                        opacity: videoLoaded ? 0.35 : 1,
-                      }}
+                      style={{ filter: gradedFilter, opacity: 1 }}
                       alt="Cinematic Graded"
                     />
                     <img
@@ -602,45 +549,9 @@ export function Hero() {
                       style={{
                         clipPath: `polygon(0 0, ${sliderPos}% 0, ${sliderPos}% 100%, 0 100%)`,
                         filter: "grayscale(0.65) contrast(0.85) brightness(1.1) saturate(75%)",
-                        opacity: videoLoaded ? 0.35 : 1,
+                        opacity: 1,
                       }}
                       alt="Raw ungraded"
-                    />
-
-                    {/* Graded / Edited footage */}
-                    <video
-                      ref={gradedVideoRef}
-                      src={HERO_VIDEO}
-                      autoPlay
-                      muted
-                      loop
-                      playsInline
-                      onPlay={() => setVideoLoaded(true)}
-                      onPlaying={() => setVideoLoaded(true)}
-                      onCanPlay={() => setVideoLoaded(true)}
-                      className="absolute inset-0 size-full object-cover pointer-events-none transition-opacity duration-500"
-                      style={{
-                        filter: gradedFilter,
-                        opacity: videoLoaded ? 1 : 0,
-                      }}
-                    />
-
-                    {/* RAW footage (left clip) */}
-                    <video
-                      ref={rawVideoRef}
-                      src={HERO_VIDEO}
-                      autoPlay
-                      muted
-                      loop
-                      playsInline
-                      onTimeUpdate={handleTimeUpdate}
-                      onLoadedMetadata={handleLoadedMetadata}
-                      className="absolute inset-0 size-full object-cover pointer-events-none transition-opacity duration-500"
-                      style={{
-                        clipPath: `polygon(0 0, ${sliderPos}% 0, ${sliderPos}% 100%, 0 100%)`,
-                        filter: "grayscale(0.65) contrast(0.85) brightness(1.1) saturate(75%)",
-                        opacity: videoLoaded ? 1 : 0,
-                      }}
                     />
 
                     {/* Slider divider line */}
@@ -675,11 +586,7 @@ export function Hero() {
                         title={isPlaying ? "Pause" : "Play"}
                       >
                         {isPlaying ? (
-                          <svg
-                            className="size-[14px]"
-                            fill="currentColor"
-                            viewBox="0 0 24 24"
-                          >
+                          <svg className="size-[14px]" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
                           </svg>
                         ) : (
@@ -696,7 +603,7 @@ export function Hero() {
                         </svg>
                       </button>
                       <button
-                        onClick={() => { }}
+                        onClick={() => {}}
                         className="hover:text-white transition-colors cursor-pointer"
                         title="Step Forward"
                       >
@@ -943,8 +850,8 @@ export function Hero() {
         </div>
 
         {/* ── BOTTOM STATS ROW & LOGOS (32px gap mt-8) ── */}
-        <div className="w-full mt-5 lg:mt-6 flex flex-col gap-4">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 border-t border-white/[0.08] pt-4 lg:pt-5">
+        <div className="w-full mt-2 lg:mt-4 flex flex-col gap-4 relative z-20">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 border-t border-white/[0.08] pt-4 lg:pt-6">
             {[
               {
                 val: "50M+",
@@ -984,7 +891,9 @@ export function Hero() {
                 <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/[0.015] to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out" />
 
                 {/* Icon circle (40px) */}
-                <div className={`relative shrink-0 size-10 rounded-full border-2 ${borderStyle} flex items-center justify-center bg-[#050810]/40 transition-colors`}>
+                <div
+                  className={`relative shrink-0 size-10 rounded-full border-2 ${borderStyle} flex items-center justify-center bg-[#050810]/40 transition-colors`}
+                >
                   <Icon
                     className="size-5 transition-transform duration-500 group-hover:scale-110"
                     strokeWidth={2}
