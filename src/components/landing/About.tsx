@@ -10,7 +10,7 @@ import {
   Sparkles,
   Scissors,
   Box,
-  ArrowUpRight
+  ArrowUpRight,
 } from "lucide-react";
 import editorProfile from "@/assets/editor-profile.jpg";
 import a1 from "@/assets/avatars/a1.jpg";
@@ -24,7 +24,7 @@ const Counter = ({
   to,
   duration = 2,
   suffix = "",
-  decimals = 0
+  decimals = 0,
 }: {
   to: number;
   duration?: number;
@@ -50,13 +50,21 @@ const Counter = ({
     return () => controls.stop();
   }, [inView, to, duration, suffix, decimals]);
 
-  return <span ref={nodeRef} className="font-space font-bold">0{suffix}</span>;
+  return (
+    <span ref={nodeRef} className="font-space font-bold">
+      0{suffix}
+    </span>
+  );
 };
 
 // SVG Sparkline / Mini Wave Visualizer
 const Sparkline = ({ color = "#18B6FF" }) => {
   return (
-    <svg className="w-16 h-6 mt-1.5 opacity-60 transition-opacity duration-300 hover:opacity-100" viewBox="0 0 60 20" fill="none">
+    <svg
+      className="w-16 h-6 mt-1.5 opacity-60 transition-opacity duration-300 hover:opacity-100"
+      viewBox="0 0 60 20"
+      fill="none"
+    >
       <motion.path
         initial={{ pathLength: 0 }}
         whileInView={{ pathLength: 1 }}
@@ -89,7 +97,7 @@ const StaggeredTitle = () => {
       y: 0,
       transition: {
         duration: 0.7,
-        ease: [0.215, 0.610, 0.355, 1], // easeOutCubic
+        ease: [0.215, 0.61, 0.355, 1], // easeOutCubic
       },
     },
   };
@@ -103,27 +111,36 @@ const StaggeredTitle = () => {
       className="text-[34px] sm:text-[44px] lg:text-[48px] xl:text-[54px] font-black leading-[1.05] tracking-[-0.04em] text-[#F9FAFB] mt-4 mb-5 flex flex-col font-sans select-none"
     >
       <span className="block py-1 relative">
-        <motion.span variants={wordVars} className="inline-block mr-[0.2em] font-extrabold bg-gradient-to-b from-white via-white to-[#A3A3C2] bg-clip-text text-transparent">
+        <motion.span
+          variants={wordVars}
+          className="inline-block mr-[0.2em] font-extrabold bg-gradient-to-b from-white via-white to-[#A3A3C2] bg-clip-text text-transparent"
+        >
           Meet
         </motion.span>
-        <motion.span variants={wordVars} className="inline-block mr-[0.2em] font-extrabold bg-gradient-to-b from-white via-white to-[#A3A3C2] bg-clip-text text-transparent">
+        <motion.span
+          variants={wordVars}
+          className="inline-block mr-[0.2em] font-extrabold bg-gradient-to-b from-white via-white to-[#A3A3C2] bg-clip-text text-transparent"
+        >
           The
         </motion.span>
         <motion.span
           variants={wordVars}
-          className="inline-block mr-[0.05em] pr-[0.15em] font-playfair font-bold italic bg-gradient-to-r from-[#00D4FF] via-[#18B6FF] to-[#0072FF] bg-clip-text text-transparent filter drop-shadow-[0_2px_15px_rgba(24,182,255,0.35)] hover:scale-105 transition-transform duration-350"
+          className="inline-block mr-[0.05em] pr-[0.15em] font-playfair font-bold italic bg-gradient-to-r from-[#00F5D4] to-[#18B6FF] bg-clip-text text-transparent filter drop-shadow-[0_2px_15px_rgba(24,182,255,0.3)] hover:scale-105 transition-transform duration-350"
         >
           Editor
         </motion.span>
       </span>
 
       <span className="block py-1 relative">
-        <motion.span variants={wordVars} className="inline-block mr-[0.2em] font-extrabold bg-gradient-to-b from-white via-white to-[#A3A3C2] bg-clip-text text-transparent">
+        <motion.span
+          variants={wordVars}
+          className="inline-block mr-[0.2em] font-extrabold bg-gradient-to-b from-white via-white to-[#A3A3C2] bg-clip-text text-transparent"
+        >
           Behind
         </motion.span>
         <motion.span
           variants={wordVars}
-          className="inline-block mr-[0.1em] pr-[0.15em] font-playfair font-bold italic bg-gradient-to-r from-[#00F5D4] via-[#18B6FF] to-[#7C5CFF] bg-clip-text text-transparent filter drop-shadow-[0_2px_20px_rgba(24,182,255,0.4)] relative group cursor-default"
+          className="inline-block mr-[0.1em] pr-[0.15em] font-playfair font-bold italic bg-gradient-to-r from-[#00C6FF] to-[#0072FF] bg-clip-text text-transparent filter drop-shadow-[0_2px_20px_rgba(0,198,255,0.35)] relative group cursor-default"
         >
           Viral
           <motion.span
@@ -137,15 +154,21 @@ const StaggeredTitle = () => {
       </span>
 
       <span className="block py-1 relative">
-        <motion.span variants={wordVars} className="inline-block mr-[0.2em] font-extrabold bg-gradient-to-b from-white via-white to-[#A3A3C2] bg-clip-text text-transparent">
+        <motion.span
+          variants={wordVars}
+          className="inline-block mr-[0.2em] font-extrabold bg-gradient-to-b from-white via-white to-[#A3A3C2] bg-clip-text text-transparent"
+        >
           Content
         </motion.span>
-        <motion.span variants={wordVars} className="inline-block mr-[0.2em] font-extrabold bg-gradient-to-b from-white via-white to-[#A3A3C2] bg-clip-text text-transparent">
+        <motion.span
+          variants={wordVars}
+          className="inline-block mr-[0.2em] font-extrabold bg-gradient-to-b from-white via-white to-[#A3A3C2] bg-clip-text text-transparent"
+        >
           That
         </motion.span>
         <motion.span
           variants={wordVars}
-          className="inline-block mr-[0.05em] pr-[0.15em] font-playfair font-bold italic bg-gradient-to-r from-[#18B6FF] via-[#7C5CFF] to-[#8B5CF6] bg-clip-text text-transparent filter drop-shadow-[0_2px_20px_rgba(139,92,246,0.4)]"
+          className="inline-block mr-[0.05em] pr-[0.15em] font-playfair font-bold italic bg-gradient-to-r from-[#18B6FF] via-[#7C5CFF] to-[#8B5CF6] bg-clip-text text-transparent filter drop-shadow-[0_2px_20px_rgba(139,92,246,0.35)]"
         >
           Converts.
         </motion.span>
@@ -193,7 +216,7 @@ const FeatureCard = ({ title, desc, icon, delay = 0 }: FeatureCardProps) => {
 const FloatingBadge = ({
   text,
   icon,
-  className
+  className,
 }: {
   text: string;
   icon?: React.ReactNode;
@@ -202,8 +225,8 @@ const FloatingBadge = ({
   return (
     <div
       className={cn(
-        "rounded-full border border-white/[0.08] bg-[#050608]/60 px-3 py-1.5 text-xs font-semibold text-white/80 backdrop-blur-md shadow-md cursor-default hover:border-[#18B6FF]/20 hover:text-white transition-all duration-300 flex items-center gap-1.5 whitespace-nowrap",
-        className
+        "rounded-full border border-white/[0.08] bg-[#050810]/60 px-3 py-1.5 text-xs font-semibold text-white/80 backdrop-blur-md shadow-md cursor-default hover:border-[#18B6FF]/20 hover:text-white transition-all duration-300 flex items-center gap-1.5 whitespace-nowrap",
+        className,
       )}
     >
       {icon}
@@ -265,7 +288,7 @@ export function About() {
       id="about"
       ref={sectionRef}
       onMouseMove={handleMouseMove}
-      className="relative w-full overflow-hidden bg-[#050608] py-20 lg:py-0 lg:h-screen lg:max-h-[1080px] flex items-center justify-center"
+      className="relative w-full overflow-hidden bg-[#050810] py-24 md:py-32 flex items-center justify-center"
     >
       {/* Background radial/mesh ambient lights (interactive parallax) */}
       <motion.div
@@ -295,11 +318,9 @@ export function About() {
         <Particle x={62} y={32} delay={1.2} />
       </div>
 
-      <div className="relative mx-auto w-full max-w-[1440px] px-6 sm:px-12 lg:px-[70px] py-4 lg:py-[90px] grid grid-cols-12 gap-8 lg:gap-[48px] items-stretch h-full z-20 lg:-translate-y-12">
-
+      <div className="relative mx-auto w-full max-w-[1320px] px-6 md:px-8 grid grid-cols-12 gap-8 lg:gap-[48px] items-stretch h-full z-20">
         {/* LEFT COLUMN (7 columns of 12) */}
         <div className="col-span-12 lg:col-span-7 flex flex-col justify-between h-full space-y-10 lg:space-y-0 text-left">
-
           {/* Top Badge & Heading group */}
           <div className="flex flex-col">
             {/* About Badge */}
@@ -311,7 +332,9 @@ export function About() {
               className="h-[42px] rounded-full border border-white/[0.08] bg-white/[0.04] px-[18px] flex items-center gap-2 self-start backdrop-blur-md hover:border-[#18B6FF]/30 hover:shadow-[0_0_15px_rgba(24,182,255,0.15)] transition-all duration-300 cursor-default"
             >
               <span className="size-1.5 rounded-full bg-[#18B6FF] animate-pulse" />
-              <span className="font-sans font-medium text-[13px] uppercase tracking-[3px] text-white/80">ABOUT THE EDITOR</span>
+              <span className="font-sans font-medium text-[13px] uppercase tracking-[3px] text-white/80">
+                ABOUT THE EDITOR
+              </span>
             </motion.div>
 
             {/* Title */}
@@ -343,29 +366,46 @@ export function About() {
           {/* Statistics Strip */}
           <div className="h-auto lg:h-[80px] w-full rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-md flex flex-col sm:flex-row items-center justify-around divide-y sm:divide-y-0 sm:divide-x divide-white/[0.08] px-4 py-3 sm:py-0 gap-y-3 sm:gap-y-0">
             <div className="flex-1 w-full flex flex-col items-center justify-center text-center">
-              <span className="font-space font-bold text-[30px] xl:text-[36px] leading-none text-[#F9FAFB]"><Counter to={50} suffix="M+" /></span>
-              <span className="font-sans uppercase text-[10px] tracking-[2px] text-[#9CA3AF] mt-1.5">Views Generated</span>
+              <span className="font-space font-bold text-[30px] xl:text-[36px] leading-none text-[#F9FAFB]">
+                <Counter to={50} suffix="M+" />
+              </span>
+              <span className="font-sans uppercase text-[10px] tracking-[2px] text-[#9CA3AF] mt-1.5">
+                Views Generated
+              </span>
             </div>
             <div className="flex-1 w-full flex flex-col items-center justify-center text-center sm:pl-2">
-              <span className="font-space font-bold text-[30px] xl:text-[36px] leading-none text-[#F9FAFB]"><Counter to={100} suffix="+" /></span>
-              <span className="font-sans uppercase text-[10px] tracking-[2px] text-[#9CA3AF] mt-1.5">Creators Edited</span>
+              <span className="font-space font-bold text-[30px] xl:text-[36px] leading-none text-[#F9FAFB]">
+                <Counter to={100} suffix="+" />
+              </span>
+              <span className="font-sans uppercase text-[10px] tracking-[2px] text-[#9CA3AF] mt-1.5">
+                Creators Edited
+              </span>
             </div>
             <div className="flex-1 w-full flex flex-col items-center justify-center text-center sm:pl-2">
-              <span className="font-space font-bold text-[30px] xl:text-[36px] leading-none text-[#F9FAFB]"><Counter to={98} suffix="%" /></span>
-              <span className="font-sans uppercase text-[10px] tracking-[2px] text-[#9CA3AF] mt-1.5">Client Satisfaction</span>
+              <span className="font-space font-bold text-[30px] xl:text-[36px] leading-none text-[#F9FAFB]">
+                <Counter to={98} suffix="%" />
+              </span>
+              <span className="font-sans uppercase text-[10px] tracking-[2px] text-[#9CA3AF] mt-1.5">
+                Client Satisfaction
+              </span>
             </div>
             <div className="flex-1 w-full flex flex-col items-center justify-center text-center sm:pl-2">
-              <span className="font-space font-bold text-[30px] xl:text-[36px] leading-none text-[#F9FAFB]"><Counter to={5} suffix="+" /></span>
-              <span className="font-sans uppercase text-[10px] tracking-[2px] text-[#9CA3AF] mt-1.5">Years Experience</span>
+              <span className="font-space font-bold text-[30px] xl:text-[36px] leading-none text-[#F9FAFB]">
+                <Counter to={5} suffix="+" />
+              </span>
+              <span className="font-sans uppercase text-[10px] tracking-[2px] text-[#9CA3AF] mt-1.5">
+                Years Experience
+              </span>
             </div>
           </div>
 
           {/* Timeline & CTA Block Side-by-Side (bottom group) */}
           <div className="flex flex-col sm:flex-row gap-6 items-stretch">
-
             {/* Timeline (40% width on desktop) */}
             <div className="w-full sm:w-[40%] flex flex-col justify-center space-y-4 pr-2">
-              <h5 className="text-[10px] font-bold uppercase tracking-[2px] text-[#9CA3AF]">THE JOURNEY</h5>
+              <h5 className="text-[10px] font-bold uppercase tracking-[2px] text-[#9CA3AF]">
+                THE JOURNEY
+              </h5>
 
               <div className="relative pl-2">
                 {/* Vertical Indicator Line */}
@@ -391,10 +431,12 @@ export function About() {
                       className="relative pl-7 text-[13px]"
                     >
                       {/* Circle node dot */}
-                      <div className="absolute left-0 top-[3px] size-3.5 rounded-full bg-[#050608] border-[1.5px] border-[#18B6FF] flex items-center justify-center shadow-[0_0_8px_rgba(24,182,255,0.4)]">
+                      <div className="absolute left-0 top-[3px] size-3.5 rounded-full bg-[#050810] border-[1.5px] border-[#18B6FF] flex items-center justify-center shadow-[0_0_8px_rgba(24,182,255,0.4)]">
                         <div className="size-1 rounded-full bg-[#18B6FF]" />
                       </div>
-                      <span className="font-space font-bold text-[#18B6FF] mr-2 tracking-wider text-xs">{event.year}</span>
+                      <span className="font-space font-bold text-[#18B6FF] mr-2 tracking-wider text-xs">
+                        {event.year}
+                      </span>
                       <span className="text-[#9CA3AF] leading-relaxed">{event.text}</span>
                     </motion.div>
                   ))}
@@ -405,7 +447,9 @@ export function About() {
             {/* CTA Card (60% width on desktop) */}
             <div className="w-full sm:w-[60%] rounded-[30px] border border-white/[0.08] bg-white/[0.03] p-6 xl:p-8 backdrop-blur-md flex flex-col justify-between space-y-5">
               <div className="space-y-2">
-                <span className="text-[10px] font-bold uppercase tracking-[2px] text-[#18B6FF]">READY TO COLLABORATE?</span>
+                <span className="text-[10px] font-bold uppercase tracking-[2px] text-[#18B6FF]">
+                  READY TO COLLABORATE?
+                </span>
                 <h4 className="font-playfair text-xl xl:text-2xl font-bold text-[#F9FAFB] leading-tight">
                   Ready To Create Your Next Viral Video?
                 </h4>
@@ -436,7 +480,7 @@ export function About() {
                       key={idx}
                       src={avatar}
                       alt="Creator avatar"
-                      className="size-6.5 rounded-full border border-[#050608] object-cover"
+                      className="size-6.5 rounded-full border border-[#050810] object-cover"
                     />
                   ))}
                 </div>
@@ -445,29 +489,46 @@ export function About() {
                 </span>
               </div>
             </div>
-
           </div>
-
         </div>
 
         {/* RIGHT COLUMN (5 columns of 12) */}
         <div className="col-span-12 lg:col-span-5 flex flex-col justify-between h-full space-y-8 lg:space-y-0 items-center">
-
           <div className="relative w-full max-w-[330px] xl:max-w-[360px] flex flex-col h-full justify-between">
-
             {/* Top Badges (Visible on Desktop/Tablet) */}
             <div className="hidden sm:flex flex-col gap-2.5 items-center lg:items-end w-full mb-6 shrink-0">
               <div className="flex flex-wrap gap-2.5 justify-center lg:justify-end">
-                <FloatingBadge text="Instagram" icon={<Instagram className="size-3 text-[#E1306C]" />} />
-                <FloatingBadge text="YouTube Shorts" icon={<Youtube className="size-3 text-[#FF0000]" />} />
+                <FloatingBadge
+                  text="Instagram"
+                  icon={<Instagram className="size-3 text-[#E1306C]" />}
+                />
+                <FloatingBadge
+                  text="YouTube Shorts"
+                  icon={<Youtube className="size-3 text-[#FF0000]" />}
+                />
                 <FloatingBadge text="TikTok" icon={<Sparkles className="size-3 text-white" />} />
-                <FloatingBadge text="Premiere Pro" icon={<Scissors className="size-3 text-[#00D4FF]" />} />
+                <FloatingBadge
+                  text="Premiere Pro"
+                  icon={<Scissors className="size-3 text-[#00D4FF]" />}
+                />
               </div>
               <div className="flex flex-wrap gap-2.5 justify-center lg:justify-end">
-                <FloatingBadge text="After Effects" icon={<Sparkles className="size-3 text-[#9999FF]" />} />
-                <FloatingBadge text="DaVinci Resolve" icon={<Box className="size-3 text-[#FF9933]" />} />
-                <FloatingBadge text="CapCut" icon={<Scissors className="size-3 text-[#00D4FF]" />} />
-                <FloatingBadge text="Motion Graphics" icon={<Box className="size-3 text-[#8B5CF6]" />} />
+                <FloatingBadge
+                  text="After Effects"
+                  icon={<Sparkles className="size-3 text-[#9999FF]" />}
+                />
+                <FloatingBadge
+                  text="DaVinci Resolve"
+                  icon={<Box className="size-3 text-[#FF9933]" />}
+                />
+                <FloatingBadge
+                  text="CapCut"
+                  icon={<Scissors className="size-3 text-[#00D4FF]" />}
+                />
+                <FloatingBadge
+                  text="Motion Graphics"
+                  icon={<Box className="size-3 text-[#8B5CF6]" />}
+                />
               </div>
             </div>
 
@@ -483,7 +544,7 @@ export function About() {
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(24,182,255,0.2)_0%,rgba(139,92,246,0.1)_40%,transparent_70%)] opacity-80 pointer-events-none z-10" />
 
               {/* Main Portrait Image (Full show, no cropping, luxury border) */}
-              <div className="relative w-full h-full overflow-hidden rounded-[34px] bg-[#050608]">
+              <div className="relative w-full h-full overflow-hidden rounded-[34px] bg-[#050810]">
                 <img
                   src={editorProfile}
                   alt="RAQVINE Editor Profile"
@@ -509,7 +570,9 @@ export function About() {
                 <span className="font-space font-bold text-white text-base">
                   <Counter to={50} suffix="M+" />
                 </span>
-                <span className="text-[9px] text-[#9CA3AF] uppercase tracking-wider mt-0.5 font-medium font-sans">Views</span>
+                <span className="text-[9px] text-[#9CA3AF] uppercase tracking-wider mt-0.5 font-medium font-sans">
+                  Views
+                </span>
                 <Sparkline color="#18B6FF" />
               </div>
               <div className="h-10 w-px bg-white/[0.08] hidden sm:block" />
@@ -517,7 +580,9 @@ export function About() {
                 <span className="font-space font-bold text-white text-base">
                   <Counter to={100} suffix="+" />
                 </span>
-                <span className="text-[9px] text-[#9CA3AF] uppercase tracking-wider mt-0.5 font-medium font-sans">Clients</span>
+                <span className="text-[9px] text-[#9CA3AF] uppercase tracking-wider mt-0.5 font-medium font-sans">
+                  Clients
+                </span>
                 <Sparkline color="#8B5CF6" />
               </div>
               <div className="h-10 w-px bg-white/[0.08] hidden sm:block" />
@@ -525,21 +590,24 @@ export function About() {
                 <span className="font-space font-bold text-white text-base">
                   <Counter to={4.9} decimals={1} suffix="★" />
                 </span>
-                <span className="text-[9px] text-[#9CA3AF] uppercase tracking-wider mt-0.5 font-medium font-sans">Rating</span>
+                <span className="text-[9px] text-[#9CA3AF] uppercase tracking-wider mt-0.5 font-medium font-sans">
+                  Rating
+                </span>
                 <Sparkline color="#18B6FF" />
               </div>
               <div className="h-10 w-px bg-white/[0.08] hidden sm:block" />
               <div className="flex-1 min-w-[70px] text-center px-1 flex flex-col items-center">
-                <span className="font-space font-bold text-white text-[11px] xl:text-xs">Worldwide</span>
-                <span className="text-[9px] text-[#9CA3AF] uppercase tracking-wider mt-0.5 font-medium font-sans">Global Reach</span>
+                <span className="font-space font-bold text-white text-[11px] xl:text-xs">
+                  Worldwide
+                </span>
+                <span className="text-[9px] text-[#9CA3AF] uppercase tracking-wider mt-0.5 font-medium font-sans">
+                  Global Reach
+                </span>
                 <Sparkline color="#8B5CF6" />
               </div>
             </motion.div>
-
           </div>
-
         </div>
-
       </div>
     </section>
   );

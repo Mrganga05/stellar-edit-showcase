@@ -9,9 +9,9 @@ const stats = [
 
 export function Results() {
   return (
-    <section id="results" className="relative overflow-hidden py-28 sm:py-36">
+    <section id="results" className="relative overflow-hidden py-24 md:py-32">
       <div className="absolute inset-0 aurora-bg opacity-60" />
-      <div className="relative mx-auto max-w-7xl px-5 sm:px-8">
+      <div className="relative mx-auto max-w-[1320px] px-6 md:px-8">
         <SectionHeading
           eyebrow="Results & Impact"
           title={
@@ -20,9 +20,12 @@ export function Results() {
             </>
           }
         />
-        <div className="mt-16 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {stats.map((s) => (
-            <div key={s.label} className="rounded-3xl glass-strong p-8 text-center">
+            <div
+              key={s.label}
+              className="rounded-3xl glass-strong p-8 text-center hover-card-premium"
+            >
               <div className="font-display text-5xl text-gradient-brand sm:text-6xl">
                 <AnimatedCounter to={s.to} suffix={s.suffix} />
               </div>

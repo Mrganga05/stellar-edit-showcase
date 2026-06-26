@@ -377,23 +377,17 @@ export function Hero() {
                 initial={{ opacity: 0, y: 28 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.75, ease: [0.19, 1, 0.22, 1] }}
-                className="font-serif text-[32px] sm:text-[38px] lg:text-[44px] leading-[1.12] tracking-[-0.01em] text-white font-medium text-left max-w-[620px]"
+                className="font-serif text-[28px] sm:text-[36px] lg:text-[40px] xl:text-[46px] leading-[1.15] tracking-[-0.01em] text-white font-medium text-left max-w-[620px]"
               >
-                <span className="block sm:inline whitespace-normal sm:whitespace-nowrap">
-                  High-End Video Editing
-                </span>
-                <br />
-                <span className="block sm:inline whitespace-normal sm:whitespace-nowrap">
-                  That Scales Your
-                </span>
-                <br />
-                <span className="animate-gradient-text font-serif italic font-medium block sm:inline-block whitespace-normal sm:whitespace-nowrap">
+                <span className="block">High-End Video Editing</span>
+                <span className="block">That Scales Your</span>
+                <span className="animate-gradient-text font-serif italic font-medium block">
                   Views, Retention, &amp; Revenue.
                 </span>
               </motion.h1>
 
               {/* Accent bar */}
-              <div className="h-[4px] w-[140px] bg-gradient-to-r from-[#22d3ee] to-[#a855f7] rounded-full mt-3 lg:mt-5" />
+              <div className="h-[4px] w-[140px] bg-gradient-to-r from-[#22d3ee] to-[#a855f7] rounded-full mt-4" />
             </div>
 
             {/* Supporting Copy */}
@@ -401,7 +395,7 @@ export function Hero() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.12 }}
-              className="mt-4 lg:mt-6 max-w-[640px] text-[16px] sm:text-[18px] lg:text-[20px] leading-[1.7] text-[#a1a1aa] text-left font-sans tracking-normal mb-8 lg:mb-10"
+              className="mt-6 max-w-[640px] text-body-premium text-[#a1a1aa] text-left mb-8"
             >
               {heroData.subheadline}
             </motion.p>
@@ -411,7 +405,7 @@ export function Hero() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.22 }}
-              className="flex flex-wrap gap-3.5 items-center justify-start z-20"
+              className="flex flex-wrap gap-4 items-center justify-start z-20"
             >
               <MagneticButton
                 href="#contact"
@@ -432,7 +426,7 @@ export function Hero() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.32 }}
-              className="mt-8 lg:mt-10 grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-5 w-full"
+              className="mt-8 lg:mt-10 grid grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 w-full"
             >
               {[
                 {
@@ -850,8 +844,8 @@ export function Hero() {
         </div>
 
         {/* ── BOTTOM STATS ROW & LOGOS (32px gap mt-8) ── */}
-        <div className="w-full mt-2 lg:mt-4 flex flex-col gap-4 relative z-20">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 border-t border-white/[0.08] pt-4 lg:pt-6">
+        <div className="w-full mt-6 lg:mt-8 flex flex-col gap-4 relative z-20">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 border-t border-white/[0.08] pt-6 lg:pt-8">
             {[
               {
                 val: "50M+",
@@ -884,7 +878,7 @@ export function Hero() {
             ].map(({ val, label, color, borderStyle, icon: Icon }) => (
               <div
                 key={label}
-                className="group relative flex flex-row items-center gap-3 lg:gap-4 rounded-[12px] border border-white/[0.08] bg-white/[0.03] p-4 lg:p-5 transition-all duration-300 hover:border-white/20 hover:bg-white/[0.05] hover:-translate-y-1 hover:shadow-lg overflow-hidden cursor-pointer w-full"
+                className="group relative flex flex-row items-center gap-4 rounded-[12px] border border-white/[0.08] bg-white/[0.03] p-4 lg:p-6 transition-all duration-300 hover:border-white/20 hover:bg-white/[0.05] hover:-translate-y-1 hover:shadow-lg overflow-hidden cursor-pointer w-full"
                 style={{ backdropFilter: "blur(20px)" }}
               >
                 {/* Glass sheen reflection overlay */}

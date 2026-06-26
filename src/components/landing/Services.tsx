@@ -57,7 +57,7 @@ export function Services() {
       : mockServices;
 
   return (
-    <section id="services" className="relative mx-auto max-w-7xl px-5 py-28 sm:px-8 sm:py-36">
+    <section id="services" className="relative mx-auto max-w-[1320px] px-6 py-24 md:px-8 md:py-32">
       <SectionHeading
         eyebrow="Services"
         title={
@@ -67,7 +67,7 @@ export function Services() {
         }
         subtitle="A full creative service for serious operators — from one-off cuts to monthly retainers."
       />
-      <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {isLoading && !dbServices
           ? Array.from({ length: 4 }).map((_, i) => (
               <div

@@ -3,9 +3,9 @@ import logoImg from "@/assets/brand-logo-v2.png";
 
 export function Footer() {
   return (
-    <footer className="relative border-t border-white/8 bg-surface/60 px-5 pb-10 pt-20 sm:px-8">
-      <div className="mx-auto max-w-7xl">
-        <div className="grid gap-10 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
+    <footer className="relative border-t border-white/8 bg-surface/60 px-6 pt-24 pb-16 md:px-8">
+      <div className="mx-auto max-w-[1320px]">
+        <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <div>
             <div className="flex items-center gap-2.5">
               <img src={logoImg} alt="Raqvine Logo" className="size-9 rounded-xl object-cover" />
@@ -77,7 +77,7 @@ export function Footer() {
           />
         </div>
 
-        <div className="mt-14 flex flex-col items-start justify-between gap-4 border-t border-white/8 pt-8 sm:flex-row sm:items-center">
+        <div className="mt-16 flex flex-col items-start justify-between gap-4 border-t border-white/8 pt-8 sm:flex-row sm:items-center">
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
             <span>© {new Date().getFullYear()} Raqvine Studio. All rights reserved.</span>
             <span className="hidden sm:inline text-white/10">•</span>
@@ -102,7 +102,7 @@ function FooterCol({ title, links }: { title: string; links: { label: string; hr
   return (
     <div>
       <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">{title}</div>
-      <ul className="mt-4 space-y-2.5 text-sm">
+      <ul className="mt-4 space-y-3 text-sm">
         {links.map((l) => (
           <li key={l.label}>
             <a href={l.href} className="text-foreground/80 hover:text-foreground">

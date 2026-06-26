@@ -1,51 +1,70 @@
-import { useState, useRef } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence, useInView, animate } from "motion/react";
 import { X, Play } from "lucide-react";
 import { projects as mockProjects, type Project } from "@/lib/portfolio-data";
-import { Reveal, AnimatedCounter } from "./primitives";
+import { SectionHeading, Reveal } from "./primitives";
 import { cn } from "@/lib/utils";
 import { usePortfolioProjects } from "@/lib/api/hooks";
 
-// Floating Particle component
-const FloatingParticle = ({ x, y, delay = 0 }: { x: number; y: number; delay?: number }) => {
+// Reusable Count-Up Counter
+const Counter = ({
+  to,
+  duration = 2.5,
+  suffix = "",
+  decimals = 0,
+}: {
+  to: number;
+  duration?: number;
+  suffix?: string;
+  decimals?: number;
+}) => {
+  const nodeRef = useRef<HTMLSpanElement>(null);
+  const inView = useInView(nodeRef, { once: true, margin: "-100px" });
+
+  useEffect(() => {
+    if (!inView) return;
+    const node = nodeRef.current;
+    if (!node) return;
+
+    const controls = animate(0, to, {
+      duration: duration,
+      ease: [0.16, 1, 0.3, 1], // easeOutExpo
+      onUpdate(value) {
+        node.textContent = value.toFixed(decimals) + suffix;
+      },
+    });
+
+    return () => controls.stop();
+  }, [inView, to, duration, suffix, decimals]);
+
+  return (
+    <span ref={nodeRef} className="font-space font-bold">
+      0{suffix}
+    </span>
+  );
+};
+
+// Background Particle Dot
+const Particle = ({ delay = 0, x = 0, y = 0 }: { delay?: number; x?: number; y?: number }) => {
   return (
     <motion.div
       initial={{ opacity: 0.1, y: 0 }}
       animate={{
-        opacity: [0.1, 0.5, 0.1],
-        y: [0, -20, 0],
-        x: [0, 8, 0],
+        opacity: [0.1, 0.45, 0.1],
+        y: [0, -35, 0],
+        x: [0, 15, 0],
       }}
       transition={{
-        duration: 7 + Math.random() * 4,
+        duration: 9 + Math.random() * 4,
         repeat: Infinity,
         ease: "easeInOut",
-        delay,
+        delay: delay,
       }}
       className="absolute size-1 rounded-full bg-[#18B6FF] pointer-events-none"
       style={{ left: `${x}%`, top: `${y}%` }}
     />
   );
 };
-
-// StatCard component
-function StatCard({ val, suffix, label }: { val: number; suffix: string; label: string }) {
-  return (
-    <motion.div
-      whileHover={{ scale: 1.05, y: -2 }}
-      transition={{ duration: 0.3, ease: "easeOut" }}
-      className="glass relative overflow-hidden rounded-2xl border border-white/[0.06] bg-[#050608]/40 p-5 text-center backdrop-blur-md hover:border-[#18B6FF]/35 hover:shadow-[0_8px_30px_rgba(24,182,255,0.12)] transition-all duration-350 group cursor-default"
-    >
-      <div className="absolute inset-0 bg-gradient-to-br from-[#18B6FF]/0 to-[#18B6FF]/[0.02] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-      <div className="font-space text-2xl sm:text-3xl font-bold text-white mb-1.5">
-        <AnimatedCounter to={val} suffix={suffix} />
-      </div>
-      <div className="text-[10px] sm:text-[11px] uppercase tracking-[1.5px] text-white/60 font-semibold leading-tight">
-        {label}
-      </div>
-    </motion.div>
-  );
-}
 
 function Card({ p, onOpen }: { p: Project; onOpen: () => void }) {
   const [hover, setHover] = useState(false);
@@ -125,10 +144,10 @@ function Card({ p, onOpen }: { p: Project; onOpen: () => void }) {
             {p.clientName}
           </span>
         )}
-        <h3 className="font-display text-xl sm:text-2xl leading-tight text-white group-hover:text-electric transition-colors duration-300">
+        <h3 className="font-display text-base sm:text-lg md:text-xl leading-tight text-white group-hover:text-electric transition-colors duration-300">
           {p.title}
         </h3>
-        <p className="mt-1 text-xs text-white/60 line-clamp-1 group-hover:text-white/80 transition-colors duration-300">
+        <p className="mt-1 text-[11px] sm:text-xs text-white/60 line-clamp-1 group-hover:text-white/80 transition-colors duration-300">
           {p.description}
         </p>
       </div>
@@ -159,66 +178,92 @@ export function Portfolio() {
       : mockProjects;
 
   return (
-    <section id="work" className="relative mx-auto max-w-7xl px-5 py-28 sm:px-8 sm:py-36">
-      {/* Decorative Background Elements */}
+    <section
+      id="work"
+      className="relative mx-auto max-w-[1320px] px-6 py-24 md:px-8 md:py-32 overflow-hidden"
+    >
+      {/* Decorative Atmosphere Behind Heading */}
       <div className="absolute inset-x-0 top-0 h-[650px] overflow-hidden pointer-events-none z-0">
-        {/* Ambient radial glows */}
-        <div className="absolute top-[25%] left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] rounded-full bg-[radial-gradient(circle,rgba(24,182,255,0.06)_0%,rgba(139,92,246,0.04)_45%,transparent_70%)] blur-2xl" />
-        {/* Soft ambient blurs */}
-        <div className="absolute top-[10%] left-[25%] w-[380px] h-[380px] rounded-full bg-[#18B6FF]/3 blur-[120px]" />
-        <div className="absolute top-[15%] right-[25%] w-[380px] h-[380px] rounded-full bg-[#7C5CFF]/3 blur-[120px]" />
+        {/* Soft Blue Radial Glow */}
+        <div className="absolute top-[10%] left-1/2 -translate-x-1/2 w-[500px] h-[350px] rounded-full bg-[#18B6FF]/5 blur-[100px]" />
+
+        {/* Purple Ambient Blur */}
+        <div className="absolute top-[25%] left-1/3 -translate-x-1/2 w-[600px] h-[400px] rounded-full bg-[#7C5CFF]/3.5 blur-[125px]" />
+
         {/* Noise overlay */}
-        <div className="absolute inset-0 about-noise opacity-[0.015]" />
-        {/* Floating particles */}
-        <FloatingParticle x={20} y={15} delay={0} />
-        <FloatingParticle x={80} y={22} delay={1.5} />
-        <FloatingParticle x={35} y={48} delay={0.8} />
-        <FloatingParticle x={65} y={35} delay={2.3} />
-        <FloatingParticle x={12} y={55} delay={3.1} />
-        <FloatingParticle x={88} y={45} delay={1.9} />
+        <div className="absolute inset-0 about-noise opacity-30" />
+
+        {/* Tiny Floating Particles */}
+        <Particle x={20} y={15} delay={0} />
+        <Particle x={78} y={22} delay={1.8} />
+        <Particle x={45} y={45} delay={3.2} />
+        <Particle x={12} y={55} delay={0.9} />
+        <Particle x={88} y={65} delay={2.3} />
       </div>
 
-      <div className="relative mx-auto max-w-[900px] text-center mb-10 z-10">
-        {/* Top Glass Badge */}
+      <div className="relative z-10 max-w-[900px] mx-auto text-center flex flex-col items-center mb-16 sm:mb-20">
+        {/* TOP LABEL (Premium Glass Badge) */}
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.6, ease: "easeOut" }}
-          className="mb-6 inline-flex items-center gap-2.5 rounded-full border border-[#18B6FF]/20 bg-white/[0.04] px-4.5 py-2 text-[13px] uppercase tracking-[5px] text-white/95 backdrop-blur-md shadow-[0_0_15px_rgba(24,182,255,0.12)]"
+          transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          className="inline-flex items-center gap-2 rounded-full border border-[#18B6FF]/25 bg-white/[0.03] backdrop-blur-md px-4.5 py-1.5 shadow-[0_0_15px_rgba(24,182,255,0.08)] mb-6 sm:mb-8 hover:border-[#18B6FF]/40 transition-colors duration-300 select-none"
         >
-          <span className="size-2 rounded-full bg-[#18B6FF] shadow-[0_0_8px_#18B6FF] animate-pulse" />
-          SIGNATURE WORK
+          {/* Blue Glowing Dot */}
+          <span className="size-2 rounded-full bg-[#18B6FF] animate-pulse shadow-[0_0_8px_#18B6FF]" />
+          <span className="font-sans font-semibold text-[13px] uppercase tracking-[5px] text-white/95">
+            SIGNATURE WORK
+          </span>
         </motion.div>
 
-        {/* Main Heading */}
+        {/* MAIN HEADING */}
         <motion.h2
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: 25 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
-          className="font-playfair text-[32px] sm:text-[46px] md:text-[54px] font-bold leading-[1.05] tracking-[-0.03em] text-white mb-2 select-none"
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
+          className="font-playfair text-section-title font-bold tracking-[-1.5px] leading-[1.0] text-white select-none max-w-[800px] mx-auto"
         >
-          Editing That <br className="hidden sm:block" />
-          Builds{" "}
-          <span className="relative inline-block">
-            <span className="inline-block italic pr-[0.12em] animate-work-gradient filter drop-shadow-[0_2px_22px_rgba(36,214,255,0.45)]">
-              Attention.
-            </span>
+          Where Creativity Meets{" "}
+          <span className="inline-block relative group pr-[0.1em] animate-work-gradient bg-clip-text text-transparent filter drop-shadow-[0_2px_15px_rgba(24,182,255,0.3)]">
+            Performance.
+            {/* Sparkle Icon */}
             <motion.span
-              animate={{ rotate: 360, scale: [0.85, 1.15, 0.85] }}
-              transition={{
-                rotate: { repeat: Infinity, duration: 12, ease: "linear" },
-                scale: { repeat: Infinity, duration: 3, ease: "easeInOut" }
-              }}
-              className="absolute -top-1 -right-4.5 text-[12px] text-[#24D6FF] opacity-90 filter drop-shadow-[0_0_6px_rgba(24,182,255,0.8)] pointer-events-none font-sans"
+              animate={{ rotate: 360 }}
+              transition={{ repeat: Infinity, duration: 8, ease: "linear" }}
+              className="absolute -top-3.5 -right-3 text-[14px] text-[#24D6FF] opacity-75 group-hover:opacity-100 group-hover:scale-125 transition-all duration-300 pointer-events-none filter drop-shadow-[0_0_8px_rgba(36,214,255,0.5)]"
             >
               ✦
             </motion.span>
           </span>
         </motion.h2>
+
+        {/* SUPPORTING TEXT */}
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
+          className="mt-5 sm:mt-6 max-w-[620px] text-body-premium text-neutral-400 font-sans leading-relaxed"
+        >
+          Explore a curated collection of high-performing edits crafted for creators, brands, and
+          businesses. Every project combines cinematic storytelling, retention-driven pacing, and
+          platform-native optimization to deliver measurable results.
+        </motion.p>
+
+        {/* THIN GLOWING DIVIDER LINE */}
+        <motion.div
+          initial={{ opacity: 0, scaleX: 0.6 }}
+          whileInView={{ opacity: 1, scaleX: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
+          className="h-px w-full max-w-[820px] bg-gradient-to-r from-transparent via-white/10 to-transparent mt-12 relative"
+        >
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-[1.5px] bg-gradient-to-r from-[#18B6FF] to-[#7C5CFF] blur-[0.5px] shadow-[0_0_8px_rgba(24,182,255,0.5)]" />
+        </motion.div>
       </div>
-      <div className="mt-14 grid gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+      <div className="relative z-10 mt-16 grid gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {isLoading && !dbProjects
           ? Array.from({ length: 8 }).map((_, i) => (
               <div

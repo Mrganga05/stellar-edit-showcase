@@ -23,7 +23,7 @@ const items = [
 
 export function WhyChooseMe() {
   return (
-    <section className="relative mx-auto max-w-7xl px-5 py-28 sm:px-8 sm:py-36">
+    <section className="relative mx-auto max-w-[1320px] px-6 py-24 md:px-8 md:py-32">
       <SectionHeading
         eyebrow="Why Clients Choose Me"
         title={
@@ -32,13 +32,13 @@ export function WhyChooseMe() {
           </>
         }
       />
-      <div className="mt-14 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {items.map((it, i) => (
           <Reveal key={it.title} delay={(i % 4) * 0.05}>
-            <div className="h-full rounded-2xl border border-white/8 bg-surface p-6 transition-colors hover:border-white/20">
+            <div className="h-full rounded-2xl border border-white/8 bg-surface p-6 hover-card-premium">
               <it.icon className="size-5 text-electric" />
-              <h3 className="mt-5 font-medium">{it.title}</h3>
-              <p className="mt-1 text-sm text-muted-foreground">{it.desc}</p>
+              <h3 className="mt-5 font-display text-lg text-white">{it.title}</h3>
+              <p className="mt-2 text-sm text-muted-foreground">{it.desc}</p>
             </div>
           </Reveal>
         ))}

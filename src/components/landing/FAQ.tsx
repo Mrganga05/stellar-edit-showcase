@@ -20,7 +20,7 @@ export function FAQ() {
       : mockFaqs;
 
   return (
-    <section className="relative mx-auto max-w-4xl px-5 py-28 sm:px-8 sm:py-36">
+    <section className="relative mx-auto max-w-4xl px-6 py-24 md:px-8 md:py-32">
       <SectionHeading
         eyebrow="FAQ"
         title={
@@ -30,15 +30,19 @@ export function FAQ() {
         }
       />
       <Reveal>
-        <Accordion type="single" collapsible className="mt-12 space-y-3">
+        <Accordion type="single" collapsible className="mt-12 space-y-4">
           {isLoading && !dbFaqs
             ? Array.from({ length: 3 }).map((_, i) => (
-                <AccordionItem key={i} value={`i${i}`} className="rounded-2xl glass px-5">
+                <AccordionItem key={i} value={`i${i}`} className="rounded-2xl glass px-6">
                   <div className="h-14 animate-pulse rounded-2xl bg-surface/50 border border-white/5 my-2" />
                 </AccordionItem>
               ))
             : faqsToRender.map((f, i) => (
-                <AccordionItem key={f.q} value={`i${i}`} className="rounded-2xl glass px-5">
+                <AccordionItem
+                  key={f.q}
+                  value={`i${i}`}
+                  className="rounded-2xl glass px-6 hover-card-premium"
+                >
                   <AccordionTrigger className="py-5 text-left text-base font-medium hover:no-underline sm:text-lg">
                     {f.q}
                   </AccordionTrigger>

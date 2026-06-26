@@ -79,7 +79,7 @@ export function Contact() {
     }
   }
   return (
-    <section id="contact" className="relative mx-auto max-w-7xl px-5 py-28 sm:px-8 sm:py-36">
+    <section id="contact" className="relative mx-auto max-w-[1320px] px-6 py-24 md:px-8 md:py-32">
       <SectionHeading
         eyebrow="Start a Project"
         title={
@@ -92,7 +92,7 @@ export function Contact() {
       <div className="mt-16 grid gap-6 lg:grid-cols-[1.4fr_1fr]">
         <Reveal>
           <form onSubmit={onSubmit} className="rounded-3xl glass-strong p-6 sm:p-10">
-            <div className="grid gap-5 sm:grid-cols-2">
+            <div className="grid gap-6 sm:grid-cols-2">
               <Field label="Name">
                 <input required name="name" className={inputCls} placeholder="Your full name" />
               </Field>
@@ -137,7 +137,7 @@ export function Contact() {
             </div>
             <button
               disabled={loading}
-              className="mt-8 inline-flex items-center justify-center gap-2 rounded-full bg-foreground px-7 py-4 text-sm font-medium text-background transition-transform hover:scale-[1.02] disabled:opacity-60"
+              className="mt-8 inline-flex items-center justify-center gap-2 rounded-full bg-foreground px-7 py-4 text-sm font-medium text-background button-premium disabled:opacity-60"
             >
               {loading ? (
                 "Sending…"
@@ -150,14 +150,14 @@ export function Contact() {
           </form>
         </Reveal>
         <Reveal delay={0.1}>
-          <div className="grid h-full gap-3">
+          <div className="grid h-full gap-4">
             {channels.map((c) => (
               <a
                 key={c.label}
                 href={c.href}
                 target="_blank"
                 rel="noreferrer"
-                className="group flex items-center gap-4 rounded-2xl glass p-5 transition-colors hover:border-white/20"
+                className="group flex items-center gap-4 rounded-2xl glass p-6 hover-card-premium"
               >
                 <div className="grid size-12 place-items-center rounded-xl bg-gradient-to-br from-electric/20 to-violet-glow/20 text-electric">
                   <c.icon className="size-5" />

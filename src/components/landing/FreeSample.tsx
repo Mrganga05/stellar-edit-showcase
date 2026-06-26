@@ -3,9 +3,9 @@ import { Reveal } from "./primitives";
 
 export function FreeSample() {
   return (
-    <section className="relative mx-auto max-w-7xl px-5 py-20 sm:px-8 sm:py-28">
+    <section className="relative mx-auto max-w-[1320px] px-6 py-24 md:px-8 md:py-32">
       <Reveal>
-        <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-surface-2 to-surface p-10 sm:p-16">
+        <div className="relative overflow-hidden rounded-[2rem] border border-white/10 bg-gradient-to-br from-surface-2 to-surface p-10 sm:p-16 hover-card-premium">
           <div className="absolute -right-32 -top-32 size-96 rounded-full bg-electric/25 blur-3xl" />
           <div className="absolute -bottom-32 -left-32 size-96 rounded-full bg-violet-glow/25 blur-3xl" />
           <div className="relative max-w-3xl">

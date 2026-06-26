@@ -71,32 +71,39 @@ export function Nav() {
           {open ? <X className="size-4" /> : <Menu className="size-4" />}
         </button>
       </div>
-      {open && (
-        <div className="w-full mt-2 rounded-2xl border border-white/[0.06] bg-[#07070a]/95 p-6 md:hidden backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] flex flex-col gap-4 mx-auto max-w-[calc(100%-2rem)]">
-          {links.map((l) => (
-            <a
-              key={l.href}
-              href={l.href}
-              onClick={() => setOpen(false)}
-              className="block rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-widest text-[#a1a1aa] hover:bg-white/5 hover:text-white transition-all"
-            >
-              {l.label}
-            </a>
-          ))}
+      {/* Mobile Menu Dropdown */}
+      <div
+        className={cn(
+          "absolute top-[64px] left-0 right-0 z-40 w-full border-b border-white/[0.08] bg-[#050810]/98 px-6 py-6 flex flex-col gap-4 md:hidden backdrop-blur-xl transition-all duration-300 ease-in-out origin-top",
+          open
+            ? "opacity-100 translate-y-0 pointer-events-auto"
+            : "opacity-0 -translate-y-4 pointer-events-none",
+        )}
+      >
+        {links.map((l) => (
           <a
-            href="#contact"
+            key={l.href}
+            href={l.href}
             onClick={() => setOpen(false)}
-            className="mt-3 flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-white transition-all duration-300 hover:scale-[1.02]"
-            style={{
-              background:
-                "linear-gradient(135deg, rgba(0,212,255,0.9) 0%, rgba(139,92,246,0.9) 100%)",
-            }}
+            className="block rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-widest text-[#a1a1aa] hover:bg-white/5 hover:text-white transition-all"
           >
-            <span>Book Strategy Call</span>
-            <span className="size-1.5 rounded-full bg-white animate-pulse" />
+            {l.label}
           </a>
-        </div>
-      )}
+        ))}
+        <a
+          href="#contact"
+          onClick={() => setOpen(false)}
+          className="mt-2 flex items-center justify-center gap-2 rounded-full px-5 py-3 text-xs font-bold uppercase tracking-widest text-white transition-all duration-300 hover:scale-[1.02]"
+          style={{
+            background:
+              "linear-gradient(135deg, rgba(0,212,255,0.9) 0%, rgba(139,92,246,0.9) 100%)",
+            boxShadow: "0 0 20px -3px rgba(0,212,255,0.3)",
+          }}
+        >
+          <span>Book Strategy Call</span>
+          <span className="size-1.5 rounded-full bg-white animate-pulse" />
+        </a>
+      </div>
     </header>
   );
 }

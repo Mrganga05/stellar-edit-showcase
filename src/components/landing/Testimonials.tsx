@@ -23,7 +23,7 @@ export function Testimonials() {
       : mockTestimonials;
 
   return (
-    <section className="relative mx-auto max-w-7xl px-5 py-28 sm:px-8 sm:py-36">
+    <section className="relative mx-auto max-w-[1320px] px-6 py-24 md:px-8 md:py-32">
       <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-end">
         <SectionHeading
           align="left"
@@ -52,7 +52,7 @@ export function Testimonials() {
         </div>
       </div>
       <div ref={emblaRef} className="mt-12 overflow-hidden">
-        <div className="flex gap-5">
+        <div className="flex gap-6">
           {isLoading && !dbTestimonials
             ? Array.from({ length: 3 }).map((_, i) => (
                 <div

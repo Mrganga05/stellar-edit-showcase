@@ -128,8 +128,68 @@
   color: transparent;
 }
 
-@keyframes gradient-text-shift {
+@utility text-hero {
+  font-size: 1.875rem; /* 30px */
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  @media (min-width: 640px) {
+    font-size: 2.5rem; /* 40px */
+  }
+  @media (min-width: 1024px) {
+    font-size: 3.5rem; /* 56px */
+  }
+  @media (min-width: 1280px) {
+    font-size: 4.5rem; /* 72px */
+  }
+}
 
+@utility text-section-title {
+  font-size: 1.625rem; /* 26px */
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  @media (min-width: 640px) {
+    font-size: 2rem; /* 32px */
+  }
+  @media (min-width: 1024px) {
+    font-size: 2.5rem; /* 40px */
+  }
+  @media (min-width: 1280px) {
+    font-size: 3rem; /* 48px */
+  }
+}
+
+@utility text-body-premium {
+  font-size: 0.9375rem; /* 15px */
+  line-height: 1.6;
+  @media (min-width: 640px) {
+    font-size: 1rem; /* 16px */
+  }
+  @media (min-width: 1024px) {
+    font-size: 1.125rem; /* 18px */
+  }
+}
+
+@utility hover-card-premium {
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  &:hover {
+    transform: translateY(-4px);
+    border-color: rgba(0, 212, 255, 0.25);
+    box-shadow: 0 12px 30px -10px rgba(0, 212, 255, 0.12);
+  }
+}
+
+@utility button-premium {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  &:hover {
+    transform: scale(1.02);
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+  }
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+@keyframes gradient-text-shift {
   0%,
   100% {
     background-position: 0% 50%;
@@ -200,7 +260,6 @@
 }
 
 @keyframes pulse-glow {
-
   0%,
   100% {
     opacity: 0.5;
@@ -218,7 +277,6 @@
 }
 
 @keyframes float-y {
-
   0%,
   100% {
     transform: translateY(0);
@@ -279,7 +337,6 @@ html {
 }
 
 @keyframes orb-drift-a {
-
   0%,
   100% {
     transform: translate(0, 0) scale(1);
@@ -295,7 +352,6 @@ html {
 }
 
 @keyframes orb-drift-b {
-
   0%,
   100% {
     transform: translate(0, 0) scale(1);
@@ -311,7 +367,6 @@ html {
 }
 
 @keyframes orb-drift-c {
-
   0%,
   100% {
     transform: translate(0, 0) scale(1);
@@ -333,7 +388,6 @@ html {
 }
 
 @keyframes dot-pulse {
-
   0%,
   100% {
     opacity: 0.3;
@@ -404,9 +458,11 @@ html {
   inset: 0;
   border-radius: inherit;
   padding: 1px;
-  background: linear-gradient(to bottom,
-      rgba(255, 255, 255, 0.1) 0%,
-      rgba(255, 255, 255, 0.02) 100%);
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.02) 100%
+  );
   -webkit-mask:
     linear-gradient(#fff 0 0) content-box,
     linear-gradient(#fff 0 0);
@@ -444,7 +500,6 @@ html {
 }
 
 @keyframes float-badge {
-
   0%,
   100% {
     transform: translateY(0);
@@ -464,11 +519,13 @@ html {
   content: "";
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg,
-      rgba(255, 255, 255, 0.12) 0%,
-      rgba(255, 255, 255, 0.03) 40%,
-      transparent 41%,
-      transparent 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.12) 0%,
+    rgba(255, 255, 255, 0.03) 40%,
+    transparent 41%,
+    transparent 100%
+  );
   pointer-events: none;
   z-index: 10;
 }
@@ -484,9 +541,11 @@ html {
   inset: 0;
   border-radius: inherit;
   padding: 1.5px;
-  background: linear-gradient(90deg, #18B6FF, #8B5CF6, #18B6FF);
+  background: linear-gradient(90deg, #18b6ff, #8b5cf6, #18b6ff);
   background-size: 200% 200%;
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
   pointer-events: none;
@@ -510,7 +569,7 @@ html {
 
 /* Shifting gradient text utility */
 .animate-gradient-text-fast {
-  background: linear-gradient(90deg, #18B6FF, #8B5CF6, #18B6FF);
+  background: linear-gradient(90deg, #18b6ff, #8b5cf6, #18b6ff);
   background-size: 200% auto;
   -webkit-background-clip: text;
   background-clip: text;
@@ -530,7 +589,7 @@ html {
 
 /* Shifting gradient text utility - Slow version for premium feel */
 .animate-text-gradient-slow {
-  background: linear-gradient(90deg, #18B6FF 0%, #8B5CF6 55%, #EC4899 100%, #18B6FF 150%);
+  background: linear-gradient(90deg, #18b6ff 0%, #8b5cf6 55%, #ec4899 100%, #18b6ff 150%);
   background-size: 300% auto;
   -webkit-background-clip: text;
   background-clip: text;
@@ -550,14 +609,14 @@ html {
   }
 }
 
-/* Work section premium animated text gradient */
+/* Shifting gradient text utility for Work section heading */
 .animate-work-gradient {
-  background: linear-gradient(90deg, #18B6FF 0%, #7C5CFF 50%, #24D6FF 100%, #18B6FF 150%);
-  background-size: 300% auto;
+  background: linear-gradient(90deg, #18b6ff 0%, #7c5cff 50%, #24d6ff 75%, #18b6ff 100%);
+  background-size: 200% auto;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-  animation: work-gradient-shift 8s linear infinite;
+  animation: work-gradient-shift 6s linear infinite;
 }
 
 @keyframes work-gradient-shift {
@@ -565,6 +624,6 @@ html {
     background-position: 0% 50%;
   }
   100% {
-    background-position: 300% 50%;
+    background-position: 200% 50%;
   }
 }

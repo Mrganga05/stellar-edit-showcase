@@ -38,10 +38,8 @@ export function SectionHeading({
           {eyebrow}
         </div>
       )}
-      <h2 className="font-display text-4xl leading-[1.05] tracking-tight text-gradient sm:text-5xl md:text-6xl">
-        {title}
-      </h2>
-      {subtitle && <p className="mt-5 text-base text-muted-foreground sm:text-lg">{subtitle}</p>}
+      <h2 className="font-display text-section-title text-gradient">{title}</h2>
+      {subtitle && <p className="mt-5 text-body-premium text-muted-foreground">{subtitle}</p>}
     </motion.div>
   );
 }
