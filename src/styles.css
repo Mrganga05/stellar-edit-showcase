@@ -549,3 +549,22 @@ html {
     background-position: 300% 50%;
   }
 }
+
+/* Work section premium animated text gradient */
+.animate-work-gradient {
+  background: linear-gradient(90deg, #18B6FF 0%, #7C5CFF 50%, #24D6FF 100%, #18B6FF 150%);
+  background-size: 300% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: work-gradient-shift 8s linear infinite;
+}
+
+@keyframes work-gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 300% 50%;
+  }
+}
