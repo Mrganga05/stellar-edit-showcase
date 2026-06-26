@@ -178,14 +178,14 @@ export function Portfolio() {
         <FloatingParticle x={88} y={45} delay={1.9} />
       </div>
 
-      <div className="relative mx-auto max-w-[900px] text-center mb-16 z-10">
+      <div className="relative mx-auto max-w-[900px] text-center mb-10 z-10">
         {/* Top Glass Badge */}
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, ease: "easeOut" }}
-          className="mb-8 inline-flex items-center gap-2.5 rounded-full border border-[#18B6FF]/20 bg-white/[0.04] px-4.5 py-2 text-[13px] uppercase tracking-[5px] text-white/95 backdrop-blur-md shadow-[0_0_15px_rgba(24,182,255,0.12)]"
+          className="mb-6 inline-flex items-center gap-2.5 rounded-full border border-[#18B6FF]/20 bg-white/[0.04] px-4.5 py-2 text-[13px] uppercase tracking-[5px] text-white/95 backdrop-blur-md shadow-[0_0_15px_rgba(24,182,255,0.12)]"
         >
           <span className="size-2 rounded-full bg-[#18B6FF] shadow-[0_0_8px_#18B6FF] animate-pulse" />
           SIGNATURE WORK
@@ -197,10 +197,10 @@ export function Portfolio() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: 0.1 }}
-          className="font-playfair text-[44px] sm:text-[62px] md:text-[72px] font-bold leading-[0.98] tracking-[-0.03em] text-white mb-6 select-none"
+          className="font-playfair text-[32px] sm:text-[46px] md:text-[54px] font-bold leading-[1.05] tracking-[-0.03em] text-white mb-2 select-none"
         >
-          Every Frame <br className="hidden sm:block" />
-          Earns{" "}
+          Editing That <br className="hidden sm:block" />
+          Builds{" "}
           <span className="relative inline-block">
             <span className="inline-block italic pr-[0.12em] animate-work-gradient filter drop-shadow-[0_2px_22px_rgba(36,214,255,0.45)]">
               Attention.
@@ -211,42 +211,12 @@ export function Portfolio() {
                 rotate: { repeat: Infinity, duration: 12, ease: "linear" },
                 scale: { repeat: Infinity, duration: 3, ease: "easeInOut" }
               }}
-              className="absolute -top-1 -right-4.5 text-[13px] text-[#24D6FF] opacity-90 filter drop-shadow-[0_0_6px_rgba(24,182,255,0.8)] pointer-events-none font-sans"
+              className="absolute -top-1 -right-4.5 text-[12px] text-[#24D6FF] opacity-90 filter drop-shadow-[0_0_6px_rgba(24,182,255,0.8)] pointer-events-none font-sans"
             >
               ✦
             </motion.span>
           </span>
         </motion.h2>
-
-        {/* Supporting Text */}
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
-          className="mx-auto max-w-[700px] text-base sm:text-[20px] font-sans text-white/70 leading-[1.6]"
-        >
-          Explore a curated collection of high-performing edits crafted for creators, brands, and businesses. Every project combines cinematic storytelling, retention-driven pacing, and platform-native optimization to deliver measurable results.
-        </motion.p>
-
-        {/* Glowing Divider Line */}
-        <motion.div
-          initial={{ opacity: 0, scaleX: 0.7 }}
-          whileInView={{ opacity: 1, scaleX: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 1, ease: "easeOut", delay: 0.35 }}
-          className="relative w-full max-w-[500px] h-px mx-auto bg-gradient-to-r from-transparent via-white/[0.08] to-transparent my-10"
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#18B6FF]/30 to-transparent blur-[2px]" />
-        </motion.div>
-
-        {/* Trust Indicators Stats Grid */}
-        <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto w-full px-2">
-          <StatCard val={50} suffix="M+" label="Views Generated" />
-          <StatCard val={100} suffix="+" label="Creators" />
-          <StatCard val={500} suffix="+" label="Projects" />
-          <StatCard val={98} suffix="%" label="Client Satisfaction" />
-        </div>
       </div>
       <div className="mt-14 grid gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {isLoading && !dbProjects
