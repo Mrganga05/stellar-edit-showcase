@@ -78,16 +78,16 @@ export function Footer() {
         </div>
 
         <div className="mt-16 flex flex-col items-start justify-between gap-4 border-t border-white/8 pt-8 sm:flex-row sm:items-center">
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-small-body text-muted-foreground">
             <span>© {new Date().getFullYear()} Raqvine Studio. All rights reserved.</span>
             <span className="hidden sm:inline text-white/10">•</span>
-            <a href="/admin" className="hover:text-foreground transition-colors">
+            <a href="/admin" className="hover:text-white transition-colors">
               Admin Console
             </a>
           </div>
           <a
             href="#top"
-            className="group inline-flex items-center gap-2 rounded-full glass px-4 py-2 text-xs uppercase tracking-[0.22em] text-muted-foreground hover:text-foreground"
+            className="group inline-flex items-center gap-2 rounded-full glass px-4.5 py-2.5 text-badge-text text-muted-foreground hover:text-white transition-colors"
           >
             Back to top{" "}
             <ArrowUp className="size-3.5 transition-transform group-hover:-translate-y-0.5" />
@@ -101,11 +101,11 @@ export function Footer() {
 function FooterCol({ title, links }: { title: string; links: { label: string; href: string }[] }) {
   return (
     <div>
-      <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">{title}</div>
-      <ul className="mt-4 space-y-3 text-sm">
+      <div className="text-badge-text text-muted-foreground">{title}</div>
+      <ul className="mt-4 space-y-3 text-small-body">
         {links.map((l) => (
           <li key={l.label}>
-            <a href={l.href} className="text-foreground/80 hover:text-foreground">
+            <a href={l.href} className="text-muted-foreground hover:text-white transition-colors">
               {l.label}
             </a>
           </li>

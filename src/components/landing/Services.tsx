@@ -83,8 +83,8 @@ export function Services() {
                     <div className="grid size-12 place-items-center rounded-xl bg-gradient-to-br from-electric/20 to-violet-glow/20 text-electric">
                       <s.icon className="size-5" />
                     </div>
-                    <h3 className="mt-5 font-display text-xl">{s.title}</h3>
-                    <p className="mt-2 text-sm text-muted-foreground">{s.desc}</p>
+                    <h3 className="mt-5 text-card-title">{s.title}</h3>
+                    <p className="mt-2 text-small-body">{s.desc}</p>
                   </div>
                 </div>
               </Reveal>

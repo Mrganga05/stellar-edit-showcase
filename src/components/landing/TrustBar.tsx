@@ -24,7 +24,7 @@ export function TrustBar() {
   const row = [...clients, ...clients];
   return (
     <section className="relative border-y border-white/5 bg-surface/50 py-12">
-      <div className="text-center text-[10px] uppercase tracking-[0.3em] text-muted-foreground">
+      <div className="text-center text-badge-text text-muted-foreground tracking-[0.3em]">
         Trusted by content teams in 24 countries
       </div>
       <div className="group relative mt-6 overflow-hidden [mask-image:linear-gradient(90deg,transparent,#000_10%,#000_90%,transparent)]">
@@ -32,7 +32,7 @@ export function TrustBar() {
           {row.map((c, i) => (
             <div
               key={i}
-              className="font-display text-2xl text-foreground/40 transition-colors hover:text-foreground sm:text-3xl"
+              className="font-medium text-2xl text-foreground/40 transition-colors hover:text-foreground sm:text-3xl"
             >
               {c}
             </div>
@@ -45,7 +45,7 @@ export function TrustBar() {
             <div className="grid size-9 place-items-center rounded-lg bg-electric/10 text-electric">
               <b.icon className="size-4" />
             </div>
-            <span className="text-sm font-medium">{b.label}</span>
+            <span className="text-small-body font-medium">{b.label}</span>
           </div>
         ))}
       </div>

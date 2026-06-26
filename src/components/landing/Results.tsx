@@ -4,7 +4,7 @@ const stats = [
   { to: 50, suffix: "M+", label: "Views Generated" },
   { to: 500, suffix: "+", label: "Projects Delivered" },
   { to: 100, suffix: "+", label: "Happy Clients" },
-  { to: 98, suffix: "%", label: "Satisfaction Rate" },
+  { to: 99, suffix: "%", label: "Satisfaction Rate" },
 ];
 
 export function Results() {
@@ -26,12 +26,10 @@ export function Results() {
               key={s.label}
               className="rounded-3xl glass-strong p-8 text-center hover-card-premium"
             >
-              <div className="font-display text-5xl text-gradient-brand sm:text-6xl">
+              <div className="font-sans font-black text-5xl text-gradient-brand sm:text-6xl">
                 <AnimatedCounter to={s.to} suffix={s.suffix} />
               </div>
-              <div className="mt-3 text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
-                {s.label}
-              </div>
+              <div className="mt-3 text-badge-text text-muted-foreground">{s.label}</div>
             </div>
           ))}
         </div>

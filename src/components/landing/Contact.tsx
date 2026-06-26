@@ -137,7 +137,7 @@ export function Contact() {
             </div>
             <button
               disabled={loading}
-              className="mt-8 inline-flex items-center justify-center gap-2 rounded-full bg-foreground px-7 py-4 text-sm font-medium text-background button-premium disabled:opacity-60"
+              className="mt-8 inline-flex items-center justify-center gap-2 rounded-full btn-primary-glow px-7 h-[48px] text-button-text text-white disabled:opacity-60"
             >
               {loading ? (
                 "Sending…"
@@ -163,10 +163,8 @@ export function Contact() {
                   <c.icon className="size-5" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-                    {c.label}
-                  </div>
-                  <div className="truncate font-medium">{c.value}</div>
+                  <div className="text-badge-text text-muted-foreground">{c.label}</div>
+                  <div className="truncate text-base font-semibold text-white">{c.value}</div>
                 </div>
                 <ArrowRight className="size-4 -translate-x-1 opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100" />
               </a>
@@ -192,9 +190,7 @@ function Field({
 }) {
   return (
     <label className={`block ${className}`}>
-      <span className="mb-2 block text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-        {label}
-      </span>
+      <span className="mb-2 block text-badge-text text-muted-foreground">{label}</span>
       {children}
     </label>
   );

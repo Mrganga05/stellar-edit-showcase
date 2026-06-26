@@ -5,10 +5,11 @@ import logoImg from "@/assets/brand-logo-v2.png";
 
 const links = [
   { href: "#work", label: "WORK" },
+  { href: "#about", label: "ABOUT" },
   { href: "#services", label: "SERVICES" },
   { href: "#process", label: "PROCESS" },
-  { href: "#results", label: "RESULTS" },
-  { href: "#contact", label: "CONTACT" },
+  { href: "#contact", label: "CONTACTS" },
+  { href: "#faq", label: "FAQ" },
 ];
 
 export function Nav() {
@@ -23,8 +24,10 @@ export function Nav() {
   return (
     <header
       className={cn(
-        "fixed inset-x-0 top-0 z-50 h-[64px] flex items-center border-b border-white/[0.08] transition-all duration-500",
-        scrolled ? "bg-[#050810]/95 backdrop-blur-xl" : "bg-transparent",
+        "fixed inset-x-0 top-0 z-50 h-[64px] flex items-center border-b transition-all duration-500",
+        scrolled
+          ? "bg-[#050816]/95 backdrop-blur-xl border-white/[0.045] shadow-[0_4px_30px_rgba(0,0,0,0.4)]"
+          : "bg-transparent border-transparent",
       )}
     >
       <div className="mx-auto w-full max-w-[1320px] px-6 md:px-8 flex items-center justify-between relative h-full">
@@ -38,12 +41,12 @@ export function Nav() {
             RAQ<span className="text-gradient-brand">VINE</span>
           </span>
         </a>
-        <nav className="hidden md:flex items-center gap-[32px] absolute left-1/2 -translate-x-1/2">
+        <nav className="hidden md:flex items-center gap-[44px] absolute left-1/2 -translate-x-1/2">
           {links.map((l) => (
             <a
               key={l.href}
               href={l.href}
-              className="text-[13px] font-medium tracking-[0.04em] text-[#a1a1aa] transition-colors hover:text-white uppercase"
+              className="text-nav-menu text-[#a1a1aa] nav-link-premium uppercase"
             >
               {l.label}
             </a>
@@ -52,15 +55,14 @@ export function Nav() {
         <div className="hidden md:block">
           <a
             href="#contact"
-            className="group relative inline-flex items-center justify-center gap-2 rounded-full px-5 h-[38px] text-[13px] font-bold uppercase tracking-wider text-white transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
-            style={{
-              background:
-                "linear-gradient(135deg, rgba(0,212,255,0.9) 0%, rgba(139,92,246,0.9) 100%)",
-              boxShadow: "0 0 20px -3px rgba(0,212,255,0.3), 0 0 20px -3px rgba(139,92,246,0.2)",
-            }}
+            className="group btn-primary-glow inline-flex items-center justify-center gap-2 rounded-full px-6 h-[44px] text-button-text uppercase text-white cursor-pointer overflow-hidden"
           >
-            <span>Book Strategy Call</span>
-            <span className="relative size-1.5 rounded-full bg-white shadow-[0_0_8px_#fff] animate-pulse ml-2" />
+            {/* Sheen reflection sweep */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out pointer-events-none" />
+            <span className="relative flex items-center gap-2.5 z-10">
+              <span>Book Strategy Call</span>
+              <span className="relative size-1.5 rounded-full bg-white shadow-[0_0_8px_#fff] animate-pulse ml-1" />
+            </span>
           </a>
         </div>
         <button
@@ -74,7 +76,7 @@ export function Nav() {
       {/* Mobile Menu Dropdown */}
       <div
         className={cn(
-          "absolute top-[64px] left-0 right-0 z-40 w-full border-b border-white/[0.08] bg-[#050810]/98 px-6 py-6 flex flex-col gap-4 md:hidden backdrop-blur-xl transition-all duration-300 ease-in-out origin-top",
+          "absolute top-[64px] left-0 right-0 z-40 w-full border-b border-white/[0.035] bg-[#050816]/98 px-6 py-6 flex flex-col gap-4 md:hidden backdrop-blur-xl transition-all duration-300 ease-in-out origin-top",
           open
             ? "opacity-100 translate-y-0 pointer-events-auto"
             : "opacity-0 -translate-y-4 pointer-events-none",
@@ -85,7 +87,7 @@ export function Nav() {
             key={l.href}
             href={l.href}
             onClick={() => setOpen(false)}
-            className="block rounded-lg px-3 py-2 text-xs font-semibold uppercase tracking-widest text-[#a1a1aa] hover:bg-white/5 hover:text-white transition-all"
+            className="block rounded-lg px-3 py-2 text-nav-menu uppercase text-[#a1a1aa] hover:bg-white/5 hover:text-white transition-all"
           >
             {l.label}
           </a>
@@ -93,15 +95,14 @@ export function Nav() {
         <a
           href="#contact"
           onClick={() => setOpen(false)}
-          className="mt-2 flex items-center justify-center gap-2 rounded-full px-5 py-3 text-xs font-bold uppercase tracking-widest text-white transition-all duration-300 hover:scale-[1.02]"
-          style={{
-            background:
-              "linear-gradient(135deg, rgba(0,212,255,0.9) 0%, rgba(139,92,246,0.9) 100%)",
-            boxShadow: "0 0 20px -3px rgba(0,212,255,0.3)",
-          }}
+          className="mt-2 group btn-primary-glow flex items-center justify-center gap-2 rounded-full px-6 h-[48px] text-button-text uppercase text-white overflow-hidden"
         >
-          <span>Book Strategy Call</span>
-          <span className="size-1.5 rounded-full bg-white animate-pulse" />
+          {/* Sheen reflection sweep */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out pointer-events-none" />
+          <span className="relative flex items-center gap-2 z-10">
+            <span>Book Strategy Call</span>
+            <span className="size-1.5 rounded-full bg-white animate-pulse" />
+          </span>
         </a>
       </div>
     </header>

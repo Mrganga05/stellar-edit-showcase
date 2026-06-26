@@ -71,3 +71,321 @@ No backend, DB, auth, admin, or Lovable Cloud. Form submit is UI-only with a suc
 - Lighthouse-friendly: lazy-load videos below the fold, `preload="metadata"`, generated images sized appropriately
 - No hardcoded color classes — all via semantic tokens
 - Strong hierarchy, generous spacing, restrained motion (no fade-in-everything)
+
+---
+
+# PERFORMANCE FIRST
+
+This website must be production-ready.
+
+Every design improvement must prioritize performance over visual effects.
+
+Do not sacrifice speed for aesthetics.
+
+Target:
+
+• Lighthouse Performance 95+
+
+• Accessibility 95+
+
+• Best Practices 100
+
+• SEO 100
+
+Desktop and Mobile.
+
+---
+
+# CODE QUALITY
+
+Generate clean, modular, maintainable code.
+
+Avoid duplicate CSS.
+
+Avoid inline styles unless necessary.
+
+Reuse components whenever possible.
+
+Use CSS variables for colors, spacing, shadows, typography, and border radius.
+
+Organize code into reusable design tokens.
+
+Remove unused styles, classes, and assets.
+
+Keep the project scalable.
+
+---
+
+# RESPONSIVENESS
+
+The website must look perfect on every device.
+
+Desktop
+
+Laptop
+
+Tablet
+
+Mobile
+
+Ultra-wide screens
+
+No overlapping elements.
+
+No text overflow.
+
+No horizontal scrolling.
+
+No broken layouts.
+
+Maintain perfect spacing on every breakpoint.
+
+---
+
+# SMOOTH USER EXPERIENCE
+
+Every interaction should feel premium.
+
+Scrolling must be smooth.
+
+Animations must be subtle.
+
+Hover effects should feel responsive.
+
+Buttons should react instantly.
+
+Avoid animation lag.
+
+Avoid excessive motion.
+
+Everything should feel fluid.
+
+---
+
+# ANIMATION GUIDELINES
+
+Use lightweight CSS animations.
+
+Avoid JavaScript-heavy animations whenever possible.
+
+Use:
+
+Opacity
+
+Transform
+
+Translate
+
+Scale
+
+GPU acceleration
+
+Avoid animating width, height, top, left, margins, or expensive layout properties.
+
+Keep animations between 200–350ms.
+
+Use modern easing curves.
+
+Animations should never reduce FPS.
+
+---
+
+# IMAGE OPTIMIZATION
+
+Optimize every image.
+
+Use modern formats when possible.
+
+Lazy-load images below the fold.
+
+Prevent layout shifts.
+
+Maintain image quality while minimizing file size.
+
+Hero images should remain visually sharp but optimized.
+
+---
+
+# LOADING PERFORMANCE
+
+Minimize render-blocking resources.
+
+Reduce unnecessary DOM elements.
+
+Avoid excessive nested containers.
+
+Optimize CSS and JavaScript.
+
+Use efficient font loading.
+
+Prevent Flash of Unstyled Text (FOUT).
+
+Avoid Cumulative Layout Shift (CLS).
+
+---
+
+# ACCESSIBILITY
+
+Maintain WCAG accessibility standards.
+
+Sufficient text contrast.
+
+Keyboard navigation support.
+
+Visible focus states.
+
+Semantic HTML.
+
+Accessible buttons.
+
+Accessible links.
+
+Proper heading hierarchy.
+
+Readable typography.
+
+---
+
+# MICRO INTERACTIONS
+
+Every interaction should feel refined.
+
+Buttons:
+
+Soft lift
+
+Glow
+
+Scale
+
+Cards:
+
+Subtle elevation
+
+Shadow increase
+
+Navigation:
+
+Smooth underline
+
+Color transition
+
+Images:
+
+Gentle zoom
+
+Badges:
+
+Slow floating motion
+
+Never overuse effects.
+
+---
+
+# VISUAL CONSISTENCY
+
+Every section must follow the same visual language.
+
+Typography
+
+Spacing
+
+Cards
+
+Buttons
+
+Icons
+
+Borders
+
+Backgrounds
+
+Animations
+
+Shadows
+
+Glows
+
+Everything should feel like one cohesive product.
+
+---
+
+# DESIGN SYSTEM
+
+Create reusable design tokens for:
+
+Colors
+
+Typography
+
+Spacing
+
+Radius
+
+Borders
+
+Shadows
+
+Animation durations
+
+Transitions
+
+Do not hardcode repeated values.
+
+---
+
+# DEPLOYMENT READY
+
+The final project must be ready for deployment.
+
+No placeholder content.
+
+No debug code.
+
+No console warnings.
+
+No unused imports.
+
+No TypeScript errors (if applicable).
+
+No ESLint warnings.
+
+No build warnings.
+
+No runtime errors.
+
+No broken links.
+
+No missing assets.
+
+No hydration issues.
+
+Everything should compile successfully on the first build.
+
+---
+
+# FINAL VALIDATION
+
+Before completing the task, verify:
+
+✓ Pixel-perfect alignment
+
+✓ Fully responsive
+
+✓ Consistent design system
+
+✓ Smooth animations
+
+✓ Optimized assets
+
+✓ Clean code structure
+
+✓ High performance
+
+✓ Accessibility compliant
+
+✓ Production-ready quality
+
+✓ Deploy-ready with zero visual regressions
+
+The final website should look like a premium creative agency portfolio while maintaining excellent performance, maintainability, and reliability suitable for immediate deployment.

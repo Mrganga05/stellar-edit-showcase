@@ -20,7 +20,7 @@ export function FAQ() {
       : mockFaqs;
 
   return (
-    <section className="relative mx-auto max-w-4xl px-6 py-24 md:px-8 md:py-32">
+    <section id="faq" className="relative mx-auto max-w-4xl px-6 py-24 md:px-8 md:py-32">
       <SectionHeading
         eyebrow="FAQ"
         title={
@@ -43,10 +43,12 @@ export function FAQ() {
                   value={`i${i}`}
                   className="rounded-2xl glass px-6 hover-card-premium"
                 >
-                  <AccordionTrigger className="py-5 text-left text-base font-medium hover:no-underline sm:text-lg">
+                  <AccordionTrigger className="py-5 text-left text-small-heading hover:no-underline">
                     {f.q}
                   </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground">{f.a}</AccordionContent>
+                  <AccordionContent className="text-body-text pb-5 text-muted-foreground">
+                    {f.a}
+                  </AccordionContent>
                 </AccordionItem>
               ))}
         </Accordion>

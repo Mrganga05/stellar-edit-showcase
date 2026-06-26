@@ -58,7 +58,7 @@ const Counter = ({
 };
 
 // SVG Sparkline / Mini Wave Visualizer
-const Sparkline = ({ color = "#18B6FF" }) => {
+const Sparkline = ({ color = "#38BDF8" }) => {
   return (
     <svg
       className="w-16 h-6 mt-1.5 opacity-60 transition-opacity duration-300 hover:opacity-100"
@@ -108,24 +108,24 @@ const StaggeredTitle = () => {
       initial="hidden"
       whileInView="visible"
       viewport={{ once: true, margin: "-100px" }}
-      className="text-[34px] sm:text-[44px] lg:text-[48px] xl:text-[54px] font-black leading-[1.05] tracking-[-0.04em] text-[#F9FAFB] mt-4 mb-5 flex flex-col font-sans select-none"
+      className="text-section-heading mt-4 mb-5 flex flex-col select-none"
     >
       <span className="block py-1 relative">
         <motion.span
           variants={wordVars}
-          className="inline-block mr-[0.2em] font-extrabold bg-gradient-to-b from-white via-white to-[#A3A3C2] bg-clip-text text-transparent"
+          className="inline-block mr-[0.2em] font-bold bg-gradient-to-b from-white via-white to-[#A3A3C2] bg-clip-text text-transparent"
         >
           Meet
         </motion.span>
         <motion.span
           variants={wordVars}
-          className="inline-block mr-[0.2em] font-extrabold bg-gradient-to-b from-white via-white to-[#A3A3C2] bg-clip-text text-transparent"
+          className="inline-block mr-[0.2em] font-bold bg-gradient-to-b from-white via-white to-[#A3A3C2] bg-clip-text text-transparent"
         >
           The
         </motion.span>
         <motion.span
           variants={wordVars}
-          className="inline-block mr-[0.05em] pr-[0.15em] font-playfair font-bold italic bg-gradient-to-r from-[#00F5D4] to-[#18B6FF] bg-clip-text text-transparent filter drop-shadow-[0_2px_15px_rgba(24,182,255,0.3)] hover:scale-105 transition-transform duration-350"
+          className="inline-block mr-[0.05em] pr-[0.15em] font-bold italic bg-gradient-to-r from-[#3B82F6] to-[#38BDF8] bg-clip-text text-transparent filter drop-shadow-[0_2px_15px_rgba(59,130,246,0.3)] hover:scale-105 transition-transform duration-350"
         >
           Editor
         </motion.span>
@@ -134,19 +134,19 @@ const StaggeredTitle = () => {
       <span className="block py-1 relative">
         <motion.span
           variants={wordVars}
-          className="inline-block mr-[0.2em] font-extrabold bg-gradient-to-b from-white via-white to-[#A3A3C2] bg-clip-text text-transparent"
+          className="inline-block mr-[0.2em] font-bold bg-gradient-to-b from-white via-white to-[#A3A3C2] bg-clip-text text-transparent"
         >
           Behind
         </motion.span>
         <motion.span
           variants={wordVars}
-          className="inline-block mr-[0.1em] pr-[0.15em] font-playfair font-bold italic bg-gradient-to-r from-[#00C6FF] to-[#0072FF] bg-clip-text text-transparent filter drop-shadow-[0_2px_20px_rgba(0,198,255,0.35)] relative group cursor-default"
+          className="inline-block mr-[0.1em] pr-[0.15em] font-bold italic bg-gradient-to-r from-[#3B82F6] to-[#38BDF8] bg-clip-text text-transparent filter drop-shadow-[0_2px_20px_rgba(59,130,246,0.3)] relative group cursor-default"
         >
           Viral
           <motion.span
             animate={{ rotate: 360 }}
             transition={{ repeat: Infinity, duration: 8, ease: "linear" }}
-            className="absolute -top-2 -right-3 text-[12px] text-[#00D4FF] opacity-80 group-hover:opacity-100 group-hover:scale-125 transition-all duration-300 pointer-events-none font-sans filter drop-shadow-[0_0_8px_rgba(0,212,255,0.6)]"
+            className="absolute -top-2 -right-3 text-[12px] text-[#38BDF8] opacity-80 group-hover:opacity-100 group-hover:scale-125 transition-all duration-300 pointer-events-none filter drop-shadow-[0_0_8px_rgba(56,189,248,0.5)]"
           >
             ✦
           </motion.span>
@@ -156,19 +156,19 @@ const StaggeredTitle = () => {
       <span className="block py-1 relative">
         <motion.span
           variants={wordVars}
-          className="inline-block mr-[0.2em] font-extrabold bg-gradient-to-b from-white via-white to-[#A3A3C2] bg-clip-text text-transparent"
+          className="inline-block mr-[0.2em] font-bold bg-gradient-to-b from-white via-white to-[#A3A3C2] bg-clip-text text-transparent"
         >
           Content
         </motion.span>
         <motion.span
           variants={wordVars}
-          className="inline-block mr-[0.2em] font-extrabold bg-gradient-to-b from-white via-white to-[#A3A3C2] bg-clip-text text-transparent"
+          className="inline-block mr-[0.2em] font-bold bg-gradient-to-b from-white via-white to-[#A3A3C2] bg-clip-text text-transparent"
         >
           That
         </motion.span>
         <motion.span
           variants={wordVars}
-          className="inline-block mr-[0.05em] pr-[0.15em] font-playfair font-bold italic bg-gradient-to-r from-[#18B6FF] via-[#7C5CFF] to-[#8B5CF6] bg-clip-text text-transparent filter drop-shadow-[0_2px_20px_rgba(139,92,246,0.35)]"
+          className="inline-block mr-[0.05em] pr-[0.15em] font-bold italic bg-gradient-to-r from-[#38BDF8] via-[#3B82F6] to-[#3B82F6] bg-clip-text text-transparent filter drop-shadow-[0_2px_20px_rgba(59,130,246,0.35)]"
         >
           Converts.
         </motion.span>
@@ -192,22 +192,20 @@ const FeatureCard = ({ title, desc, icon, delay = 0 }: FeatureCardProps) => {
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay }}
-      className="group relative overflow-hidden rounded-[22px] border border-white/[0.08] bg-white/[0.03] p-[18px] xl:p-[20px] backdrop-blur-md flex flex-col justify-between lg:h-[140px] transition-all duration-[450ms] ease-out hover:border-[#18B6FF]/40 hover:-translate-y-1.5 hover:shadow-[0_10px_25px_rgba(24,182,255,0.06)]"
+      className="group relative overflow-hidden rounded-[22px] border border-white/[0.08] bg-white/[0.03] p-6 backdrop-blur-md flex flex-col justify-between lg:h-[150px] transition-all duration-[450ms] ease-out hover:border-[#38BDF8]/40 hover:-translate-y-1.5 hover:shadow-[0_10px_25px_rgba(56,189,248,0.06)]"
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-[#18B6FF]/0 to-[#18B6FF]/[0.03] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+      <div className="absolute inset-0 bg-gradient-to-br from-[#38BDF8]/0 to-[#38BDF8]/[0.03] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
 
       <div className="flex items-center gap-3">
         {/* Icon wrapper */}
-        <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white/[0.03] border border-white/10 text-[#9CA3AF] transition-all duration-500 group-hover:scale-110 group-hover:text-[#18B6FF] group-hover:border-[#18B6FF]/30 group-hover:shadow-[0_0_12px_rgba(24,182,255,0.15)]">
+        <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white/[0.03] border border-white/10 text-[#9CA3AF] transition-all duration-500 group-hover:scale-110 group-hover:text-[#38BDF8] group-hover:border-[#38BDF8]/30 group-hover:shadow-[0_0_12px_rgba(56,189,248,0.15)]">
           {icon}
         </div>
-        <h4 className="text-sm font-semibold text-[#F9FAFB] group-hover:text-[#18B6FF] transition-colors duration-300">
+        <h4 className="text-small-heading group-hover:text-[#38BDF8] transition-colors duration-300">
           {title}
         </h4>
       </div>
-      <p className="text-[11.5px] text-[#9CA3AF] leading-[150%] group-hover:text-white/80 transition-colors duration-300">
-        {desc}
-      </p>
+      <p className="text-small-body mt-2">{desc}</p>
     </motion.div>
   );
 };
@@ -225,7 +223,7 @@ const FloatingBadge = ({
   return (
     <div
       className={cn(
-        "rounded-full border border-white/[0.08] bg-[#050810]/60 px-3 py-1.5 text-xs font-semibold text-white/80 backdrop-blur-md shadow-md cursor-default hover:border-[#18B6FF]/20 hover:text-white transition-all duration-300 flex items-center gap-1.5 whitespace-nowrap",
+        "rounded-full border border-white/[0.08] bg-[#0B1224]/60 px-3 py-1.5 text-xs font-semibold text-white/80 backdrop-blur-md shadow-md cursor-default hover:border-[#38BDF8]/20 hover:text-white transition-all duration-300 flex items-center gap-1.5 whitespace-nowrap",
         className,
       )}
     >
@@ -251,7 +249,7 @@ const Particle = ({ delay = 0, x = 0, y = 0 }: { delay?: number; x?: number; y?:
         ease: "easeInOut",
         delay: delay,
       }}
-      className="absolute size-1 rounded-full bg-[#18B6FF] pointer-events-none"
+      className="absolute size-1 rounded-full bg-[#38BDF8] pointer-events-none"
       style={{ left: `${x}%`, top: `${y}%` }}
     />
   );
@@ -288,25 +286,9 @@ export function About() {
       id="about"
       ref={sectionRef}
       onMouseMove={handleMouseMove}
-      className="relative w-full overflow-hidden bg-[#050810] py-24 md:py-32 flex items-center justify-center"
+      className="relative w-full overflow-hidden bg-transparent py-24 md:py-32 flex items-center justify-center"
     >
-      {/* Background radial/mesh ambient lights (interactive parallax) */}
-      <motion.div
-        style={{ x: springMouseX, y: springMouseY }}
-        className="absolute inset-0 overflow-hidden pointer-events-none z-0"
-      >
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(24,182,255,0.035)_0%,rgba(139,92,246,0.025)_40%,transparent_75%)]" />
 
-        {/* Soft Ambient lighting orbs */}
-        <div className="absolute top-1/4 left-1/4 size-[550px] rounded-full bg-[#18B6FF]/3 opacity-20 blur-[130px]" />
-        <div className="absolute bottom-1/4 right-1/4 size-[600px] rounded-full bg-[#8B5CF6]/3 opacity-15 blur-[140px]" />
-      </motion.div>
-
-      {/* Grid overlay */}
-      <div className="absolute inset-0 about-grid opacity-25 pointer-events-none z-0" />
-
-      {/* Noise overlay */}
-      <div className="absolute inset-0 about-noise pointer-events-none z-0" />
 
       {/* Background floating particles */}
       <div className="absolute inset-0 pointer-events-none z-0">
@@ -329,12 +311,10 @@ export function About() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
-              className="h-[42px] rounded-full border border-white/[0.08] bg-white/[0.04] px-[18px] flex items-center gap-2 self-start backdrop-blur-md hover:border-[#18B6FF]/30 hover:shadow-[0_0_15px_rgba(24,182,255,0.15)] transition-all duration-300 cursor-default"
+              className="h-[42px] rounded-full border border-white/[0.08] bg-white/[0.04] px-[18px] flex items-center gap-2 self-start backdrop-blur-md hover:border-[#38BDF8]/30 hover:shadow-[0_0_15px_rgba(56,189,248,0.15)] transition-all duration-300 cursor-default"
             >
-              <span className="size-1.5 rounded-full bg-[#18B6FF] animate-pulse" />
-              <span className="font-sans font-medium text-[13px] uppercase tracking-[3px] text-white/80">
-                ABOUT THE EDITOR
-              </span>
+              <span className="size-1.5 rounded-full bg-[#38BDF8] animate-pulse" />
+              <span className="text-badge-text text-white/80">ABOUT THE EDITOR</span>
             </motion.div>
 
             {/* Title */}
@@ -363,49 +343,11 @@ export function About() {
             />
           </div>
 
-          {/* Statistics Strip */}
-          <div className="h-auto lg:h-[80px] w-full rounded-2xl border border-white/[0.08] bg-white/[0.03] backdrop-blur-md flex flex-col sm:flex-row items-center justify-around divide-y sm:divide-y-0 sm:divide-x divide-white/[0.08] px-4 py-3 sm:py-0 gap-y-3 sm:gap-y-0">
-            <div className="flex-1 w-full flex flex-col items-center justify-center text-center">
-              <span className="font-space font-bold text-[30px] xl:text-[36px] leading-none text-[#F9FAFB]">
-                <Counter to={50} suffix="M+" />
-              </span>
-              <span className="font-sans uppercase text-[10px] tracking-[2px] text-[#9CA3AF] mt-1.5">
-                Views Generated
-              </span>
-            </div>
-            <div className="flex-1 w-full flex flex-col items-center justify-center text-center sm:pl-2">
-              <span className="font-space font-bold text-[30px] xl:text-[36px] leading-none text-[#F9FAFB]">
-                <Counter to={100} suffix="+" />
-              </span>
-              <span className="font-sans uppercase text-[10px] tracking-[2px] text-[#9CA3AF] mt-1.5">
-                Creators Edited
-              </span>
-            </div>
-            <div className="flex-1 w-full flex flex-col items-center justify-center text-center sm:pl-2">
-              <span className="font-space font-bold text-[30px] xl:text-[36px] leading-none text-[#F9FAFB]">
-                <Counter to={98} suffix="%" />
-              </span>
-              <span className="font-sans uppercase text-[10px] tracking-[2px] text-[#9CA3AF] mt-1.5">
-                Client Satisfaction
-              </span>
-            </div>
-            <div className="flex-1 w-full flex flex-col items-center justify-center text-center sm:pl-2">
-              <span className="font-space font-bold text-[30px] xl:text-[36px] leading-none text-[#F9FAFB]">
-                <Counter to={5} suffix="+" />
-              </span>
-              <span className="font-sans uppercase text-[10px] tracking-[2px] text-[#9CA3AF] mt-1.5">
-                Years Experience
-              </span>
-            </div>
-          </div>
-
           {/* Timeline & CTA Block Side-by-Side (bottom group) */}
           <div className="flex flex-col sm:flex-row gap-6 items-stretch">
             {/* Timeline (40% width on desktop) */}
             <div className="w-full sm:w-[40%] flex flex-col justify-center space-y-4 pr-2">
-              <h5 className="text-[10px] font-bold uppercase tracking-[2px] text-[#9CA3AF]">
-                THE JOURNEY
-              </h5>
+              <h5 className="text-badge-text text-[#9CA3AF]">THE JOURNEY</h5>
 
               <div className="relative pl-2">
                 {/* Vertical Indicator Line */}
@@ -415,7 +357,7 @@ export function About() {
                     whileInView={{ height: "100%" }}
                     viewport={{ once: true }}
                     transition={{ duration: 1.5, ease: "easeInOut" }}
-                    className="w-full bg-gradient-to-b from-[#18B6FF] to-[#8B5CF6]"
+                    className="w-full bg-gradient-to-b from-[#38BDF8] to-[#3B82F6]"
                   />
                 </div>
 
@@ -431,13 +373,13 @@ export function About() {
                       className="relative pl-7 text-[13px]"
                     >
                       {/* Circle node dot */}
-                      <div className="absolute left-0 top-[3px] size-3.5 rounded-full bg-[#050810] border-[1.5px] border-[#18B6FF] flex items-center justify-center shadow-[0_0_8px_rgba(24,182,255,0.4)]">
-                        <div className="size-1 rounded-full bg-[#18B6FF]" />
+                      <div className="absolute left-0 top-[3px] size-3.5 rounded-full bg-[#050816] border-[1.5px] border-[#38BDF8] flex items-center justify-center shadow-[0_0_8px_rgba(56,189,248,0.4)]">
+                        <div className="size-1 rounded-full bg-[#38BDF8]" />
                       </div>
-                      <span className="font-space font-bold text-[#18B6FF] mr-2 tracking-wider text-xs">
+                      <span className="font-bold text-[#38BDF8] mr-2 tracking-wider text-xs">
                         {event.year}
                       </span>
-                      <span className="text-[#9CA3AF] leading-relaxed">{event.text}</span>
+                      <span className="text-small-body">{event.text}</span>
                     </motion.div>
                   ))}
                 </div>
@@ -447,10 +389,8 @@ export function About() {
             {/* CTA Card (60% width on desktop) */}
             <div className="w-full sm:w-[60%] rounded-[30px] border border-white/[0.08] bg-white/[0.03] p-6 xl:p-8 backdrop-blur-md flex flex-col justify-between space-y-5">
               <div className="space-y-2">
-                <span className="text-[10px] font-bold uppercase tracking-[2px] text-[#18B6FF]">
-                  READY TO COLLABORATE?
-                </span>
-                <h4 className="font-playfair text-xl xl:text-2xl font-bold text-[#F9FAFB] leading-tight">
+                <span className="text-badge-text text-[#38BDF8]">READY TO COLLABORATE?</span>
+                <h4 className="text-card-title text-[#F9FAFB] leading-tight">
                   Ready To Create Your Next Viral Video?
                 </h4>
               </div>
@@ -458,7 +398,7 @@ export function About() {
               <div className="flex flex-wrap items-center gap-3">
                 <motion.button
                   whileHover={{ scale: 1.03 }}
-                  className="group relative inline-flex items-center justify-center gap-2 rounded-full bg-gradient-to-r from-[#8B5CF6] to-[#18B6FF] px-6 py-3 text-xs xl:text-sm font-semibold text-white transition-all duration-300 hover:shadow-[0_0_30px_rgba(139,92,246,0.4)] cursor-pointer"
+                  className="group relative inline-flex items-center justify-center gap-2 rounded-full btn-primary-glow px-6 h-[48px] text-button-text text-white cursor-pointer"
                 >
                   Book Strategy Call
                   <ArrowUpRight className="size-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
@@ -466,7 +406,7 @@ export function About() {
 
                 <motion.button
                   whileHover={{ scale: 1.03 }}
-                  className="group relative inline-flex items-center justify-center gap-2 rounded-full border border-white/10 bg-white/[0.03] px-6 py-3 text-xs xl:text-sm font-semibold text-white backdrop-blur-md transition-all duration-300 hover:border-[#18B6FF]/40 hover:shadow-[0_0_20px_rgba(24,182,255,0.15)] cursor-pointer"
+                  className="group relative inline-flex items-center justify-center gap-2 rounded-full btn-secondary-glow px-6 h-[48px] text-button-text text-white cursor-pointer"
                 >
                   View Portfolio
                 </motion.button>
@@ -480,7 +420,7 @@ export function About() {
                       key={idx}
                       src={avatar}
                       alt="Creator avatar"
-                      className="size-6.5 rounded-full border border-[#050810] object-cover"
+                      className="size-6.5 rounded-full border border-[#050816] object-cover"
                     />
                   ))}
                 </div>
@@ -527,37 +467,39 @@ export function About() {
                 />
                 <FloatingBadge
                   text="Motion Graphics"
-                  icon={<Box className="size-3 text-[#8B5CF6]" />}
+                  icon={<Box className="size-3 text-[#3B82F6]" />}
                 />
               </div>
             </div>
 
             {/* Layered Profile Card Container (Stable, no floating/hover scaling) */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8 }}
-              className="group relative flex flex-col rounded-[34px] border border-white/[0.08] bg-white/[0.03] backdrop-blur-xl shadow-[0_20px_50px_rgba(24,182,255,0.1)] hover:shadow-[0_25px_65px_rgba(24,182,255,0.2)] overflow-hidden animate-border-beam w-full aspect-[2/3] shrink-0 transition-shadow duration-500"
-            >
-              {/* Cinematic spotlight behind editor head */}
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_35%,rgba(24,182,255,0.2)_0%,rgba(139,92,246,0.1)_40%,transparent_70%)] opacity-80 pointer-events-none z-10" />
+            <div className="relative w-full aspect-[2/3] shrink-0">
+              {/* Cinematic spotlight behind the card (ambient back-glow, doesn't overlay image) */}
+              <div className="absolute -inset-4 bg-[radial-gradient(circle_at_50%_35%,rgba(24,182,255,0.25)_0%,rgba(139,92,246,0.15)_40%,transparent_70%)] opacity-90 pointer-events-none z-0 blur-lg" />
 
-              {/* Main Portrait Image (Full show, no cropping, luxury border) */}
-              <div className="relative w-full h-full overflow-hidden rounded-[34px] bg-[#050810]">
-                <img
-                  src={editorProfile}
-                  alt="RAQVINE Editor Profile"
-                  className="w-full h-full object-cover object-center opacity-95 pointer-events-none select-none"
-                />
+              <motion.div
+                initial={{ opacity: 0 }}
+                whileInView={{ opacity: 1 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8 }}
+                className="group relative z-10 flex flex-col rounded-[34px] border border-white/[0.08] bg-white/[0.03] backdrop-blur-xl shadow-[0_20px_50px_rgba(24,182,255,0.1)] hover:shadow-[0_25px_65px_rgba(24,182,255,0.2)] overflow-hidden animate-border-beam w-full h-full transition-shadow duration-500"
+              >
+                {/* Main Portrait Image (Full show, no cropping, luxury border) - Original colors and full clarity */}
+                <div className="relative w-full h-full overflow-hidden rounded-[34px] bg-[#050810]">
+                  <img
+                    src={editorProfile}
+                    alt="RAQVINE Editor Profile"
+                    className="w-full h-full object-cover object-center opacity-100 pointer-events-none select-none"
+                  />
 
-                {/* Subtle card reflection shine */}
-                <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/[0.03] to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-20" />
+                  {/* Subtle card reflection shine */}
+                  <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/[0.03] to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none z-20" />
 
-                {/* Inner border highlighted on hover */}
-                <div className="absolute inset-0 rounded-[34px] border border-white/[0.05] group-hover:border-[#18B6FF]/30 transition-colors duration-500 pointer-events-none z-30" />
-              </div>
-            </motion.div>
+                  {/* Inner border highlighted on hover */}
+                  <div className="absolute inset-0 rounded-[34px] border border-white/[0.05] group-hover:border-[#38BDF8]/30 transition-colors duration-500 pointer-events-none z-30" />
+                </div>
+              </motion.div>
+            </div>
 
             <motion.div
               initial={{ opacity: 0 }}
@@ -567,43 +509,33 @@ export function About() {
               className="mt-6 flex items-center justify-between rounded-2xl border border-white/[0.08] bg-white/[0.03] px-2 py-3.5 text-xs text-[#9CA3AF] backdrop-blur-md shadow-md shrink-0 w-full"
             >
               <div className="flex-1 min-w-[70px] text-center px-1 flex flex-col items-center">
-                <span className="font-space font-bold text-white text-base">
+                <span className="font-bold text-white text-base">
                   <Counter to={50} suffix="M+" />
                 </span>
-                <span className="text-[9px] text-[#9CA3AF] uppercase tracking-wider mt-0.5 font-medium font-sans">
-                  Views
-                </span>
-                <Sparkline color="#18B6FF" />
+                <span className="text-badge-text text-[#9CA3AF] mt-0.5">Views</span>
+                <Sparkline color="#38BDF8" />
               </div>
               <div className="h-10 w-px bg-white/[0.08] hidden sm:block" />
               <div className="flex-1 min-w-[70px] text-center px-1 flex flex-col items-center">
-                <span className="font-space font-bold text-white text-base">
+                <span className="font-bold text-white text-base">
                   <Counter to={100} suffix="+" />
                 </span>
-                <span className="text-[9px] text-[#9CA3AF] uppercase tracking-wider mt-0.5 font-medium font-sans">
-                  Clients
-                </span>
-                <Sparkline color="#8B5CF6" />
+                <span className="text-badge-text text-[#9CA3AF] mt-0.5">Clients</span>
+                <Sparkline color="#3B82F6" />
               </div>
               <div className="h-10 w-px bg-white/[0.08] hidden sm:block" />
               <div className="flex-1 min-w-[70px] text-center px-1 flex flex-col items-center">
-                <span className="font-space font-bold text-white text-base">
+                <span className="font-bold text-white text-base">
                   <Counter to={4.9} decimals={1} suffix="★" />
                 </span>
-                <span className="text-[9px] text-[#9CA3AF] uppercase tracking-wider mt-0.5 font-medium font-sans">
-                  Rating
-                </span>
-                <Sparkline color="#18B6FF" />
+                <span className="text-badge-text text-[#9CA3AF] mt-0.5">Rating</span>
+                <Sparkline color="#38BDF8" />
               </div>
               <div className="h-10 w-px bg-white/[0.08] hidden sm:block" />
               <div className="flex-1 min-w-[70px] text-center px-1 flex flex-col items-center">
-                <span className="font-space font-bold text-white text-[11px] xl:text-xs">
-                  Worldwide
-                </span>
-                <span className="text-[9px] text-[#9CA3AF] uppercase tracking-wider mt-0.5 font-medium font-sans">
-                  Global Reach
-                </span>
-                <Sparkline color="#8B5CF6" />
+                <span className="font-bold text-white text-[11px] xl:text-xs">Worldwide</span>
+                <span className="text-badge-text text-[#9CA3AF] mt-0.5">Global Reach</span>
+                <Sparkline color="#3B82F6" />
               </div>
             </motion.div>
           </div>

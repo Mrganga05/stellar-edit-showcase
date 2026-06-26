@@ -60,7 +60,7 @@ const Particle = ({ delay = 0, x = 0, y = 0 }: { delay?: number; x?: number; y?:
         ease: "easeInOut",
         delay: delay,
       }}
-      className="absolute size-1 rounded-full bg-[#18B6FF] pointer-events-none"
+      className="absolute size-1 rounded-full bg-[#38BDF8] pointer-events-none"
       style={{ left: `${x}%`, top: `${y}%` }}
     />
   );
@@ -140,14 +140,12 @@ function Card({ p, onOpen }: { p: Project; onOpen: () => void }) {
       <div className="absolute inset-x-0 bottom-0 p-5 z-10 flex flex-col justify-end">
         {/* Client handle/name */}
         {p.clientName && (
-          <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-electric mb-1.5">
-            {p.clientName}
-          </span>
+          <span className="text-badge-text text-electric mb-1.5">{p.clientName}</span>
         )}
-        <h3 className="font-display text-base sm:text-lg md:text-xl leading-tight text-white group-hover:text-electric transition-colors duration-300">
+        <h3 className="text-card-title text-white group-hover:text-electric transition-colors duration-300">
           {p.title}
         </h3>
-        <p className="mt-1 text-[11px] sm:text-xs text-white/60 line-clamp-1 group-hover:text-white/80 transition-colors duration-300">
+        <p className="mt-1 text-small-body text-white/60 line-clamp-1 group-hover:text-white/80 transition-colors duration-300">
           {p.description}
         </p>
       </div>
@@ -185,10 +183,10 @@ export function Portfolio() {
       {/* Decorative Atmosphere Behind Heading */}
       <div className="absolute inset-x-0 top-0 h-[650px] overflow-hidden pointer-events-none z-0">
         {/* Soft Blue Radial Glow */}
-        <div className="absolute top-[10%] left-1/2 -translate-x-1/2 w-[500px] h-[350px] rounded-full bg-[#18B6FF]/5 blur-[100px]" />
+        <div className="absolute top-[10%] left-1/2 -translate-x-1/2 w-[500px] h-[350px] rounded-full bg-[#38BDF8]/5 blur-[100px]" />
 
         {/* Purple Ambient Blur */}
-        <div className="absolute top-[25%] left-1/3 -translate-x-1/2 w-[600px] h-[400px] rounded-full bg-[#7C5CFF]/3.5 blur-[125px]" />
+        <div className="absolute top-[25%] left-1/3 -translate-x-1/2 w-[600px] h-[400px] rounded-full bg-[#3B82F6]/3.5 blur-[125px]" />
 
         {/* Noise overlay */}
         <div className="absolute inset-0 about-noise opacity-30" />
@@ -208,13 +206,11 @@ export function Portfolio() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="inline-flex items-center gap-2 rounded-full border border-[#18B6FF]/25 bg-white/[0.03] backdrop-blur-md px-4.5 py-1.5 shadow-[0_0_15px_rgba(24,182,255,0.08)] mb-6 sm:mb-8 hover:border-[#18B6FF]/40 transition-colors duration-300 select-none"
+          className="inline-flex items-center gap-2 rounded-full border border-[#38BDF8]/25 bg-white/[0.03] backdrop-blur-md px-4.5 py-1.5 shadow-[0_0_15px_rgba(56,189,248,0.08)] mb-6 sm:mb-8 hover:border-[#38BDF8]/40 transition-colors duration-300 select-none"
         >
           {/* Blue Glowing Dot */}
-          <span className="size-2 rounded-full bg-[#18B6FF] animate-pulse shadow-[0_0_8px_#18B6FF]" />
-          <span className="font-sans font-semibold text-[13px] uppercase tracking-[5px] text-white/95">
-            SIGNATURE WORK
-          </span>
+          <span className="size-2 rounded-full bg-[#38BDF8] animate-pulse shadow-[0_0_8px_rgba(56,189,248,0.6)]" />
+          <span className="text-badge-text text-white/95">SIGNATURE WORK</span>
         </motion.div>
 
         {/* MAIN HEADING */}
@@ -223,16 +219,16 @@ export function Portfolio() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
-          className="font-playfair text-section-title font-bold tracking-[-1.5px] leading-[1.0] text-white select-none max-w-[800px] mx-auto"
+          className="text-section-heading select-none max-w-[800px] mx-auto"
         >
           Where Creativity Meets{" "}
-          <span className="inline-block relative group pr-[0.1em] animate-work-gradient bg-clip-text text-transparent filter drop-shadow-[0_2px_15px_rgba(24,182,255,0.3)]">
+          <span className="inline-block relative group pr-[0.1em] animate-work-gradient bg-clip-text text-transparent filter drop-shadow-[0_2px_15px_rgba(56,189,248,0.3)]">
             Performance.
             {/* Sparkle Icon */}
             <motion.span
               animate={{ rotate: 360 }}
               transition={{ repeat: Infinity, duration: 8, ease: "linear" }}
-              className="absolute -top-3.5 -right-3 text-[14px] text-[#24D6FF] opacity-75 group-hover:opacity-100 group-hover:scale-125 transition-all duration-300 pointer-events-none filter drop-shadow-[0_0_8px_rgba(36,214,255,0.5)]"
+              className="absolute -top-3.5 -right-3 text-[14px] text-[#38BDF8] opacity-75 group-hover:opacity-100 group-hover:scale-125 transition-all duration-300 pointer-events-none filter drop-shadow-[0_0_8px_rgba(56,189,248,0.5)]"
             >
               ✦
             </motion.span>
@@ -245,7 +241,7 @@ export function Portfolio() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.2 }}
-          className="mt-5 sm:mt-6 max-w-[620px] text-body-premium text-neutral-400 font-sans leading-relaxed"
+          className="mt-5 sm:mt-6 max-w-[620px] text-body-text text-neutral-400 mx-auto"
         >
           Explore a curated collection of high-performing edits crafted for creators, brands, and
           businesses. Every project combines cinematic storytelling, retention-driven pacing, and
@@ -260,7 +256,7 @@ export function Portfolio() {
           transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.3 }}
           className="h-px w-full max-w-[820px] bg-gradient-to-r from-transparent via-white/10 to-transparent mt-12 relative"
         >
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-[1.5px] bg-gradient-to-r from-[#18B6FF] to-[#7C5CFF] blur-[0.5px] shadow-[0_0_8px_rgba(24,182,255,0.5)]" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-[1.5px] bg-gradient-to-r from-[#38BDF8] to-[#3B82F6] blur-[0.5px] shadow-[0_0_8px_rgba(56,189,248,0.5)]" />
         </motion.div>
       </div>
       <div className="relative z-10 mt-16 grid gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
@@ -309,24 +305,20 @@ export function Portfolio() {
               </div>
 
               {/* Right Column: Project Details Panel */}
-              <div className="flex flex-col h-[45vh] md:h-full overflow-y-auto p-6 md:p-8 bg-[#090b11]/75 backdrop-blur-md border-t md:border-t-0 md:border-l border-white/5">
+              <div className="flex flex-col h-[45vh] md:h-full overflow-y-auto p-6 md:p-8 bg-[#0B1224]/75 backdrop-blur-md border-t md:border-t-0 md:border-l border-white/[0.08]">
                 <div className="space-y-6">
                   <div>
                     <div className="flex items-center gap-2">
                       {open.clientName && (
-                        <span className="text-[10px] uppercase tracking-[0.2em] text-electric font-bold">
-                          {open.clientName}
-                        </span>
+                        <span className="text-badge-text text-electric">{open.clientName}</span>
                       )}
                       {open.clientName && <span className="text-white/20">•</span>}
-                      <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-semibold">
-                        {open.category}
-                      </span>
+                      <span className="text-badge-text text-muted-foreground">{open.category}</span>
                     </div>
-                    <h3 className="mt-2 font-display text-2xl md:text-3xl leading-tight text-white">
-                      {open.title}
-                    </h3>
-                    <p className="mt-3 text-xs text-white/60 leading-relaxed">{open.overview}</p>
+                    <h3 className="mt-2 text-card-title text-white">{open.title}</h3>
+                    <p className="mt-3 text-small-body text-white/60 leading-relaxed">
+                      {open.overview}
+                    </p>
                   </div>
 
                   <div className="space-y-4 border-t border-white/5 pt-5">
@@ -347,8 +339,8 @@ export function Portfolio() {
 function Detail({ label, items }: { label: string; items: string[] }) {
   return (
     <div>
-      <div className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">{label}</div>
-      <ul className="mt-2 space-y-1.5 text-sm">
+      <div className="text-badge-text text-muted-foreground">{label}</div>
+      <ul className="mt-2 space-y-1.5 text-small-body">
         {items.map((it) => (
           <li key={it} className="flex gap-2">
             <span className="mt-2 size-1 shrink-0 rounded-full bg-electric" />

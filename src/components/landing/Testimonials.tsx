@@ -23,7 +23,10 @@ export function Testimonials() {
       : mockTestimonials;
 
   return (
-    <section className="relative mx-auto max-w-[1320px] px-6 py-24 md:px-8 md:py-32">
+    <section
+      id="testimonials"
+      className="relative mx-auto max-w-[1320px] px-6 py-24 md:px-8 md:py-32"
+    >
       <div className="flex flex-col items-start justify-between gap-6 sm:flex-row sm:items-end">
         <SectionHeading
           align="left"
@@ -69,7 +72,7 @@ export function Testimonials() {
                 >
                   <div className="flex h-full flex-col rounded-3xl glass-strong p-7">
                     <Quote className="size-7 text-electric" />
-                    <p className="mt-5 text-lg leading-relaxed text-foreground/90">"{t.quote}"</p>
+                    <p className="mt-5 text-body-text">"{t.quote}"</p>
                     <div className="mt-auto flex items-center gap-4 pt-8">
                       <img
                         src={t.avatar}
@@ -80,8 +83,8 @@ export function Testimonials() {
                         className="size-14 rounded-full object-cover"
                       />
                       <div className="min-w-0 flex-1">
-                        <div className="font-medium">{t.name}</div>
-                        <div className="truncate text-xs text-muted-foreground">{t.company}</div>
+                        <div className="font-semibold text-white">{t.name}</div>
+                        <div className="truncate text-sm text-muted-foreground">{t.company}</div>
                       </div>
                       <div className="flex gap-0.5">
                         {Array.from({ length: t.rating }).map((_, i) => (

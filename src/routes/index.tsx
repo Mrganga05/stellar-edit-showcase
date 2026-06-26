@@ -36,20 +36,36 @@ export const Route = createFileRoute("/")({
 });
 
 function LandingPage() {
+  const divider = (
+    <div className="mx-auto w-full max-w-[1320px] px-6 md:px-8">
+      <div className="h-px w-full bg-white/[0.08]" />
+    </div>
+  );
+
   return (
-    <main className="relative min-h-screen overflow-x-clip bg-[#050810] text-foreground">
+    <main className="relative min-h-screen overflow-x-clip bg-[#050816] text-foreground">
       <Nav />
       <Hero />
       <TrustBar />
+      {divider}
       <Portfolio />
+      {divider}
       <About />
+      {divider}
       <Services />
+      {divider}
       <WhyChooseMe />
+      {divider}
       <Process />
+      {divider}
       <Results />
+      {divider}
       <Testimonials />
+      {divider}
       <FreeSample />
+      {divider}
       <FAQ />
+      {divider}
       <Contact />
       <Footer />
       <Toaster theme="dark" position="bottom-right" />

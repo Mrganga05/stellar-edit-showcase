@@ -30,7 +30,7 @@ export function SectionHeading({
       {eyebrow && (
         <div
           className={cn(
-            "mb-5 inline-flex items-center gap-2 rounded-full glass px-3 py-1 text-xs uppercase tracking-[0.2em] text-muted-foreground",
+            "mb-5 inline-flex items-center gap-2 rounded-full glass px-3 py-1.5 text-badge-text text-muted-foreground",
             align === "center" && "mx-auto",
           )}
         >
@@ -38,8 +38,8 @@ export function SectionHeading({
           {eyebrow}
         </div>
       )}
-      <h2 className="font-display text-section-title text-gradient">{title}</h2>
-      {subtitle && <p className="mt-5 text-body-premium text-muted-foreground">{subtitle}</p>}
+      <h2 className="text-section-heading text-gradient">{title}</h2>
+      {subtitle && <p className="mt-5 text-body-text text-muted-foreground">{subtitle}</p>}
     </motion.div>
   );
 }
