@@ -111,7 +111,7 @@ const StaggeredTitle = () => {
         </motion.span>
         <motion.span
           variants={wordVars}
-          className="inline-block mr-[0.05em] pr-[0.15em] font-playfair font-bold italic bg-gradient-to-r from-[#FF2E93] via-[#FF8A00] to-[#FFD600] bg-clip-text text-transparent filter drop-shadow-[0_2px_15px_rgba(255,46,147,0.35)] hover:scale-105 transition-transform duration-350"
+          className="inline-block mr-[0.05em] pr-[0.15em] font-playfair font-bold italic bg-gradient-to-r from-[#00D4FF] via-[#18B6FF] to-[#0072FF] bg-clip-text text-transparent filter drop-shadow-[0_2px_15px_rgba(24,182,255,0.35)] hover:scale-105 transition-transform duration-350"
         >
           Editor
         </motion.span>
@@ -123,7 +123,7 @@ const StaggeredTitle = () => {
         </motion.span>
         <motion.span
           variants={wordVars}
-          className="inline-block mr-[0.1em] pr-[0.15em] font-playfair font-bold italic bg-gradient-to-r from-[#00F5D4] via-[#00D4FF] to-[#0072FF] bg-clip-text text-transparent filter drop-shadow-[0_2px_20px_rgba(0,212,255,0.4)] relative group cursor-default"
+          className="inline-block mr-[0.1em] pr-[0.15em] font-playfair font-bold italic bg-gradient-to-r from-[#00F5D4] via-[#18B6FF] to-[#7C5CFF] bg-clip-text text-transparent filter drop-shadow-[0_2px_20px_rgba(24,182,255,0.4)] relative group cursor-default"
         >
           Viral
           <motion.span
@@ -145,7 +145,7 @@ const StaggeredTitle = () => {
         </motion.span>
         <motion.span
           variants={wordVars}
-          className="inline-block mr-[0.05em] pr-[0.15em] font-playfair font-bold italic bg-gradient-to-r from-[#8B5CF6] via-[#D946EF] to-[#FF007F] bg-clip-text text-transparent filter drop-shadow-[0_2px_20px_rgba(217,70,239,0.4)]"
+          className="inline-block mr-[0.05em] pr-[0.15em] font-playfair font-bold italic bg-gradient-to-r from-[#18B6FF] via-[#7C5CFF] to-[#8B5CF6] bg-clip-text text-transparent filter drop-shadow-[0_2px_20px_rgba(139,92,246,0.4)]"
         >
           Converts.
         </motion.span>
