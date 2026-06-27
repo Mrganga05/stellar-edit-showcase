@@ -2,7 +2,6 @@ import { motion, AnimatePresence, useInView } from "motion/react";
 import { ArrowRight, Play, X, Eye, Briefcase, Users, Star } from "lucide-react";
 import { useRef, useState, useEffect } from "react";
 import { HERO_VIDEO } from "@/lib/portfolio-data";
-import { supabase } from "@/lib/supabase";
 import heroBgImg from "@/assets/hero-bg.png";
 import { cn } from "@/lib/utils";
 
@@ -107,35 +106,7 @@ export function Hero() {
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Load headline data
-  useEffect(() => {
-    async function loadHero() {
-      try {
-        const { data } = await supabase
-          .from("hero_settings")
-          .select("*")
-          .order("createdAt", { ascending: false })
-          .limit(1)
-          .maybeSingle();
-        if (data) {
-          let formattedHeadline = data.headline;
-          if (
-            formattedHeadline.includes("That Scales Your ") &&
-            !formattedHeadline.includes("That Scales Your<br/>")
-          ) {
-            formattedHeadline = formattedHeadline.replace(
-              "That Scales Your ",
-              "That Scales Your<br/>",
-            );
-          }
-          setHeroData({ headline: formattedHeadline, subheadline: data.subheadline });
-        }
-      } catch (err) {
-        console.error("Failed to load hero settings", err);
-      }
-    }
-    loadHero();
-  }, []);
+
 
   return (
     <section
