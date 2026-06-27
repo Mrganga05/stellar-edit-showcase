@@ -160,12 +160,38 @@ export function Hero() {
             <div className="absolute -right-10 -bottom-10 size-[350px] rounded-full bg-purple-500/20 blur-[120px] pointer-events-none -z-10" />
 
             {/* Top Badge */}
-            <div className="relative inline-flex items-center gap-2 rounded-full p-[1px] mb-5 lg:mb-6 select-none bg-gradient-to-r from-[#3B82F6]/80 to-[#38BDF8]/80 shadow-[0_4px_20px_rgba(59,130,246,0.15)]">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.92, y: -12 }}
+              animate={{ 
+                opacity: 1, 
+                scale: [1, 1.02, 1],
+                boxShadow: [
+                  "0 4px 20px rgba(59,130,246,0.15)", 
+                  "0 4px 30px rgba(34,211,238,0.4)", 
+                  "0 4px 20px rgba(59,130,246,0.15)"
+                ]
+              }}
+              whileHover={{ scale: 1.05 }}
+              transition={{
+                opacity: { duration: 0.6 },
+                scale: { duration: 4, repeat: Infinity, ease: "easeInOut" },
+                boxShadow: { duration: 4, repeat: Infinity, ease: "easeInOut" }
+              }}
+              className="relative inline-flex items-center gap-2 rounded-full p-[1.5px] mb-5 lg:mb-6 select-none bg-gradient-to-r from-[#3B82F6] via-[#22d3ee] to-[#a855f7] bg-[length:200%_auto] animate-gradient-text"
+            >
               <div className="flex items-center gap-2 rounded-full bg-[#050816]/95 px-[18px] py-[8px]">
-                <span className="text-[#22d3ee] text-[13px] font-bold">✦</span>
-                <span className="text-badge-text text-[#a5f3fc]">Premium Video Editing Studio</span>
+                <motion.span 
+                  animate={{ rotate: 360 }}
+                  transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
+                  className="text-[#22d3ee] text-[13px] font-bold inline-block"
+                >
+                  ✦
+                </motion.span>
+                <span className="text-badge-text text-white font-black tracking-wider uppercase bg-clip-text text-transparent bg-gradient-to-r from-[#a5f3fc] via-[#ffffff] to-[#a5f3fc] bg-[length:200%_auto] animate-gradient-text">
+                  CINEMATIC VIDEO EDITOR
+                </span>
               </div>
-            </div>
+            </motion.div>
 
             {/* Editorial Headline */}
             <div className="flex flex-col items-start">
