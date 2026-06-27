@@ -191,25 +191,25 @@ export function Testimonials() {
                   key={idx}
                   className="min-w-0 flex-[0_0_100%] sm:flex-[0_0_60%] lg:flex-[0_0_40%]"
                 >
-                  <div className="flex h-full flex-col rounded-3xl glass-strong p-7">
-                    <Quote className="size-7 text-electric" />
-                    <p className="mt-5 text-body-text">"{t.quote}"</p>
-                    <div className="mt-auto flex items-center gap-4 pt-8">
+                  <div className="flex h-full flex-col rounded-[20px] sm:rounded-3xl glass-strong p-4.5 sm:p-7">
+                    <Quote className="size-5 sm:size-7 text-electric shrink-0" />
+                    <p className="mt-3 sm:mt-5 text-xs sm:text-body-text text-neutral-300 leading-normal">"{t.quote}"</p>
+                    <div className="mt-auto flex items-center gap-2.5 sm:gap-4 pt-5 sm:pt-8">
                       <img
                         src={t.avatar}
                         alt={t.name}
                         loading="lazy"
                         width={56}
                         height={56}
-                        className="size-14 rounded-full object-cover border border-white/10"
+                        className="size-10 sm:size-14 rounded-full object-cover border border-white/10 shrink-0"
                       />
                       <div className="min-w-0 flex-1">
-                        <div className="font-semibold text-white">{t.name}</div>
-                        <div className="truncate text-sm text-muted-foreground">{t.company}</div>
+                        <div className="font-semibold text-xs sm:text-base text-white">{t.name}</div>
+                        <div className="truncate text-[10px] sm:text-sm text-muted-foreground">{t.company}</div>
                       </div>
-                      <div className="flex gap-0.5">
+                      <div className="flex gap-0.5 shrink-0">
                         {Array.from({ length: t.rating }).map((_, i) => (
-                          <Star key={i} className="size-3.5 fill-electric text-electric" />
+                          <Star key={i} className="size-2.5 sm:size-3.5 fill-electric text-electric" />
                         ))}
                       </div>
                     </div>

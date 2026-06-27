@@ -5,6 +5,54 @@ import { HERO_VIDEO } from "@/lib/portfolio-data";
 import heroBgImg from "@/assets/hero-bg.png";
 import { cn } from "@/lib/utils";
 
+// ─── Letter-by-letter animation for "THAT DEMANDS ATTENTION." ───────────────
+const prefersReducedMotion =
+  typeof window !== "undefined"
+    ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    : false;
+
+function AnimatedHeadingLine({
+  text,
+  className,
+}: {
+  text: string;
+  className?: string;
+}) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const isInView = useInView(ref, { once: true, margin: "-40px" });
+
+  if (prefersReducedMotion) {
+    return <span ref={ref} className={className}>{text}</span>;
+  }
+
+  const chars = Array.from(text); // preserves unicode chars correctly
+
+  return (
+    <span ref={ref} className={cn("inline", className)} aria-label={text}>
+      {chars.map((char, i) => (
+        <motion.span
+          key={i}
+          aria-hidden
+          initial={{ opacity: 0, y: 25, scale: 0.95, filter: "blur(8px)" }}
+          animate={
+            isInView
+              ? { opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }
+              : { opacity: 0, y: 25, scale: 0.95, filter: "blur(8px)" }
+          }
+          transition={{
+            duration: 0.55,
+            delay: i * 0.035,
+            ease: [0.22, 1, 0.36, 1],
+          }}
+          style={{ display: "inline-block", whiteSpace: char === " " ? "pre" : undefined }}
+        >
+          {char === " " ? "\u00A0" : char}
+        </motion.span>
+      ))}
+    </span>
+  );
+}
+
 // Ease-out smooth animated counter for stats cards
 function AnimatedCounter({ value, className }: { value: string; className?: string }) {
   const ref = useRef<HTMLSpanElement>(null);
@@ -116,20 +164,38 @@ export function Hero() {
       style={{ backgroundColor: "#050816" }}
     >
       {/* Background Image covering whole hero section - Highly Visible with Full Clarity */}
+      {/* Desktop background - untouched */}
       <div
-        className="absolute inset-0 z-0 pointer-events-none bg-cover bg-no-repeat opacity-100"
+        className="absolute inset-0 z-0 pointer-events-none bg-cover bg-no-repeat opacity-100 hidden lg:block"
         style={{
           backgroundImage: `url(${heroBgImg})`,
           backgroundPosition: "68% center",
         }}
       />
+      {/* Mobile/Tablet background - centered and slightly lower opacity for text contrast */}
+      <div
+        className="absolute inset-0 z-0 pointer-events-none bg-cover bg-no-repeat opacity-30 lg:hidden"
+        style={{
+          backgroundImage: `url(${heroBgImg})`,
+          backgroundPosition: "center center",
+        }}
+      />
 
       {/* Horizontal & Vertical Gradient Overlay for Text Readability & Smooth Transition - Shifted Left for Background Clarity */}
+      {/* Desktop overlay - untouched */}
       <div
-        className="absolute inset-0 z-1 pointer-events-none"
+        className="absolute inset-0 z-1 pointer-events-none hidden lg:block"
         style={{
           background:
             "linear-gradient(to right, rgba(5, 8, 22, 0.95) 0%, rgba(5, 8, 22, 0.7) 25%, rgba(5, 8, 22, 0) 52%), linear-gradient(to bottom, transparent 75%, #050816 100%)",
+        }}
+      />
+      {/* Mobile/Tablet overlay - full screen dark radial gradient for readability */}
+      <div
+        className="absolute inset-0 z-1 pointer-events-none lg:hidden"
+        style={{
+          background:
+            "radial-gradient(circle at center, rgba(5, 8, 22, 0.85) 0%, rgba(5, 8, 22, 0.95) 100%), linear-gradient(to bottom, transparent 75%, #050816 100%)",
         }}
       />
 
@@ -154,7 +220,7 @@ export function Hero() {
         {/* Two-Column Grid: Left Column has structured copy, Right Column is empty to expose background image */}
         <div className="grid w-full grid-cols-1 lg:grid-cols-[54%_42%] items-center gap-x-[4%]">
           {/* ── LEFT SIDE: BRAND & COPY ── */}
-          <div className="relative text-left flex flex-col items-start justify-start pt-0">
+          <div className="relative text-center lg:text-left flex flex-col items-center lg:items-start justify-center lg:justify-start pt-0">
             {/* Ambient light glow behind text for contrast and aesthetics */}
             <div className="absolute -left-20 -top-20 size-[400px] rounded-full bg-cyan-500/25 blur-[120px] pointer-events-none -z-10" />
             <div className="absolute -right-10 -bottom-10 size-[350px] rounded-full bg-purple-500/20 blur-[120px] pointer-events-none -z-10" />
@@ -162,12 +228,12 @@ export function Hero() {
             {/* Top Badge */}
             <motion.div
               initial={{ opacity: 0, scale: 0.92, y: -12 }}
-              animate={{ 
-                opacity: 1, 
+              animate={{
+                opacity: 1,
                 scale: [1, 1.02, 1],
                 boxShadow: [
-                  "0 4px 20px rgba(59,130,246,0.15)", 
-                  "0 4px 30px rgba(34,211,238,0.4)", 
+                  "0 4px 20px rgba(59,130,246,0.15)",
+                  "0 4px 30px rgba(34,211,238,0.4)",
                   "0 4px 20px rgba(59,130,246,0.15)"
                 ]
               }}
@@ -180,7 +246,7 @@ export function Hero() {
               className="relative inline-flex items-center gap-2 rounded-full p-[1.5px] mb-5 lg:mb-6 select-none bg-gradient-to-r from-[#3B82F6] via-[#22d3ee] to-[#a855f7] bg-[length:200%_auto] animate-gradient-text"
             >
               <div className="flex items-center gap-2 rounded-full bg-[#050816]/95 px-[18px] py-[8px]">
-                <motion.span 
+                <motion.span
                   animate={{ rotate: 360 }}
                   transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
                   className="text-[#22d3ee] text-[13px] font-bold inline-block"
@@ -194,12 +260,12 @@ export function Hero() {
             </motion.div>
 
             {/* Editorial Headline */}
-            <div className="flex flex-col items-start">
+            <div className="flex flex-col items-center lg:items-start w-full">
               <motion.h1
                 initial={{ opacity: 0, y: 28 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.75, ease: [0.19, 1, 0.22, 1] }}
-                className="text-hero-title max-w-[820px] text-left pr-6"
+                className="text-hero-title max-w-[820px] text-center lg:text-left pr-6"
               >
                 {heroData.headline.includes("<br") || heroData.headline.includes("<span") ? (
                   <span dangerouslySetInnerHTML={{ __html: heroData.headline }} />
@@ -207,9 +273,10 @@ export function Hero() {
                   <>
                     <span className="block">TURNING RAW FOOTAGE</span>
                     <span className="block">INTO CONTENT</span>
-                    <span className="animate-gradient-text italic block pr-2.5 font-black">
-                      THAT DEMANDS ATTENTION.
-                    </span>
+                    <AnimatedHeadingLine
+                      text="THAT DEMANDS ATTENTION."
+                      className="animate-gradient-text italic block pr-2.5 font-black"
+                    />
                   </>
                 )}
               </motion.h1>
@@ -223,7 +290,7 @@ export function Hero() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.12 }}
-              className="mt-6 max-w-[540px] text-hero-subtitle text-left mb-8 text-white/80 leading-relaxed font-sans"
+              className="mt-6 max-w-[540px] text-hero-subtitle text-center lg:text-left mb-8 text-white/80 leading-relaxed font-sans"
             >
               {heroData.subheadline}
             </motion.p>
@@ -233,11 +300,11 @@ export function Hero() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.22 }}
-              className="flex flex-wrap gap-4 items-center justify-start z-20"
+              className="flex flex-col sm:flex-row gap-4 items-center justify-center lg:justify-start w-full sm:w-auto z-20"
             >
               <MagneticButton
                 href="#contact"
-                className="group btn-primary-glow inline-flex items-center justify-center gap-2.5 rounded-full px-9 h-[54px] text-button-text uppercase text-white cursor-pointer overflow-hidden"
+                className="group btn-primary-glow inline-flex items-center justify-center gap-2.5 rounded-full px-9 h-[54px] text-button-text uppercase text-white cursor-pointer overflow-hidden w-full sm:w-auto"
               >
                 {/* Sheen reflection sweep */}
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out pointer-events-none" />
@@ -249,7 +316,7 @@ export function Hero() {
 
               <button
                 onClick={() => setShowreelOpen(true)}
-                className="group btn-secondary-glow inline-flex items-center justify-center gap-2.5 rounded-full px-9 h-[54px] text-button-text uppercase text-white overflow-hidden cursor-pointer"
+                className="group btn-secondary-glow inline-flex items-center justify-center gap-2.5 rounded-full px-9 h-[54px] text-button-text uppercase text-white overflow-hidden cursor-pointer w-full sm:w-auto"
               >
                 {/* Sheen reflection sweep */}
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out pointer-events-none" />
@@ -268,7 +335,7 @@ export function Hero() {
 
       {/* ── BOTTOM STATS ROW ── */}
       <div className="relative z-10 mx-auto w-full max-w-[1320px] px-6 md:px-8 mt-auto pt-6 pb-4">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 border-t border-white/[0.08] pt-6 lg:pt-8">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 border-t border-white/[0.08] pt-6 lg:pt-8">
           {[
             {
               val: "50M+",
@@ -319,7 +386,7 @@ export function Hero() {
               <div
                 key={label}
                 className={cn(
-                  "group relative flex flex-row items-center gap-4 rounded-[12px] border border-white/[0.05] bg-[#050810]/40 p-4 lg:p-6 transition-all duration-500 hover:-translate-y-1.5 overflow-hidden cursor-default w-full backdrop-blur-xl card-tech-grid",
+                  "group relative flex flex-row items-center gap-2 sm:gap-4 rounded-[12px] border border-white/[0.05] bg-[#050810]/40 p-2.5 sm:p-4 lg:p-6 transition-all duration-500 hover:-translate-y-1.5 overflow-hidden cursor-default w-full backdrop-blur-xl card-tech-grid",
                   borderBeamClass,
                 )}
               >
@@ -340,18 +407,18 @@ export function Hero() {
 
                 {/* Icon circle */}
                 <div
-                  className={`relative shrink-0 size-10 rounded-full border-2 ${borderStyle} flex items-center justify-center bg-[#050810]/60 transition-all duration-500 group-hover:scale-105 z-10 shadow-[0_0_15px_rgba(255,255,255,0.02)]`}
+                  className={`relative shrink-0 size-8 sm:size-10 rounded-full border-2 ${borderStyle} flex items-center justify-center bg-[#050810]/60 transition-all duration-500 group-hover:scale-105 z-10 shadow-[0_0_15px_rgba(255,255,255,0.02)]`}
                 >
                   <Icon
-                    className="size-5 transition-transform duration-500 group-hover:scale-110"
+                    className="size-4 sm:size-5 transition-transform duration-500 group-hover:scale-110"
                     strokeWidth={2}
                   />
                 </div>
-                <div className="flex flex-col text-left z-10">
-                  <span className="font-sans text-[28px] lg:text-[32px] font-extrabold leading-none tracking-tight">
+                <div className="flex flex-col text-left z-10 min-w-0">
+                  <span className="font-sans text-[20px] min-[375px]:text-[22px] sm:text-[28px] lg:text-[32px] font-extrabold leading-none tracking-tight">
                     <AnimatedCounter value={val} className={textGradientClass} />
                   </span>
-                  <span className="text-[10px] lg:text-[11px] text-[#a1a1aa] font-black uppercase tracking-widest mt-1.5 leading-tight font-sans opacity-85 group-hover:opacity-100 group-hover:text-white transition-colors duration-300">
+                  <span className="text-[8px] min-[375px]:text-[9px] sm:text-[10px] lg:text-[11px] text-[#a1a1aa] font-black uppercase tracking-widest mt-1 leading-tight font-sans opacity-85 group-hover:opacity-100 group-hover:text-white transition-colors duration-300">
                     {label}
                   </span>
                 </div>

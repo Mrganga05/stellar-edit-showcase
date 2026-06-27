@@ -77,8 +77,8 @@ export function Footer() {
           />
         </div>
 
-        <div className="mt-16 flex flex-col items-start justify-between gap-4 border-t border-white/8 pt-8 sm:flex-row sm:items-center">
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-small-body text-muted-foreground">
+        <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-white/8 pt-8 sm:flex-row sm:items-center">
+          <div className="flex flex-wrap items-center justify-center sm:justify-start gap-x-4 gap-y-1 text-small-body text-muted-foreground text-center sm:text-left">
             <span>© {new Date().getFullYear()} Raqvine Studio. All rights reserved.</span>
             <span className="hidden sm:inline text-white/10">•</span>
             <a href="/admin" className="hover:text-white transition-colors">
@@ -87,7 +87,7 @@ export function Footer() {
           </div>
           <a
             href="#top"
-            className="group inline-flex items-center gap-2 rounded-full glass px-4.5 py-2.5 text-badge-text text-muted-foreground hover:text-white transition-colors"
+            className="group inline-flex items-center gap-2 rounded-full glass px-4.5 py-2.5 text-badge-text text-muted-foreground hover:text-white transition-colors w-full sm:w-auto justify-center"
           >
             Back to top{" "}
             <ArrowUp className="size-3.5 transition-transform group-hover:-translate-y-0.5" />

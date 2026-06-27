@@ -77,7 +77,7 @@ function Card({ p, onOpen }: { p: Project; onOpen: () => void }) {
       onClick={onOpen}
       onMouseEnter={() => {
         setHover(true);
-        videoRef.current?.play().catch(() => {});
+        videoRef.current?.play().catch(() => { });
       }}
       onMouseLeave={() => {
         setHover(false);
@@ -159,19 +159,19 @@ export function Portfolio() {
   const projectsToRender =
     dbProjects && dbProjects.length > 0
       ? dbProjects.map((p) => ({
-          id: p.id,
-          title: p.title,
-          category: p.category,
-          description: p.description,
-          thumb: p.thumbnail,
-          video: p.videoUrl,
-          overview: p.overview,
-          techniques: p.techniques,
-          results: p.results,
-          tools: p.tools,
-          clientName: p.clientName || "",
-          metric: p.metric || "",
-        }))
+        id: p.id,
+        title: p.title,
+        category: p.category,
+        description: p.description,
+        thumb: p.thumbnail,
+        video: p.videoUrl,
+        overview: p.overview,
+        techniques: p.techniques,
+        results: p.results,
+        tools: p.tools,
+        clientName: p.clientName || "",
+        metric: p.metric || "",
+      }))
       : mockProjects;
 
   return (
@@ -261,16 +261,16 @@ export function Portfolio() {
       <div className="relative z-10 mt-16 grid gap-3 sm:gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {isLoading && !dbProjects
           ? Array.from({ length: 8 }).map((_, i) => (
-              <div
-                key={i}
-                className="aspect-[9/16] w-full animate-pulse rounded-2xl bg-surface/50 border border-white/5"
-              />
-            ))
+            <div
+              key={i}
+              className="aspect-[9/16] w-full animate-pulse rounded-2xl bg-surface/50 border border-white/5"
+            />
+          ))
           : projectsToRender.map((p, i) => (
-              <Reveal key={p.id} delay={(i % 4) * 0.05}>
-                <Card p={p} onOpen={() => setOpen(p)} />
-              </Reveal>
-            ))}
+            <Reveal key={p.id} delay={(i % 4) * 0.05}>
+              <Card p={p} onOpen={() => setOpen(p)} />
+            </Reveal>
+          ))}
       </div>
 
       <AnimatePresence>
@@ -288,7 +288,7 @@ export function Portfolio() {
               exit={{ opacity: 0, scale: 0.96, y: 20 }}
               transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
               onClick={(e) => e.stopPropagation()}
-              className="relative grid w-full max-w-md md:max-w-4xl h-[90vh] md:h-[80vh] grid-cols-1 md:grid-cols-[1.15fr_1fr] grid-rows-[auto_1fr] md:grid-rows-1 overflow-hidden rounded-3xl glass-strong border border-white/10 shadow-2xl"
+              className="relative w-full max-w-sm md:max-w-4xl h-[92vh] md:h-[80vh] overflow-hidden rounded-3xl glass-strong border border-white/10 shadow-2xl flex flex-col md:grid md:grid-cols-[1.15fr_1fr]"
             >
               <button
                 onClick={() => setOpen(null)}
@@ -298,29 +298,35 @@ export function Portfolio() {
                 <X className="size-4.5" />
               </button>
 
-              {/* Left Column: Video Player Container */}
-              <div className="relative w-full h-[45vh] md:h-full bg-black overflow-hidden flex items-center justify-center">
-                <video src={open.video} controls autoPlay className="w-full h-full object-cover" />
+              {/* Video Player — portrait on mobile, landscape fill on desktop */}
+              <div className="relative w-full bg-black overflow-hidden flex items-center justify-center flex-shrink-0 aspect-[9/16] md:aspect-auto md:h-full">
+                <video
+                  src={open.video}
+                  controls
+                  autoPlay
+                  playsInline
+                  className="w-full h-full object-contain md:object-cover"
+                />
               </div>
 
-              {/* Right Column: Project Details Panel */}
-              <div className="flex flex-col h-[45vh] md:h-full overflow-y-auto p-6 md:p-8 bg-[#0B1224]/75 backdrop-blur-md border-t md:border-t-0 md:border-l border-white/[0.08]">
-                <div className="space-y-6">
+              {/* Project Details Panel — scrollable below video on mobile */}
+              <div className="flex flex-col flex-1 overflow-y-auto p-5 sm:p-6 md:p-8 bg-[#0B1224]/75 backdrop-blur-md border-t md:border-t-0 md:border-l border-white/[0.08] min-h-0">
+                <div className="space-y-5">
                   <div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       {open.clientName && (
                         <span className="text-badge-text text-electric">{open.clientName}</span>
                       )}
                       {open.clientName && <span className="text-white/20">•</span>}
                       <span className="text-badge-text text-muted-foreground">{open.category}</span>
                     </div>
-                    <h3 className="mt-2 text-card-title text-white">{open.title}</h3>
-                    <p className="mt-3 text-small-body text-white/60 leading-relaxed">
+                    <h3 className="mt-2 text-sm sm:text-card-title text-white font-bold">{open.title}</h3>
+                    <p className="mt-2 text-xs sm:text-small-body text-white/60 leading-relaxed">
                       {open.overview}
                     </p>
                   </div>
 
-                  <div className="space-y-4 border-t border-white/5 pt-5">
+                  <div className="space-y-4 border-t border-white/5 pt-4">
                     <Detail label="Techniques" items={open.techniques} />
                     <Detail label="Results" items={open.results} />
                     <Detail label="Tools" items={open.tools} />

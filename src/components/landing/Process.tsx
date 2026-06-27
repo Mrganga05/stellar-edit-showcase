@@ -52,7 +52,7 @@ export function Process() {
           style={{ height: lineH }}
           className="absolute left-6 top-6 bottom-6 hidden w-px bg-gradient-to-b from-electric to-violet-glow sm:block"
         />
-        <div className="space-y-8 sm:space-y-12">
+        <div className="space-y-5 sm:space-y-12">
           {steps.map((s, i) => (
             <motion.div
               key={s.title}
@@ -60,15 +60,15 @@ export function Process() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true, margin: "-80px" }}
               transition={{ duration: 0.6, delay: i * 0.05 }}
-              className="relative grid grid-cols-[auto_1fr] items-start gap-6 sm:gap-8"
+              className="relative grid grid-cols-[auto_1fr] items-start gap-3.5 sm:gap-8"
             >
-              <div className="relative z-10 grid size-12 place-items-center rounded-full glass-strong glow-blue">
-                <s.icon className="size-5 text-electric" />
+              <div className="relative z-10 grid size-9 sm:size-12 place-items-center rounded-full glass-strong glow-blue">
+                <s.icon className="size-4 sm:size-5 text-electric" />
               </div>
-              <div className="rounded-2xl glass p-6 hover-card-premium">
-                <div className="text-badge-text text-muted-foreground">Step {i + 1}</div>
-                <h3 className="mt-2 text-card-title text-white">{s.title}</h3>
-                <p className="mt-2 text-small-body">{s.desc}</p>
+              <div className="rounded-xl sm:rounded-2xl glass p-4 sm:p-6 hover-card-premium">
+                <div className="text-[9px] sm:text-badge-text text-muted-foreground">Step {i + 1}</div>
+                <h3 className="mt-1 sm:mt-2 text-xs min-[375px]:text-sm sm:text-card-title text-white font-semibold">{s.title}</h3>
+                <p className="mt-1 sm:mt-2 text-[10px] min-[375px]:text-xs sm:text-small-body text-neutral-400 leading-normal">{s.desc}</p>
               </div>
             </motion.div>
           ))}

@@ -97,6 +97,11 @@
     scroll-behavior: smooth;
   }
 
+  /* Offset anchor-scroll targets so fixed nav (64px) doesn't cover the top of the section */
+  section[id] {
+    scroll-margin-top: 72px;
+  }
+
   body {
     background-color: #050816;
     color: rgba(255, 255, 255, 0.75);

@@ -91,8 +91,8 @@ export function Contact() {
       />
       <div className="mt-16 grid gap-6 lg:grid-cols-[1.4fr_1fr]">
         <Reveal>
-          <form onSubmit={onSubmit} className="rounded-3xl glass-strong p-6 sm:p-10">
-            <div className="grid gap-6 sm:grid-cols-2">
+          <form onSubmit={onSubmit} className="rounded-3xl glass-strong p-5 sm:p-10">
+            <div className="grid gap-4 sm:gap-6 sm:grid-cols-2">
               <Field label="Name">
                 <input required name="name" className={inputCls} placeholder="Your full name" />
               </Field>
@@ -129,7 +129,7 @@ export function Contact() {
                 <textarea
                   required
                   name="details"
-                  rows={5}
+                  rows={4}
                   className={inputCls}
                   placeholder="Footage type, deliverables, references, deadlines…"
                 />
@@ -137,7 +137,7 @@ export function Contact() {
             </div>
             <button
               disabled={loading}
-              className="mt-8 inline-flex items-center justify-center gap-2 rounded-full btn-primary-glow px-7 h-[48px] text-button-text text-white disabled:opacity-60"
+              className="mt-6 sm:mt-8 inline-flex items-center justify-center gap-2 rounded-full btn-primary-glow px-6 sm:px-7 h-[42px] sm:h-[48px] text-xs sm:text-button-text text-white disabled:opacity-60 w-full sm:w-auto"
             >
               {loading ? (
                 "Sending…"
@@ -150,23 +150,23 @@ export function Contact() {
           </form>
         </Reveal>
         <Reveal delay={0.1}>
-          <div className="grid h-full gap-4">
+          <div className="grid grid-cols-2 lg:flex lg:flex-col gap-3 lg:gap-4 h-full">
             {channels.map((c) => (
               <a
                 key={c.label}
                 href={c.href}
                 target="_blank"
                 rel="noreferrer"
-                className="group flex items-center gap-4 rounded-2xl glass p-6 hover-card-premium"
+                className="group flex items-center gap-2.5 sm:gap-4 rounded-xl sm:rounded-2xl glass p-3.5 sm:p-6 hover-card-premium"
               >
-                <div className="grid size-12 place-items-center rounded-xl bg-gradient-to-br from-electric/20 to-violet-glow/20 text-electric">
-                  <c.icon className="size-5" />
+                <div className="grid size-9 sm:size-12 place-items-center rounded-xl bg-gradient-to-br from-electric/20 to-violet-glow/20 text-electric shrink-0">
+                  <c.icon className="size-4 sm:size-5" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="text-badge-text text-muted-foreground">{c.label}</div>
-                  <div className="truncate text-base font-semibold text-white">{c.value}</div>
+                  <div className="text-[9px] sm:text-badge-text text-muted-foreground font-semibold uppercase">{c.label}</div>
+                  <div className="truncate text-xs sm:text-base font-semibold text-white mt-0.5">{c.value}</div>
                 </div>
-                <ArrowRight className="size-4 -translate-x-1 opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100" />
+                <ArrowRight className="size-4 -translate-x-1 opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100 hidden sm:block" />
               </a>
             ))}
           </div>
@@ -177,7 +177,7 @@ export function Contact() {
 }
 
 const inputCls =
-  "w-full rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-electric focus:outline-none focus:ring-2 focus:ring-electric/30 transition";
+  "w-full rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-2.5 sm:px-4 sm:py-3 text-xs sm:text-sm text-foreground placeholder:text-muted-foreground focus:border-electric focus:outline-none focus:ring-2 focus:ring-electric/30 transition";
 
 function Field({
   label,
@@ -190,7 +190,7 @@ function Field({
 }) {
   return (
     <label className={`block ${className}`}>
-      <span className="mb-2 block text-badge-text text-muted-foreground">{label}</span>
+      <span className="mb-1.5 block text-[10px] sm:text-badge-text text-muted-foreground font-bold uppercase tracking-wider">{label}</span>
       {children}
     </label>
   );

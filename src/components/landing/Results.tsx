@@ -20,16 +20,16 @@ export function Results() {
             </>
           }
         />
-        <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-16 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
           {stats.map((s) => (
             <div
               key={s.label}
-              className="rounded-3xl glass-strong p-8 text-center hover-card-premium"
+              className="rounded-2xl sm:rounded-3xl glass-strong p-4 sm:p-8 text-center hover-card-premium"
             >
-              <div className="font-sans font-black text-5xl text-gradient-brand sm:text-6xl">
+              <div className="font-sans font-black text-2xl min-[375px]:text-3xl sm:text-5xl text-gradient-brand lg:text-6xl">
                 <AnimatedCounter to={s.to} suffix={s.suffix} />
               </div>
-              <div className="mt-3 text-badge-text text-muted-foreground">{s.label}</div>
+              <div className="mt-1.5 sm:mt-3 text-[9px] sm:text-badge-text text-muted-foreground">{s.label}</div>
             </div>
           ))}
         </div>
