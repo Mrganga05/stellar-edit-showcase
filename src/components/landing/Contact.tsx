@@ -137,7 +137,7 @@ export function Contact() {
             </div>
             <button
               disabled={loading}
-              className="mt-8 inline-flex items-center justify-center gap-2 rounded-full btn-primary-glow px-7 h-[48px] text-button-text text-white disabled:opacity-60"
+              className="mt-8 w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-full btn-primary-glow px-7 h-[48px] text-button-text text-white disabled:opacity-60"
             >
               {loading ? (
                 "Sending…"

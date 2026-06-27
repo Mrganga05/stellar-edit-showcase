@@ -144,18 +144,31 @@ export function Hero() {
       className="relative min-h-screen w-full flex flex-col pt-[88px] pb-16 lg:pb-24 overflow-hidden"
       style={{ backgroundColor: "#050816" }}
     >
-      {/* Background Image covering whole hero section - Highly Visible with Full Clarity */}
+      {/* Background Image covering whole hero section - Full clarity on desktop, blurred & centered on mobile */}
       <div
-        className="absolute inset-0 z-0 pointer-events-none bg-cover bg-no-repeat opacity-100"
+        className="absolute inset-0 z-0 pointer-events-none bg-cover bg-no-repeat opacity-100 block md:hidden filter blur-[8px] scale-[1.05]"
+        style={{
+          backgroundImage: `url(${heroBgImg})`,
+          backgroundPosition: "center center",
+        }}
+      />
+      <div
+        className="absolute inset-0 z-0 pointer-events-none bg-cover bg-no-repeat opacity-100 hidden md:block"
         style={{
           backgroundImage: `url(${heroBgImg})`,
           backgroundPosition: "68% center",
         }}
       />
 
-      {/* Horizontal & Vertical Gradient Overlay for Text Readability & Smooth Transition - Shifted Left for Background Clarity */}
+      {/* Horizontal & Vertical Gradient Overlay for Text Readability & Smooth Transition - Optimized for Mobile Blur vs Desktop Clarity */}
       <div
-        className="absolute inset-0 z-1 pointer-events-none"
+        className="absolute inset-0 z-1 pointer-events-none block md:hidden"
+        style={{
+          background: "linear-gradient(to bottom, rgba(5, 8, 22, 0.75) 0%, rgba(5, 8, 22, 0.85) 100%)",
+        }}
+      />
+      <div
+        className="absolute inset-0 z-1 pointer-events-none hidden md:block"
         style={{
           background:
             "linear-gradient(to right, rgba(5, 8, 22, 0.95) 0%, rgba(5, 8, 22, 0.7) 25%, rgba(5, 8, 22, 0) 52%), linear-gradient(to bottom, transparent 75%, #050816 100%)",
@@ -183,13 +196,13 @@ export function Hero() {
         {/* Two-Column Grid: Left Column has structured copy, Right Column is empty to expose background image */}
         <div className="grid w-full grid-cols-1 lg:grid-cols-[54%_42%] items-center gap-x-[4%]">
           {/* ── LEFT SIDE: BRAND & COPY ── */}
-          <div className="relative text-left flex flex-col items-start justify-start pt-0">
+          <div className="relative text-center lg:text-left flex flex-col items-center lg:items-start justify-center lg:justify-start pt-0 w-full mx-auto lg:mx-0">
             {/* Ambient light glow behind text for contrast and aesthetics */}
             <div className="absolute -left-20 -top-20 size-[400px] rounded-full bg-cyan-500/25 blur-[120px] pointer-events-none -z-10" />
             <div className="absolute -right-10 -bottom-10 size-[350px] rounded-full bg-purple-500/20 blur-[120px] pointer-events-none -z-10" />
 
             {/* Top Badge */}
-            <div className="relative inline-flex items-center gap-2 rounded-full p-[1px] mb-5 lg:mb-6 select-none bg-gradient-to-r from-[#3B82F6]/80 to-[#38BDF8]/80 shadow-[0_4px_20px_rgba(59,130,246,0.15)]">
+            <div className="relative inline-flex items-center gap-2 rounded-full p-[1px] mb-5 lg:mb-6 select-none bg-gradient-to-r from-[#3B82F6]/80 to-[#38BDF8]/80 shadow-[0_4px_20px_rgba(59,130,246,0.15)] mx-auto lg:mx-0">
               <div className="flex items-center gap-2 rounded-full bg-[#050816]/95 px-[18px] py-[8px]">
                 <span className="text-[#22d3ee] text-[13px] font-bold">✦</span>
                 <span className="text-badge-text text-[#a5f3fc]">Premium Video Editing Studio</span>
@@ -197,12 +210,12 @@ export function Hero() {
             </div>
 
             {/* Editorial Headline */}
-            <div className="flex flex-col items-start">
+            <div className="flex flex-col items-center lg:items-start w-full">
               <motion.h1
                 initial={{ opacity: 0, y: 28 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.75, ease: [0.19, 1, 0.22, 1] }}
-                className="text-hero-title max-w-[820px] text-left pr-6"
+                className="text-[30px] sm:text-[38px] lg:text-hero-title font-sans font-black tracking-tight leading-tight max-w-[820px] text-center lg:text-left pr-0 lg:pr-6 text-white uppercase"
               >
                 {heroData.headline.includes("<br") || heroData.headline.includes("<span") ? (
                   <span dangerouslySetInnerHTML={{ __html: heroData.headline }} />
@@ -218,7 +231,7 @@ export function Hero() {
               </motion.h1>
 
               {/* Accent bar */}
-              <div className="h-[4px] w-[140px] bg-gradient-to-r from-[#22d3ee] to-[#a855f7] rounded-full mt-4" />
+              <div className="h-[4px] w-[140px] bg-gradient-to-r from-[#22d3ee] to-[#a855f7] rounded-full mt-4 mx-auto lg:mx-0" />
             </div>
 
             {/* Supporting Copy */}
@@ -226,7 +239,7 @@ export function Hero() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.12 }}
-              className="mt-6 max-w-[540px] text-hero-subtitle text-left mb-8 text-white/80 leading-relaxed font-sans"
+              className="mt-6 max-w-[540px] text-[15px] sm:text-[16px] lg:text-hero-subtitle text-center lg:text-left mb-8 text-white/80 leading-relaxed font-sans mx-auto lg:mx-0"
             >
               {heroData.subheadline}
             </motion.p>
@@ -236,15 +249,15 @@ export function Hero() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.22 }}
-              className="flex flex-wrap gap-4 items-center justify-start z-20"
+              className="flex flex-col sm:flex-row gap-4 items-center justify-center lg:justify-start z-20 w-full sm:w-auto"
             >
               <MagneticButton
                 href="#contact"
-                className="group btn-primary-glow inline-flex items-center justify-center gap-2.5 rounded-full px-9 h-[54px] text-button-text uppercase text-white cursor-pointer overflow-hidden"
+                className="group btn-primary-glow inline-flex items-center justify-center gap-2.5 rounded-full w-full sm:w-auto px-9 h-[54px] text-button-text uppercase text-white cursor-pointer overflow-hidden"
               >
                 {/* Sheen reflection sweep */}
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out pointer-events-none" />
-                <span className="relative flex items-center gap-2.5 z-10">
+                <span className="relative flex items-center justify-center gap-2.5 z-10 w-full">
                   <span>BOOK A STRATEGY CALL</span>
                   <ArrowRight className="size-4.5 transition-transform duration-300 group-hover:translate-x-1" />
                 </span>
@@ -252,11 +265,11 @@ export function Hero() {
 
               <button
                 onClick={() => setShowreelOpen(true)}
-                className="group btn-secondary-glow inline-flex items-center justify-center gap-2.5 rounded-full px-9 h-[54px] text-button-text uppercase text-white overflow-hidden cursor-pointer"
+                className="group btn-secondary-glow inline-flex items-center justify-center gap-2.5 rounded-full w-full sm:w-auto px-9 h-[54px] text-button-text uppercase text-white overflow-hidden cursor-pointer"
               >
                 {/* Sheen reflection sweep */}
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out pointer-events-none" />
-                <span className="relative flex items-center gap-2.5 z-10">
+                <span className="relative flex items-center justify-center gap-2.5 z-10 w-full">
                   <Play className="size-4.5 fill-white/10 text-white group-hover:fill-[#22d3ee]/20 group-hover:text-[#22d3ee] transition-colors" />
                   <span>WATCH SHOWREEL</span>
                 </span>
@@ -271,7 +284,7 @@ export function Hero() {
 
       {/* ── BOTTOM STATS ROW ── */}
       <div className="relative z-10 mx-auto w-full max-w-[1320px] px-6 md:px-8 mt-auto pt-6 pb-4">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 border-t border-white/[0.08] pt-6 lg:pt-8">
+        <div className="grid grid-cols-4 lg:grid-cols-4 gap-1.5 sm:gap-4 border-t border-white/[0.08] pt-6 lg:pt-8 w-full">
           {[
             {
               val: "50M+",
@@ -322,7 +335,7 @@ export function Hero() {
               <div
                 key={label}
                 className={cn(
-                  "group relative flex flex-row items-center gap-4 rounded-[12px] border border-white/[0.05] bg-[#050810]/40 p-4 lg:p-6 transition-all duration-500 hover:-translate-y-1.5 overflow-hidden cursor-default w-full backdrop-blur-xl card-tech-grid",
+                  "group relative flex flex-col sm:flex-row items-center gap-1 sm:gap-4 rounded-[12px] border border-white/[0.05] bg-[#050810]/40 p-2 sm:p-4 lg:p-6 transition-all duration-500 hover:-translate-y-1.5 overflow-hidden cursor-default w-full backdrop-blur-xl card-tech-grid text-center sm:text-left",
                   borderBeamClass,
                 )}
               >
@@ -341,20 +354,20 @@ export function Hero() {
                   }}
                 />
 
-                {/* Icon circle */}
+                {/* Icon circle - hidden on mobile to save space */}
                 <div
-                  className={`relative shrink-0 size-10 rounded-full border-2 ${borderStyle} flex items-center justify-center bg-[#050810]/60 transition-all duration-500 group-hover:scale-105 z-10 shadow-[0_0_15px_rgba(255,255,255,0.02)]`}
+                  className={`hidden sm:flex shrink-0 size-10 rounded-full border-2 ${borderStyle} items-center justify-center bg-[#050810]/60 transition-all duration-500 group-hover:scale-105 z-10 shadow-[0_0_15px_rgba(255,255,255,0.02)]`}
                 >
                   <Icon
                     className="size-5 transition-transform duration-500 group-hover:scale-110"
                     strokeWidth={2}
                   />
                 </div>
-                <div className="flex flex-col text-left z-10">
-                  <span className="font-sans text-[28px] lg:text-[32px] font-extrabold leading-none tracking-tight">
+                <div className="flex flex-col items-center sm:items-start z-10 w-full">
+                  <span className="font-sans text-[15px] xs:text-[17px] sm:text-[28px] lg:text-[32px] font-extrabold leading-none tracking-tight">
                     <AnimatedCounter value={val} className={textGradientClass} />
                   </span>
-                  <span className="text-[10px] lg:text-[11px] text-[#a1a1aa] font-black uppercase tracking-widest mt-1.5 leading-tight font-sans opacity-85 group-hover:opacity-100 group-hover:text-white transition-colors duration-300">
+                  <span className="text-[7px] sm:text-[10px] lg:text-[11px] text-[#a1a1aa] font-black uppercase tracking-wider sm:tracking-widest mt-1 sm:mt-1.5 leading-tight font-sans opacity-85 group-hover:opacity-100 group-hover:text-white transition-colors duration-300 truncate max-w-full">
                     {label}
                   </span>
                 </div>
