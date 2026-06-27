@@ -389,27 +389,20 @@ export function About() {
             {/* CTA Card (60% width on desktop) */}
             <div className="w-full sm:w-[60%] rounded-[30px] border border-white/[0.08] bg-white/[0.03] p-6 xl:p-8 backdrop-blur-md flex flex-col justify-between space-y-5">
               <div className="space-y-2">
-                <span className="text-badge-text text-[#38BDF8]">READY TO COLLABORATE?</span>
-                <h4 className="text-card-title text-[#F9FAFB] leading-tight">
+                <span className="text-badge-text text-[#38BDF8] font-bold">READY TO COLLABORATE?</span>
+                <h4 className="text-card-title text-[#F9FAFB] leading-tight font-bold">
                   Ready To Create Your Next Viral Video?
                 </h4>
               </div>
 
               <div className="flex flex-wrap items-center gap-3">
-                <motion.button
-                  whileHover={{ scale: 1.03 }}
-                  className="group relative inline-flex items-center justify-center gap-2 rounded-full btn-primary-glow px-6 h-[48px] text-button-text text-white cursor-pointer"
+                <a
+                  href="#contact"
+                  className="group relative inline-flex items-center justify-center gap-2 rounded-full btn-primary-glow px-6 h-[48px] text-button-text text-white cursor-pointer transition-transform hover:scale-[1.02] flex items-center justify-center"
                 >
                   Book Strategy Call
                   <ArrowUpRight className="size-4 transition-transform duration-300 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                </motion.button>
-
-                <motion.button
-                  whileHover={{ scale: 1.03 }}
-                  className="group relative inline-flex items-center justify-center gap-2 rounded-full btn-secondary-glow px-6 h-[48px] text-button-text text-white cursor-pointer"
-                >
-                  View Portfolio
-                </motion.button>
+                </a>
               </div>
 
               {/* Avatar Group Trust Badge */}
