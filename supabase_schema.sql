@@ -194,5 +194,23 @@ ON CONFLICT (id) DO NOTHING;
 
 -- Seed initial hero settings
 INSERT INTO hero_settings (id, headline, subheadline) VALUES
-  ('h1e73e6a-72ef-4d6d-88f5-bfa33dbb48c1', 'Edits That <span class="font-display italic font-normal text-gradient-brand">Hold Attention</span> <br/> And Drive Results.', 'Raqvine transforms raw footage into cinematic, high-retention content built to move audiences, scale channels, and grow ambitious brands worldwide.')
+  ('71e73e6a-72ef-4d6d-88f5-bfa33dbb48c1', 'Edits That <span class="font-display italic font-normal text-gradient-brand">Hold Attention</span> <br/> And Drive Results.', 'Raqvine transforms raw footage into cinematic, high-retention content built to move audiences, scale channels, and grow ambitious brands worldwide.')
 ON CONFLICT (id) DO NOTHING;
+
+-- Ensure storage bucket configurations exist
+INSERT INTO storage.buckets (id, name, public) 
+VALUES ('portfolio', 'portfolio', true) 
+ON CONFLICT (id) DO NOTHING;
+
+-- Enable storage policies for public access (Read/Write)
+CREATE POLICY "Allow public select on portfolio storage" ON storage.objects
+  FOR SELECT TO public USING (bucket_id = 'portfolio');
+
+CREATE POLICY "Allow public insert on portfolio storage" ON storage.objects
+  FOR INSERT TO public WITH CHECK (bucket_id = 'portfolio');
+
+CREATE POLICY "Allow public update on portfolio storage" ON storage.objects
+  FOR UPDATE TO public USING (bucket_id = 'portfolio') WITH CHECK (bucket_id = 'portfolio');
+
+CREATE POLICY "Allow public delete on portfolio storage" ON storage.objects
+  FOR DELETE TO public USING (bucket_id = 'portfolio');

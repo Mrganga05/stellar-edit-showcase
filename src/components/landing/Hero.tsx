@@ -49,63 +49,7 @@ function AnimatedCounter({ value, className }: { value: string; className?: stri
   );
 }
 
-const floatingTools = [
-  {
-    name: "Premiere Pro",
-    logoText: "Pr",
-    bgColor: "bg-[#18002a]/85",
-    borderColor: "border-[#EA80FC]/50",
-    textColor: "text-[#EA80FC]",
-    shadowColor: "shadow-[#EA80FC]/20",
-    position: { top: "16%", left: "46%" },
-    yRange: [-6, 6],
-    duration: 3,
-  },
-  {
-    name: "After Effects",
-    logoText: "Ae",
-    bgColor: "bg-[#0d001a]/85",
-    borderColor: "border-[#9999FF]/50",
-    textColor: "text-[#9999FF]",
-    shadowColor: "shadow-[#9999FF]/20",
-    position: { top: "18%", left: "74%" },
-    yRange: [-8, 8],
-    duration: 3.5,
-  },
-  {
-    name: "DaVinci Resolve",
-    logoText: "Dr",
-    bgColor: "bg-[#1a0f00]/85",
-    borderColor: "border-[#ff9933]/50",
-    textColor: "text-[#ff9933]",
-    shadowColor: "shadow-[#ff9933]/20",
-    position: { top: "35%", right: "8%" },
-    yRange: [-5, 5],
-    duration: 4,
-  },
-  {
-    name: "CapCut",
-    logoText: "Cc",
-    bgColor: "bg-[#09090b]/85",
-    borderColor: "border-[#00f2fe]/50",
-    textColor: "text-[#00f2fe]",
-    shadowColor: "shadow-[#00f2fe]/20",
-    position: { bottom: "38%", right: "5%" },
-    yRange: [-6, 6],
-    duration: 3.2,
-  },
-  {
-    name: "AI Tools",
-    logoText: "Ai",
-    bgColor: "bg-[#0a0518]/90",
-    borderColor: "border-[#a855f7]/55",
-    textColor: "text-[#c084fc]",
-    shadowColor: "shadow-[#a855f7]/25",
-    position: { top: "45%", left: "41%" },
-    yRange: [-5, 5],
-    duration: 4.2,
-  },
-];
+
 
 // Reusable premium spring-loaded Magnetic Button Wrapper
 function MagneticButton({
@@ -156,7 +100,7 @@ export function Hero() {
   const [showreelOpen, setShowreelOpen] = useState(false);
   const [heroData, setHeroData] = useState({
     headline:
-      'TURNING RAW FOOTAGE<br/>INTO CONTENT<br/><span class="text-gradient-brand font-display italic font-normal animate-gradient-text pr-2.5 inline-block">THAT DEMANDS ATTENTION.</span>',
+      'TURNING RAW FOOTAGE<br/>INTO CONTENT<br/><span class="text-gradient-brand font-display italic font-black animate-gradient-text pr-2.5 inline-block">THAT DEMANDS ATTENTION.</span>',
     subheadline:
       "Helping creators, startups, and brands transform raw footage into cinematic content that captures attention, builds credibility, and delivers measurable results.",
   });
@@ -232,39 +176,7 @@ export function Hero() {
       {/* Grid overlay for digital alignment */}
       <div className="hero-grid absolute inset-0 opacity-[0.015] pointer-events-none" />
 
-      {/* Floating Editing Tools Badges (Matches User's Dot Markings) */}
-      {floatingTools.map((tool, idx) => (
-        <motion.div
-          key={idx}
-          animate={{
-            y: tool.yRange,
-            rotate: [idx % 2 === 0 ? -1 : 1, idx % 2 === 0 ? 1 : -1],
-          }}
-          transition={{
-            y: {
-              duration: tool.duration,
-              repeat: Infinity,
-              repeatType: "reverse",
-              ease: "easeInOut",
-            },
-            rotate: {
-              duration: tool.duration * 1.5,
-              repeat: Infinity,
-              repeatType: "reverse",
-              ease: "easeInOut",
-            },
-          }}
-          className={`absolute hidden lg:flex items-center gap-2 rounded-xl border ${tool.borderColor} ${tool.bgColor} px-3 py-2 shadow-lg ${tool.shadowColor} backdrop-blur-md z-10 select-none cursor-default`}
-          style={tool.position}
-        >
-          <div
-            className={`font-display text-[15px] font-bold tracking-tight ${tool.textColor} border ${tool.borderColor.replace("/40", "/80")} rounded px-1 min-w-[24px] text-center bg-black/20`}
-          >
-            {tool.logoText}
-          </div>
-          <span className="text-[12px] font-bold text-white tracking-tight pr-1">{tool.name}</span>
-        </motion.div>
-      ))}
+
 
       {/* ── MAIN HERO LAYOUT CONTAINER ── */}
       <div className="relative z-10 mx-auto w-full max-w-[1440px] pl-6 pr-6 md:pl-8 md:pr-8 lg:pl-12 lg:pr-12 xl:pl-16 xl:pr-16 pt-8 lg:pt-12 pb-6 lg:pb-8 flex-grow flex flex-col justify-center">
@@ -273,8 +185,8 @@ export function Hero() {
           {/* ── LEFT SIDE: BRAND & COPY ── */}
           <div className="relative text-left flex flex-col items-start justify-start pt-0">
             {/* Ambient light glow behind text for contrast and aesthetics */}
-            <div className="absolute -left-20 -top-20 size-[320px] rounded-full bg-cyan-500/10 blur-[120px] pointer-events-none -z-10" />
-            <div className="absolute -right-10 -bottom-10 size-[300px] rounded-full bg-purple-500/5 blur-[120px] pointer-events-none -z-10" />
+            <div className="absolute -left-20 -top-20 size-[400px] rounded-full bg-cyan-500/25 blur-[120px] pointer-events-none -z-10" />
+            <div className="absolute -right-10 -bottom-10 size-[350px] rounded-full bg-purple-500/20 blur-[120px] pointer-events-none -z-10" />
 
             {/* Top Badge */}
             <div className="relative inline-flex items-center gap-2 rounded-full p-[1px] mb-5 lg:mb-6 select-none bg-gradient-to-r from-[#3B82F6]/80 to-[#38BDF8]/80 shadow-[0_4px_20px_rgba(59,130,246,0.15)]">
@@ -298,7 +210,7 @@ export function Hero() {
                   <>
                     <span className="block">TURNING RAW FOOTAGE</span>
                     <span className="block">INTO CONTENT</span>
-                    <span className="animate-gradient-text italic block pr-2.5">
+                    <span className="animate-gradient-text italic block pr-2.5 font-black">
                       THAT DEMANDS ATTENTION.
                     </span>
                   </>

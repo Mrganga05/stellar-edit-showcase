@@ -74,5 +74,5 @@ CREATE POLICY "Allow public full access to hero_settings" ON hero_settings
 
 -- Seed initial hero settings
 INSERT INTO hero_settings (id, headline, subheadline) VALUES
-  ('h1e73e6a-72ef-4d6d-88f5-bfa33dbb48c1', 'Edits That <span class="font-display italic font-normal text-gradient-brand">Hold Attention</span> <br/> And Drive Results.', 'Raqvine transforms raw footage into cinematic, high-retention content built to move audiences, scale channels, and grow ambitious brands worldwide.')
+  ('71e73e6a-72ef-4d6d-88f5-bfa33dbb48c1', 'Edits That <span class="font-display italic font-normal text-gradient-brand">Hold Attention</span> <br/> And Drive Results.', 'Raqvine transforms raw footage into cinematic, high-retention content built to move audiences, scale channels, and grow ambitious brands worldwide.')
 ON CONFLICT (id) DO NOTHING;

@@ -21,6 +21,7 @@ import {
   Sparkles,
   Layers,
   X,
+  Star,
 } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
@@ -37,7 +38,7 @@ function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [usernameInput, setUsernameInput] = useState("");
   const [passwordInput, setPasswordInput] = useState("");
-  const [activeTab, setActiveTab] = useState<"contact" | "sample" | "portfolio" | "hero">(
+  const [activeTab, setActiveTab] = useState<"contact" | "sample" | "portfolio" | "hero" | "testimonials">(
     "contact",
   );
   const [loading, setLoading] = useState(false);
@@ -48,6 +49,7 @@ function AdminPage() {
   const [samples, setSamples] = useState<any[]>([]);
   const [portfolioProjects, setPortfolioProjects] = useState<any[]>([]);
   const [services, setServices] = useState<any[]>([]);
+  const [testimonials, setTestimonials] = useState<any[]>([]);
 
   // Hero settings states
   const [heroHeadline, setHeroHeadline] = useState("");
@@ -74,6 +76,57 @@ function AdminPage() {
   const [projServiceId, setProjServiceId] = useState("");
   const [projClientName, setProjClientName] = useState("");
   const [projMetric, setProjMetric] = useState("");
+
+  // Testimonials form states
+  const [editingTestimonial, setEditingTestimonial] = useState<any | null>(null);
+  const [isTestimonialModalOpen, setIsTestimonialModalOpen] = useState(false);
+  const [savingTestimonial, setSavingTestimonial] = useState(false);
+  const [testClientName, setTestClientName] = useState("");
+  const [testCompany, setTestCompany] = useState("");
+  const [testRating, setTestRating] = useState<number>(5);
+  const [testReview, setTestReview] = useState("");
+  const [testProfileImage, setTestProfileImage] = useState("");
+  const [testSortOrder, setTestSortOrder] = useState<number>(0);
+  const [testIsPublished, setTestIsPublished] = useState(true);
+
+  // Upload states
+  const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
+  const [uploadingVideo, setUploadingVideo] = useState(false);
+  const [uploadingTestimonialAvatar, setUploadingTestimonialAvatar] = useState(false);
+
+  const handleUploadFile = async (
+    file: File,
+    folder: "portfolio" | "avatars",
+    setUploadingState: React.Dispatch<React.SetStateAction<boolean>>,
+    setUrlState: React.Dispatch<React.SetStateAction<string>>
+  ) => {
+    setUploadingState(true);
+    try {
+      const fileExt = file.name.split(".").pop();
+      const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
+      const filePath = `${folder}/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from("portfolio")
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from("portfolio")
+        .getPublicUrl(filePath);
+
+      setUrlState(publicUrl);
+      toast.success("File uploaded successfully!");
+    } catch (err: any) {
+      console.error(err);
+      toast.error("Failed to upload file", {
+        description: err.message,
+      });
+    } finally {
+      setUploadingState(false);
+    }
+  };
 
   useEffect(() => {
     const authStatus = sessionStorage.getItem("is_raqvine_admin");
@@ -122,6 +175,15 @@ function AdminPage() {
       if (serviceErr) throw serviceErr;
       setServices(serviceData || []);
 
+      // Fetch testimonials
+      const { data: testimonialData, error: testimonialErr } = await supabase
+        .from("testimonials")
+        .select("*")
+        .order("sortOrder", { ascending: true });
+
+      if (testimonialErr) throw testimonialErr;
+      setTestimonials(testimonialData || []);
+
       // Fetch hero settings (we will fetch a single row)
       const { data: heroData, error: heroErr } = await supabase
         .from("hero_settings")
@@ -146,9 +208,96 @@ function AdminPage() {
     }
   }
 
+  // Testimonial management functions
+  function openAddTestimonialModal() {
+    setEditingTestimonial(null);
+    setTestClientName("");
+    setTestCompany("");
+    setTestRating(5);
+    setTestReview("");
+    setTestProfileImage("https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80");
+    setTestSortOrder(testimonials.length);
+    setTestIsPublished(true);
+    setIsTestimonialModalOpen(true);
+  }
+
+  function openEditTestimonialModal(t: any) {
+    setEditingTestimonial(t);
+    setTestClientName(t.clientName || "");
+    setTestCompany(t.company || "");
+    setTestRating(t.rating || 5);
+    setTestReview(t.review || "");
+    setTestProfileImage(t.profileImage || "");
+    setTestSortOrder(t.sortOrder || 0);
+    setTestIsPublished(t.isPublished !== false);
+    setIsTestimonialModalOpen(true);
+  }
+
+  async function handleSaveTestimonial(e: React.FormEvent) {
+    e.preventDefault();
+    setSavingTestimonial(true);
+
+    const payload = {
+      clientName: testClientName,
+      company: testCompany,
+      rating: Number(testRating),
+      review: testReview,
+      profileImage: testProfileImage || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80",
+      sortOrder: Number(testSortOrder),
+      isPublished: testIsPublished,
+      updatedAt: new Date().toISOString(),
+    };
+
+    try {
+      if (editingTestimonial) {
+        const { error } = await supabase
+          .from("testimonials")
+          .update(payload)
+          .eq("id", editingTestimonial.id);
+
+        if (error) throw error;
+        toast.success("Testimonial updated successfully");
+      } else {
+        const { error } = await supabase
+          .from("testimonials")
+          .insert([{ ...payload, createdAt: new Date().toISOString() }]);
+
+        if (error) throw error;
+        toast.success("Testimonial added successfully");
+      }
+      setIsTestimonialModalOpen(false);
+      fetchData();
+    } catch (err: any) {
+      console.error(err);
+      toast.error("Failed to save testimonial", {
+        description: err.message,
+      });
+    } finally {
+      setSavingTestimonial(false);
+    }
+  }
+
+  async function deleteTestimonial(id: string) {
+    if (!confirm("Are you sure you want to delete this testimonial? This action is permanent.")) {
+      return;
+    }
+
+    try {
+      const { error } = await supabase.from("testimonials").delete().eq("id", id);
+      if (error) throw error;
+      toast.success("Testimonial deleted successfully");
+      fetchData();
+    } catch (err: any) {
+      console.error(err);
+      toast.error("Failed to delete testimonial", {
+        description: err.message,
+      });
+    }
+  }
+
   function handleLogin(e: React.FormEvent) {
     e.preventDefault();
-    if (usernameInput === "raqvineee" && passwordInput === "9160382004") {
+    if (usernameInput === "9160851678" && passwordInput === "9160851678") {
       sessionStorage.setItem("is_raqvine_admin", "true");
       setIsAuthenticated(true);
       toast.success("Welcome back, Raqvine!", {
@@ -358,7 +507,7 @@ function AdminPage() {
       } else {
         const { error } = await supabase.from("hero_settings").insert([
           {
-            id: "h1e73e6a-72ef-4d6d-88f5-bfa33dbb48c1",
+            id: "71e73e6a-72ef-4d6d-88f5-bfa33dbb48c1",
             headline: heroHeadline,
             subheadline: heroSubheadline,
             createdAt: new Date().toISOString(),
@@ -401,6 +550,13 @@ function AdminPage() {
       p.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       p.category?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       p.description?.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
+
+  const filteredTestimonials = testimonials.filter(
+    (t) =>
+      t.clientName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      t.company?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      t.review?.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   if (!isAuthenticated) {
@@ -492,6 +648,10 @@ function AdminPage() {
       title: "Featured Work Manager",
       desc: "Manage the portfolio projects shown on the homepage (9:16 aspect ratio edits).",
     },
+    testimonials: {
+      title: "Client Testimonials",
+      desc: "Manage client testimonials and reviews shown on the homepage.",
+    },
     hero: {
       title: "Hero Section Editor",
       desc: "Update the main Headline and Subheadline of the homepage.",
@@ -528,6 +688,12 @@ function AdminPage() {
                 className={`text-sm font-medium px-3 py-1.5 rounded-lg transition ${activeTab === "portfolio" ? "bg-white/10 text-foreground" : "text-muted-foreground hover:text-foreground"}`}
               >
                 Featured Work
+              </button>
+              <button
+                onClick={() => setActiveTab("testimonials")}
+                className={`text-sm font-medium px-3 py-1.5 rounded-lg transition ${activeTab === "testimonials" ? "bg-white/10 text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                Testimonials
               </button>
               <button
                 onClick={() => setActiveTab("hero")}
@@ -575,6 +741,12 @@ function AdminPage() {
             Featured Work
           </button>
           <button
+            onClick={() => setActiveTab("testimonials")}
+            className={`whitespace-nowrap px-4 py-2.5 rounded-xl font-medium text-sm border transition ${activeTab === "testimonials" ? "bg-foreground text-background border-foreground" : "border-white/10 text-muted-foreground"}`}
+          >
+            Testimonials
+          </button>
+          <button
             onClick={() => setActiveTab("hero")}
             className={`whitespace-nowrap px-4 py-2.5 rounded-xl font-medium text-sm border transition ${activeTab === "hero" ? "bg-foreground text-background border-foreground" : "border-white/10 text-muted-foreground"}`}
           >
@@ -596,6 +768,14 @@ function AdminPage() {
                 className="inline-flex items-center gap-2 rounded-xl bg-foreground hover:scale-[1.01] text-background px-4 py-2 text-xs font-semibold transition"
               >
                 <Plus className="size-4" /> Add Project
+              </button>
+            )}
+            {activeTab === "testimonials" && (
+              <button
+                onClick={openAddTestimonialModal}
+                className="inline-flex items-center gap-2 rounded-xl bg-foreground hover:scale-[1.01] text-background px-4 py-2 text-xs font-semibold transition cursor-pointer"
+              >
+                <Plus className="size-4" /> Add Testimonial
               </button>
             )}
 
@@ -851,6 +1031,92 @@ function AdminPage() {
                 </div>
               ))}
 
+            {activeTab === "testimonials" &&
+              (filteredTestimonials.length === 0 ? (
+                <EmptyState icon={Star} text="No testimonials found" />
+              ) : (
+                <div className="grid gap-4">
+                  {filteredTestimonials.map((t) => (
+                    <div
+                      key={t.id}
+                      className="rounded-2xl border border-white/8 bg-surface/40 p-5 flex flex-col gap-4 md:flex-row md:items-start md:justify-between transition-colors hover:border-white/15"
+                    >
+                      <div className="space-y-3 flex-1">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="font-semibold text-lg text-foreground">{t.clientName}</span>
+                          <span className="text-muted-foreground text-sm">({t.company})</span>
+                          <div className="flex gap-0.5 ml-2">
+                            {Array.from({ length: t.rating }).map((_, i) => (
+                              <Star key={i} className="size-3 fill-electric text-electric" />
+                            ))}
+                          </div>
+                          <span className="text-xs text-muted-foreground ml-auto sm:ml-0">
+                            Order: {t.sortOrder}
+                          </span>
+                        </div>
+                        <p className="text-sm text-foreground/80 leading-relaxed max-w-3xl whitespace-pre-wrap">
+                          "{t.review}"
+                        </p>
+                        <div className="flex items-center gap-2 pt-1">
+                          <img
+                            src={t.profileImage}
+                            alt={t.clientName}
+                            className="size-8 rounded-full object-cover border border-white/10"
+                          />
+                          <span className="text-xs text-muted-foreground break-all">{t.profileImage}</span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3 self-end md:self-start pt-2 md:pt-0">
+                        {/* Publish status toggle */}
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                            Status:
+                          </span>
+                          <select
+                            value={t.isPublished ? "published" : "draft"}
+                            onChange={async (e) => {
+                              try {
+                                const isPub = e.target.value === "published";
+                                const { error } = await supabase
+                                  .from("testimonials")
+                                  .update({ isPublished: isPub, updatedAt: new Date().toISOString() })
+                                  .eq("id", t.id);
+                                if (error) throw error;
+                                toast.success("Status updated");
+                                fetchData();
+                              } catch (err: any) {
+                                toast.error("Failed to update status", { description: err.message });
+                              }
+                            }}
+                            className="bg-black/40 border border-white/10 rounded-lg text-xs text-foreground px-2.5 py-1.5 focus:outline-none focus:border-electric"
+                          >
+                            <option value="published">Published</option>
+                            <option value="draft">Draft</option>
+                          </select>
+                        </div>
+                        {/* Edit Button */}
+                        <button
+                          onClick={() => openEditTestimonialModal(t)}
+                          className="grid size-9 place-items-center rounded-xl border border-white/10 bg-white/[0.03] text-muted-foreground hover:text-white hover:border-white/20 transition cursor-pointer"
+                          title="Edit review"
+                        >
+                          <Edit2 className="size-4" />
+                        </button>
+                        {/* Delete Button */}
+                        <button
+                          onClick={() => deleteTestimonial(t.id)}
+                          className="grid size-9 place-items-center rounded-xl border border-white/10 bg-white/[0.03] text-muted-foreground hover:text-red-400 hover:border-red-400/20 transition cursor-pointer"
+                          title="Delete review"
+                        >
+                          <Trash2 className="size-4" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ))}
+
             {activeTab === "hero" && (
               <div className="max-w-3xl rounded-2xl border border-white/8 bg-surface/40 p-6 space-y-6">
                 <div>
@@ -995,29 +1261,59 @@ function AdminPage() {
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5">
-                    Thumbnail Image URL
+                    Thumbnail Image File / URL
                   </label>
-                  <input
-                    required
-                    type="url"
-                    value={projThumbnail}
-                    onChange={(e) => setProjThumbnail(e.target.value)}
-                    placeholder="https://images.unsplash.com/..."
-                    className="w-full rounded-xl border border-white/10 bg-white/[0.03] p-3 text-sm text-foreground focus:border-electric focus:outline-none focus:ring-1 focus:ring-electric/30 transition"
-                  />
+                  <div className="space-y-2">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleUploadFile(file, "portfolio", setUploadingThumbnail, setProjThumbnail);
+                      }}
+                      className="w-full text-xs text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-white/10 file:text-foreground hover:file:bg-white/20 file:cursor-pointer"
+                      disabled={uploadingThumbnail}
+                    />
+                    {uploadingThumbnail && (
+                      <div className="text-xs text-electric animate-pulse">Uploading thumbnail...</div>
+                    )}
+                    <input
+                      required
+                      type="url"
+                      value={projThumbnail}
+                      onChange={(e) => setProjThumbnail(e.target.value)}
+                      placeholder="https://images.unsplash.com/..."
+                      className="w-full rounded-xl border border-white/10 bg-white/[0.03] p-3 text-sm text-foreground focus:border-electric focus:outline-none focus:ring-1 focus:ring-electric/30 transition"
+                    />
+                  </div>
                 </div>
                 <div>
                   <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5">
-                    Video URL
+                    Video File / URL
                   </label>
-                  <input
-                    required
-                    type="url"
-                    value={projVideoUrl}
-                    onChange={(e) => setProjVideoUrl(e.target.value)}
-                    placeholder="https://commondatastorage.googleapis.com/..."
-                    className="w-full rounded-xl border border-white/10 bg-white/[0.03] p-3 text-sm text-foreground focus:border-electric focus:outline-none focus:ring-1 focus:ring-electric/30 transition"
-                  />
+                  <div className="space-y-2">
+                    <input
+                      type="file"
+                      accept="video/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleUploadFile(file, "portfolio", setUploadingVideo, setProjVideoUrl);
+                      }}
+                      className="w-full text-xs text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-white/10 file:text-foreground hover:file:bg-white/20 file:cursor-pointer"
+                      disabled={uploadingVideo}
+                    />
+                    {uploadingVideo && (
+                      <div className="text-xs text-electric animate-pulse">Uploading video...</div>
+                    )}
+                    <input
+                      required
+                      type="url"
+                      value={projVideoUrl}
+                      onChange={(e) => setProjVideoUrl(e.target.value)}
+                      placeholder="https://commondatastorage.googleapis.com/..."
+                      className="w-full rounded-xl border border-white/10 bg-white/[0.03] p-3 text-sm text-foreground focus:border-electric focus:outline-none focus:ring-1 focus:ring-electric/30 transition"
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -1150,6 +1446,160 @@ function AdminPage() {
                   className="inline-flex items-center justify-center rounded-xl bg-foreground px-5 py-2.5 text-xs font-semibold text-background hover:scale-[1.01] transition-transform disabled:opacity-50"
                 >
                   {savingProject ? "Saving..." : "Save Project"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Testimonial Add/Edit Modal */}
+      {isTestimonialModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-md overflow-y-auto">
+          <div className="relative w-full max-w-lg rounded-3xl border border-white/10 bg-[#090909] p-6 shadow-2xl backdrop-blur-xl my-8">
+            <button
+              onClick={() => setIsTestimonialModalOpen(false)}
+              className="absolute right-4 top-4 z-10 grid size-10 place-items-center rounded-full border border-white/10 bg-black/40 text-white backdrop-blur-md transition-colors hover:bg-white/10"
+              type="button"
+            >
+              <X className="size-5" />
+            </button>
+
+            <h2 className="font-display text-2xl mb-6">
+              {editingTestimonial ? "Edit Testimonial" : "Add Testimonial"}
+            </h2>
+
+            <form onSubmit={handleSaveTestimonial} className="space-y-4">
+              <div>
+                <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5 font-bold">
+                  Client Name
+                </label>
+                <input
+                  required
+                  type="text"
+                  value={testClientName}
+                  onChange={(e) => setTestClientName(e.target.value)}
+                  placeholder="e.g. David Dobrik"
+                  className="w-full rounded-xl border border-white/10 bg-white/[0.03] p-3 text-sm text-foreground focus:border-electric focus:outline-none focus:ring-1 focus:ring-electric/30 transition"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5 font-bold">
+                  Company / Platform
+                </label>
+                <input
+                  required
+                  type="text"
+                  value={testCompany}
+                  onChange={(e) => setTestCompany(e.target.value)}
+                  placeholder="e.g. YouTube Creator"
+                  className="w-full rounded-xl border border-white/10 bg-white/[0.03] p-3 text-sm text-foreground focus:border-electric focus:outline-none focus:ring-1 focus:ring-electric/30 transition"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5 font-bold">
+                  Profile Image File / URL
+                </label>
+                <div className="space-y-2">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleUploadFile(file, "avatars", setUploadingTestimonialAvatar, setTestProfileImage);
+                    }}
+                    className="w-full text-xs text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-white/10 file:text-foreground hover:file:bg-white/20 file:cursor-pointer"
+                    disabled={uploadingTestimonialAvatar}
+                  />
+                  {uploadingTestimonialAvatar && (
+                    <div className="text-xs text-electric animate-pulse">Uploading avatar...</div>
+                  )}
+                  <input
+                    required
+                    type="url"
+                    value={testProfileImage}
+                    onChange={(e) => setTestProfileImage(e.target.value)}
+                    placeholder="https://images.unsplash.com/..."
+                    className="w-full rounded-xl border border-white/10 bg-white/[0.03] p-3 text-sm text-foreground focus:border-electric focus:outline-none focus:ring-1 focus:ring-electric/30 transition"
+                  />
+                </div>
+              </div>
+
+              <div className="grid gap-4 grid-cols-2">
+                <div>
+                  <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5 font-bold">
+                    Rating (1-5)
+                  </label>
+                  <input
+                    required
+                    type="number"
+                    min={1}
+                    max={5}
+                    value={testRating}
+                    onChange={(e) => setTestRating(Number(e.target.value))}
+                    className="w-full rounded-xl border border-white/10 bg-white/[0.03] p-3 text-sm text-foreground focus:border-electric focus:outline-none focus:ring-1 focus:ring-electric/30 transition"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5 font-bold">
+                    Sort Order
+                  </label>
+                  <input
+                    required
+                    type="number"
+                    value={testSortOrder}
+                    onChange={(e) => setTestSortOrder(Number(e.target.value))}
+                    className="w-full rounded-xl border border-white/10 bg-white/[0.03] p-3 text-sm text-foreground focus:border-electric focus:outline-none focus:ring-1 focus:ring-electric/30 transition"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5 font-bold">
+                  Review Text
+                </label>
+                <textarea
+                  required
+                  rows={4}
+                  value={testReview}
+                  onChange={(e) => setTestReview(e.target.value)}
+                  placeholder="Collaborated on 10+ projects. Absolute standard..."
+                  className="w-full rounded-xl border border-white/10 bg-white/[0.03] p-3 text-sm text-foreground focus:border-electric focus:outline-none focus:ring-1 focus:ring-electric/30 transition resize-none"
+                />
+              </div>
+
+              <div className="flex items-center gap-2 pt-2">
+                <input
+                  type="checkbox"
+                  id="testIsPublished"
+                  checked={testIsPublished}
+                  onChange={(e) => setTestIsPublished(e.target.checked)}
+                  className="size-4 rounded border-white/10 bg-white/[0.03] text-electric focus:ring-electric"
+                />
+                <label
+                  htmlFor="testIsPublished"
+                  className="text-xs uppercase tracking-wider text-muted-foreground select-none cursor-pointer"
+                >
+                  Published
+                </label>
+              </div>
+
+              <div className="pt-4 flex justify-end gap-3 border-t border-white/5">
+                <button
+                  type="button"
+                  onClick={() => setIsTestimonialModalOpen(false)}
+                  className="rounded-xl border border-white/10 px-5 py-2.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingTestimonial}
+                  className="inline-flex items-center justify-center rounded-xl bg-foreground px-5 py-2.5 text-xs font-semibold text-background hover:scale-[1.01] transition-transform disabled:opacity-50 cursor-pointer"
+                >
+                  {savingTestimonial ? "Saving..." : "Save Testimonial"}
                 </button>
               </div>
             </form>

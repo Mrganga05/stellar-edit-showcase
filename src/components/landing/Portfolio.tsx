@@ -65,7 +65,6 @@ const Particle = ({ delay = 0, x = 0, y = 0 }: { delay?: number; x?: number; y?:
     />
   );
 };
-
 function Card({ p, onOpen }: { p: Project; onOpen: () => void }) {
   const [hover, setHover] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -115,15 +114,15 @@ function Card({ p, onOpen }: { p: Project; onOpen: () => void }) {
       <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/45 to-transparent transition-opacity duration-300 group-hover:from-black/100" />
 
       {/* Top badges bar */}
-      <div className="absolute inset-x-0 top-0 p-4 flex items-center justify-between z-10">
+      <div className="absolute inset-x-0 top-0 p-3 sm:p-4 flex flex-row gap-1 items-center justify-between z-10 w-full">
         {/* Category */}
-        <span className="inline-flex items-center gap-1.5 rounded-full glass px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.15em] text-white/90">
+        <span className="inline-flex items-center gap-1 rounded-full glass px-2 py-0.5 sm:px-2.5 sm:py-1 text-[8px] sm:text-[9px] font-semibold uppercase tracking-[0.15em] text-white/90 truncate max-w-[50%]">
           {p.category}
         </span>
 
         {/* Metric */}
         {displayMetric && (
-          <span className="inline-flex items-center justify-center rounded-full bg-electric/15 border border-electric/30 px-3 py-1 text-[9px] font-bold tracking-wider text-electric shadow-[0_0_12px_rgba(0,212,255,0.2)]">
+          <span className="inline-flex items-center justify-center rounded-full bg-electric/15 border border-electric/30 px-2 py-0.5 sm:px-3 sm:py-1 text-[8px] sm:text-[9px] font-bold tracking-wider text-electric shadow-[0_0_12px_rgba(0,212,255,0.2)] truncate max-w-[50%]">
             {displayMetric}
           </span>
         )}
@@ -131,21 +130,21 @@ function Card({ p, onOpen }: { p: Project; onOpen: () => void }) {
 
       {/* Center play button on hover */}
       <div className="absolute inset-0 grid place-items-center pointer-events-none z-10">
-        <div className="grid size-12 place-items-center rounded-full bg-black/60 text-white border border-white/20 opacity-0 scale-75 blur-xs transition-all duration-300 group-hover:opacity-100 group-hover:scale-100 group-hover:blur-none group-hover:bg-electric group-hover:text-background group-hover:border-electric shadow-[0_0_15px_rgba(0,212,255,0.4)]">
-          <Play className="size-5 fill-current ml-0.5" />
+        <div className="grid size-10 sm:size-12 place-items-center rounded-full bg-black/60 text-white border border-white/20 opacity-0 scale-75 blur-xs transition-all duration-300 group-hover:opacity-100 group-hover:scale-100 group-hover:blur-none group-hover:bg-electric group-hover:text-background group-hover:border-electric shadow-[0_0_15px_rgba(0,212,255,0.4)]">
+          <Play className="size-4 sm:size-5 fill-current ml-0.5" />
         </div>
       </div>
 
       {/* Bottom information */}
-      <div className="absolute inset-x-0 bottom-0 p-5 z-10 flex flex-col justify-end">
-        {/* Client handle/name */}
+      <div className="absolute inset-x-0 bottom-0 p-3.5 sm:p-5 z-10 flex flex-col justify-end">
+        {/* Client name */}
         {p.clientName && (
-          <span className="text-badge-text text-electric mb-1.5">{p.clientName}</span>
+          <span className="text-[9px] sm:text-badge-text text-electric mb-1 font-bold">{p.clientName}</span>
         )}
-        <h3 className="text-card-title text-white group-hover:text-electric transition-colors duration-300">
+        <h3 className="text-xs sm:text-card-title font-semibold text-white group-hover:text-electric transition-colors duration-300 line-clamp-2 leading-tight">
           {p.title}
         </h3>
-        <p className="mt-1 text-small-body text-white/60 line-clamp-1 group-hover:text-white/80 transition-colors duration-300">
+        <p className="mt-0.5 text-[10px] sm:text-small-body text-white/60 line-clamp-1 group-hover:text-white/80 transition-colors duration-300">
           {p.description}
         </p>
       </div>
@@ -259,7 +258,7 @@ export function Portfolio() {
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-[1.5px] bg-gradient-to-r from-[#38BDF8] to-[#3B82F6] blur-[0.5px] shadow-[0_0_8px_rgba(56,189,248,0.5)]" />
         </motion.div>
       </div>
-      <div className="relative z-10 mt-16 grid gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+      <div className="relative z-10 mt-16 grid gap-3 sm:gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {isLoading && !dbProjects
           ? Array.from({ length: 8 }).map((_, i) => (
               <div
