@@ -38,7 +38,7 @@ function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [usernameInput, setUsernameInput] = useState("");
   const [passwordInput, setPasswordInput] = useState("");
-  const [activeTab, setActiveTab] = useState<"contact" | "sample" | "portfolio" | "hero" | "testimonials">(
+  const [activeTab, setActiveTab] = useState<"contact" | "sample" | "portfolio" | "testimonials">(
     "contact",
   );
   const [loading, setLoading] = useState(false);
@@ -50,12 +50,6 @@ function AdminPage() {
   const [portfolioProjects, setPortfolioProjects] = useState<any[]>([]);
   const [services, setServices] = useState<any[]>([]);
   const [testimonials, setTestimonials] = useState<any[]>([]);
-
-  // Hero settings states
-  const [heroHeadline, setHeroHeadline] = useState("");
-  const [heroSubheadline, setHeroSubheadline] = useState("");
-  const [heroRowId, setHeroRowId] = useState<string | null>(null);
-  const [savingHero, setSavingHero] = useState(false);
 
   // Portfolio project form states
   const [editingProject, setEditingProject] = useState<any | null>(null);
@@ -184,20 +178,7 @@ function AdminPage() {
       if (testimonialErr) throw testimonialErr;
       setTestimonials(testimonialData || []);
 
-      // Fetch hero settings (we will fetch a single row)
-      const { data: heroData, error: heroErr } = await supabase
-        .from("hero_settings")
-        .select("*")
-        .order("createdAt", { ascending: false })
-        .limit(1)
-        .maybeSingle();
 
-      if (heroErr) throw heroErr;
-      if (heroData) {
-        setHeroHeadline(heroData.headline);
-        setHeroSubheadline(heroData.subheadline);
-        setHeroRowId(heroData.id);
-      }
     } catch (err: any) {
       console.error(err);
       toast.error("Failed to load requests from Supabase", {
@@ -487,47 +468,7 @@ function AdminPage() {
     }
   }
 
-  async function handleSaveHeroSettings(e: React.FormEvent) {
-    e.preventDefault();
-    setSavingHero(true);
 
-    try {
-      if (heroRowId) {
-        const { error } = await supabase
-          .from("hero_settings")
-          .update({
-            headline: heroHeadline,
-            subheadline: heroSubheadline,
-            updatedAt: new Date().toISOString(),
-          })
-          .eq("id", heroRowId);
-
-        if (error) throw error;
-        toast.success("Hero settings updated successfully");
-      } else {
-        const { error } = await supabase.from("hero_settings").insert([
-          {
-            id: "71e73e6a-72ef-4d6d-88f5-bfa33dbb48c1",
-            headline: heroHeadline,
-            subheadline: heroSubheadline,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          },
-        ]);
-
-        if (error) throw error;
-        toast.success("Hero settings created successfully");
-      }
-      fetchData();
-    } catch (err: any) {
-      console.error(err);
-      toast.error("Failed to save hero settings", {
-        description: err.message,
-      });
-    } finally {
-      setSavingHero(false);
-    }
-  }
 
   // Filtered queries
   const filteredContacts = contacts.filter(
@@ -652,10 +593,6 @@ function AdminPage() {
       title: "Client Testimonials",
       desc: "Manage client testimonials and reviews shown on the homepage.",
     },
-    hero: {
-      title: "Hero Section Editor",
-      desc: "Update the main Headline and Subheadline of the homepage.",
-    },
   };
 
   return (
@@ -694,12 +631,6 @@ function AdminPage() {
                 className={`text-sm font-medium px-3 py-1.5 rounded-lg transition ${activeTab === "testimonials" ? "bg-white/10 text-foreground" : "text-muted-foreground hover:text-foreground"}`}
               >
                 Testimonials
-              </button>
-              <button
-                onClick={() => setActiveTab("hero")}
-                className={`text-sm font-medium px-3 py-1.5 rounded-lg transition ${activeTab === "hero" ? "bg-white/10 text-foreground" : "text-muted-foreground hover:text-foreground"}`}
-              >
-                Hero Editor
               </button>
             </nav>
           </div>
@@ -746,12 +677,6 @@ function AdminPage() {
           >
             Testimonials
           </button>
-          <button
-            onClick={() => setActiveTab("hero")}
-            className={`whitespace-nowrap px-4 py-2.5 rounded-xl font-medium text-sm border transition ${activeTab === "hero" ? "bg-foreground text-background border-foreground" : "border-white/10 text-muted-foreground"}`}
-          >
-            Hero Editor
-          </button>
         </div>
 
         {/* Dashboard Title & Controls */}
@@ -780,18 +705,16 @@ function AdminPage() {
             )}
 
             {/* Search Input for searchable lists */}
-            {activeTab !== "hero" && (
-              <div className="relative">
-                <Search className="absolute left-3.5 top-2.5 size-4 text-muted-foreground" />
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full sm:w-64 rounded-xl border border-white/10 bg-white/[0.03] py-2 pl-10 pr-4 text-xs text-foreground placeholder:text-muted-foreground focus:border-electric focus:outline-none focus:ring-1 focus:ring-electric/30 transition"
-                />
-              </div>
-            )}
+            <div className="relative">
+              <Search className="absolute left-3.5 top-2.5 size-4 text-muted-foreground" />
+              <input
+                type="text"
+                placeholder="Search..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full sm:w-64 rounded-xl border border-white/10 bg-white/[0.03] py-2 pl-10 pr-4 text-xs text-foreground placeholder:text-muted-foreground focus:border-electric focus:outline-none focus:ring-1 focus:ring-electric/30 transition"
+              />
+            </div>
 
             {/* Refresh Button */}
             <button
@@ -1117,67 +1040,7 @@ function AdminPage() {
                 </div>
               ))}
 
-            {activeTab === "hero" && (
-              <div className="max-w-3xl rounded-2xl border border-white/8 bg-surface/40 p-6 space-y-6">
-                <div>
-                  <h3 className="text-lg font-medium text-foreground">Homepage Hero Content</h3>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Update the primary headline and narrative that loads in the hero banner.
-                  </p>
-                </div>
 
-                <form onSubmit={handleSaveHeroSettings} className="space-y-4">
-                  <div>
-                    <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5">
-                      Banner Headline
-                    </label>
-                    <textarea
-                      required
-                      value={heroHeadline}
-                      onChange={(e) => setHeroHeadline(e.target.value)}
-                      rows={3}
-                      className="w-full rounded-xl border border-white/10 bg-white/[0.03] p-4 text-sm text-foreground focus:border-electric focus:outline-none focus:ring-1 focus:ring-electric/30 transition"
-                      placeholder="Edits That Hold Attention And Drive Results."
-                    />
-                    <p className="text-[10px] text-muted-foreground mt-1.5 leading-relaxed">
-                      💡 Tip: Use{" "}
-                      <code className="text-electric font-semibold">
-                        &lt;span class="font-display italic font-normal
-                        text-gradient-brand"&gt;styled text&lt;/span&gt;
-                      </code>{" "}
-                      for the custom cyan-purple italic highlight, and{" "}
-                      <code className="text-electric font-semibold">&lt;br/&gt;</code> to force a
-                      line break.
-                    </p>
-                  </div>
-
-                  <div>
-                    <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5">
-                      Subheadline Narrative
-                    </label>
-                    <textarea
-                      required
-                      value={heroSubheadline}
-                      onChange={(e) => setHeroSubheadline(e.target.value)}
-                      rows={4}
-                      className="w-full rounded-xl border border-white/10 bg-white/[0.03] p-4 text-sm text-foreground focus:border-electric focus:outline-none focus:ring-1 focus:ring-electric/30 transition"
-                      placeholder="Provide a compelling 2-3 sentence overview."
-                    />
-                  </div>
-
-                  <div className="pt-4 border-t border-white/5 flex justify-end">
-                    <button
-                      type="submit"
-                      disabled={savingHero}
-                      className="inline-flex items-center gap-2 rounded-xl bg-foreground px-5 py-2.5 text-xs font-semibold text-background hover:scale-[1.01] transition-transform disabled:opacity-50"
-                    >
-                      <Save className="size-4" />
-                      {savingHero ? "Saving..." : "Save Changes"}
-                    </button>
-                  </div>
-                </form>
-              </div>
-            )}
           </div>
         )}
       </div>
