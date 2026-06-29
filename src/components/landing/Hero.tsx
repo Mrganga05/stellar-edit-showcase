@@ -11,44 +11,63 @@ const prefersReducedMotion =
     ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
     : false;
 
-function AnimatedHeadingLine({
-  text,
-  className,
-}: {
-  text: string;
+interface TypeAnimationProps {
+  sequence: (string | number)[];
+  speed: number;
   className?: string;
-}) {
-  const ref = useRef<HTMLSpanElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-40px" });
+}
 
-  if (prefersReducedMotion) {
-    return <span ref={ref} className={className}>{text}</span>;
-  }
+function TypeAnimation({ sequence, speed, className }: TypeAnimationProps) {
+  const [displayText, setDisplayText] = useState("");
 
-  const chars = Array.from(text); // preserves unicode chars correctly
+  useEffect(() => {
+    let isMounted = true;
+    let sequenceIndex = 0;
+
+    const runSequence = async () => {
+      while (isMounted) {
+        const currentVal = sequence[sequenceIndex];
+
+        if (typeof currentVal === "string") {
+          // Type character by character
+          for (let i = 0; i <= currentVal.length; i++) {
+            if (!isMounted) return;
+            setDisplayText(currentVal.slice(0, i));
+            await new Promise((r) => setTimeout(r, speed));
+          }
+        } else if (typeof currentVal === "number") {
+          // Pause for the duration
+          await new Promise((r) => setTimeout(r, currentVal));
+
+          if (!isMounted) return;
+          // Erase character by character
+          const lastIndex = (sequenceIndex - 1 + sequence.length) % sequence.length;
+          const lastVal = sequence[lastIndex];
+          const textToErase = typeof lastVal === "string" ? lastVal : "";
+
+          for (let i = textToErase.length; i >= 0; i--) {
+            if (!isMounted) return;
+            setDisplayText(textToErase.slice(0, i));
+            await new Promise((r) => setTimeout(r, speed / 3)); // Erase 3x faster
+          }
+          await new Promise((r) => setTimeout(r, 400));
+        }
+
+        sequenceIndex = (sequenceIndex + 1) % sequence.length;
+      }
+    };
+
+    runSequence();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [sequence, speed]);
 
   return (
-    <span ref={ref} className={cn("inline", className)} aria-label={text}>
-      {chars.map((char, i) => (
-        <motion.span
-          key={i}
-          aria-hidden
-          initial={{ opacity: 0, y: 25, scale: 0.95, filter: "blur(8px)" }}
-          animate={
-            isInView
-              ? { opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }
-              : { opacity: 0, y: 25, scale: 0.95, filter: "blur(8px)" }
-          }
-          transition={{
-            duration: 0.55,
-            delay: i * 0.035,
-            ease: [0.22, 1, 0.36, 1],
-          }}
-          style={{ display: "inline-block", whiteSpace: char === " " ? "pre" : undefined }}
-        >
-          {char === " " ? "\u00A0" : char}
-        </motion.span>
-      ))}
+    <span className={className}>
+      {displayText}
+      <span className="animate-blink font-normal text-electric select-none">|</span>
     </span>
   );
 }
@@ -260,25 +279,22 @@ export function Hero() {
             </motion.div>
 
             {/* Editorial Headline */}
-            <div className="flex flex-col items-center lg:items-start w-full">
+            <div className="flex flex-col items-center lg:text-left w-full">
               <motion.h1
                 initial={{ opacity: 0, y: 28 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.75, ease: [0.19, 1, 0.22, 1] }}
                 className="text-hero-title max-w-[820px] text-center lg:text-left pr-6"
               >
-                {heroData.headline.includes("<br") || heroData.headline.includes("<span") ? (
-                  <span dangerouslySetInnerHTML={{ __html: heroData.headline }} />
-                ) : (
-                  <>
-                    <span className="block">TURNING RAW FOOTAGE</span>
-                    <span className="block">INTO CONTENT</span>
-                    <AnimatedHeadingLine
-                      text="THAT DEMANDS ATTENTION."
-                      className="animate-gradient-text italic block pr-2.5 font-black"
-                    />
-                  </>
-                )}
+                <span className="block">TURNING RAW FOOTAGE</span>
+                <span className="block">INTO CONTENT</span>
+                <span className="block min-h-[2.2em] relative">
+                  <TypeAnimation
+                    sequence={["THAT DEMANDS ATTENTION.", 3000]}
+                    speed={110}
+                    className="text-gradient-brand font-display italic font-black animate-gradient-text pr-2.5 inline-block filter drop-shadow-[0_0_15px_rgba(56,189,248,0.45)]"
+                  />
+                </span>
               </motion.h1>
 
               {/* Accent bar */}

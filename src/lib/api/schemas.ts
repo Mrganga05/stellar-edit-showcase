@@ -83,11 +83,11 @@ export const faqInputSchema = z.object({
 
 export const contactCreateSchema = z.object({
   serviceId: z.string().uuid().nullable().optional(),
-  name: z.string().trim().min(2).max(120),
+  name: z.string().trim().min(2, "Name must be at least 2 characters").max(120),
   email: z
     .string()
     .trim()
-    .email()
+    .email("Please enter a valid email address")
     .max(254)
     .transform((value) => value.toLowerCase()),
   projectType: z.enum([
@@ -100,7 +100,7 @@ export const contactCreateSchema = z.object({
   ]),
   budget: z.string().optional().default("Not Specified"),
   timeline: z.enum(["ASAP / Urgent", "1–2 Weeks", "3–4 Weeks", "Ongoing Partnership"]),
-  details: z.string().trim().min(20).max(5000),
+  details: z.string().trim().min(20, "Project details must be at least 20 characters").max(5000),
 });
 
 export const contactUpdateSchema = z
@@ -111,15 +111,15 @@ export const contactUpdateSchema = z
   .refine((value) => Object.keys(value).length > 0, "At least one field is required");
 
 export const sampleRequestCreateSchema = z.object({
-  name: z.string().trim().min(2).max(120),
+  name: z.string().trim().min(2, "Name must be at least 2 characters").max(120),
   email: z
     .string()
     .trim()
-    .email()
+    .email("Please enter a valid email address")
     .max(254)
     .transform((value) => value.toLowerCase()),
   footageLink: httpUrl,
-  message: z.string().trim().min(10).max(3000),
+  message: z.string().trim().min(10, "Message must be at least 10 characters").max(3000),
 });
 
 export const sampleRequestUpdateSchema = z

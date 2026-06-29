@@ -3,6 +3,7 @@ import { toast } from "sonner";
 import { MessageCircle, Instagram, Linkedin, Youtube, ArrowRight } from "lucide-react";
 import { SectionHeading, Reveal } from "./primitives";
 import { contactApi } from "@/lib/api/services";
+import { contactCreateSchema } from "@/lib/api/schemas";
 
 const channels = [
   {
@@ -56,15 +57,27 @@ export function Contact() {
     const timeline = formData.get("timeline") as any;
     const details = formData.get("details") as string;
 
-    try {
-      await contactApi.create({
-        name,
-        email,
-        projectType,
-        budget: "Not Specified",
-        timeline,
-        details,
+    const validationResult = contactCreateSchema.safeParse({
+      name,
+      email,
+      projectType,
+      budget: "Not Specified",
+      timeline,
+      details,
+    });
+
+    if (!validationResult.success) {
+      setLoading(false);
+      const errors = validationResult.error.flatten().fieldErrors;
+      const errorMsg = Object.values(errors).flat().join(". ");
+      toast.error("Validation Error", {
+        description: errorMsg || "Please check your inputs.",
       });
+      return;
+    }
+
+    try {
+      await contactApi.create(validationResult.data);
       form.reset();
       toast.success("Project request received", {
         description: "I'll be in touch within 12 hours.",

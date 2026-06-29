@@ -834,6 +834,14 @@ html {
   }
 }
 
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+.animate-blink {
+  animation: blink 1s step-start infinite;
+}
+
 /* ─────────────────────────────────────────────
    PREMIUM CTA BUTTONS & STATS CARDS
    ───────────────────────────────────────────── */
