@@ -205,7 +205,9 @@ const FeatureCard = ({ title, desc, icon, delay = 0 }: FeatureCardProps) => {
           {title}
         </h4>
       </div>
-      <p className="text-[10px] sm:text-xs lg:text-small-body text-neutral-400 leading-relaxed">{desc}</p>
+      <p className="text-[10px] sm:text-xs lg:text-small-body text-neutral-400 leading-relaxed">
+        {desc}
+      </p>
     </motion.div>
   );
 };
@@ -288,8 +290,6 @@ export function About() {
       onMouseMove={handleMouseMove}
       className="relative w-full overflow-hidden bg-transparent py-24 md:py-32 flex items-center justify-center max-lg:pt-12 max-lg:pb-16"
     >
-
-
       {/* Background floating particles */}
       <div className="absolute inset-0 pointer-events-none z-0">
         <Particle x={8} y={15} delay={0} />
@@ -347,7 +347,9 @@ export function About() {
           <div className="flex flex-col sm:flex-row gap-6 items-stretch max-lg:order-6 max-lg:flex-col max-lg:gap-0 max-lg:w-full max-lg:max-w-[360px] max-lg:mx-auto">
             {/* Timeline (40% width on desktop) */}
             <div className="w-full sm:w-[40%] flex flex-col justify-center space-y-3 sm:space-y-4 overflow-hidden max-lg:w-full max-lg:mt-8">
-              <h5 className="text-[10px] sm:text-badge-text text-[#9CA3AF] tracking-wider font-bold">THE JOURNEY</h5>
+              <h5 className="text-[10px] sm:text-badge-text text-[#9CA3AF] tracking-wider font-bold">
+                THE JOURNEY
+              </h5>
 
               <div className="relative pl-2">
                 {/* Vertical Indicator Line */}
@@ -380,7 +382,9 @@ export function About() {
                         <span className="font-bold text-[#38BDF8] tracking-wider text-[9px] min-[375px]:text-xs shrink-0">
                           {event.year}
                         </span>
-                        <span className="text-[10px] min-[375px]:text-xs lg:text-small-body text-neutral-400 break-words">{event.text}</span>
+                        <span className="text-[10px] min-[375px]:text-xs lg:text-small-body text-neutral-400 break-words">
+                          {event.text}
+                        </span>
                       </div>
                     </motion.div>
                   ))}
@@ -391,7 +395,9 @@ export function About() {
             {/* CTA Card (60% width on desktop) */}
             <div className="w-full sm:w-[60%] rounded-[24px] border border-white/[0.08] bg-white/[0.03] p-4.5 sm:p-6 xl:p-8 backdrop-blur-md flex flex-col justify-between space-y-4 sm:space-y-5 max-lg:w-full max-lg:mt-10 max-lg:rounded-[20px] max-lg:p-5">
               <div className="space-y-1 sm:space-y-2">
-                <span className="text-[9px] sm:text-badge-text text-[#38BDF8] font-bold">READY TO COLLABORATE?</span>
+                <span className="text-[9px] sm:text-badge-text text-[#38BDF8] font-bold">
+                  READY TO COLLABORATE?
+                </span>
                 <h4 className="text-xs min-[375px]:text-sm sm:text-card-title text-[#F9FAFB] leading-tight font-bold">
                   Ready To Create Your Next Viral Video?
                 </h4>
@@ -452,7 +458,12 @@ export function About() {
                     key={text}
                     variants={{
                       hidden: { opacity: 0, scale: 0.82, y: 10 },
-                      visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] } },
+                      visible: {
+                        opacity: 1,
+                        scale: 1,
+                        y: 0,
+                        transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] },
+                      },
                     }}
                     whileHover={{ scale: 1.06, y: -2 }}
                     whileTap={{ scale: 0.96 }}
@@ -472,7 +483,12 @@ export function About() {
                     key={text}
                     variants={{
                       hidden: { opacity: 0, scale: 0.82, y: 10 },
-                      visible: { opacity: 1, scale: 1, y: 0, transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] } },
+                      visible: {
+                        opacity: 1,
+                        scale: 1,
+                        y: 0,
+                        transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] },
+                      },
                     }}
                     whileHover={{ scale: 1.06, y: -2 }}
                     whileTap={{ scale: 0.96 }}
@@ -523,7 +539,9 @@ export function About() {
                 <span className="font-bold text-white text-sm min-[375px]:text-base sm:text-lg max-lg:text-xl">
                   <Counter to={50} suffix="M+" />
                 </span>
-                <span className="text-[9px] sm:text-badge-text text-[#9CA3AF] mt-0.5 max-lg:text-[9px]">Views</span>
+                <span className="text-[9px] sm:text-badge-text text-[#9CA3AF] mt-0.5 max-lg:text-[9px]">
+                  Views
+                </span>
                 <Sparkline color="#38BDF8" />
               </div>
               <div className="h-10 w-px bg-white/[0.08] hidden sm:block" />
@@ -531,7 +549,9 @@ export function About() {
                 <span className="font-bold text-white text-sm min-[375px]:text-base sm:text-lg max-lg:text-xl">
                   <Counter to={100} suffix="+" />
                 </span>
-                <span className="text-[9px] sm:text-badge-text text-[#9CA3AF] mt-0.5 max-lg:text-[9px]">Clients</span>
+                <span className="text-[9px] sm:text-badge-text text-[#9CA3AF] mt-0.5 max-lg:text-[9px]">
+                  Clients
+                </span>
                 <Sparkline color="#3B82F6" />
               </div>
               <div className="h-10 w-px bg-white/[0.08] hidden sm:block" />
@@ -539,13 +559,19 @@ export function About() {
                 <span className="font-bold text-white text-sm min-[375px]:text-base sm:text-lg max-lg:text-xl">
                   <Counter to={4.9} decimals={1} suffix="★" />
                 </span>
-                <span className="text-[9px] sm:text-badge-text text-[#9CA3AF] mt-0.5 max-lg:text-[9px]">Rating</span>
+                <span className="text-[9px] sm:text-badge-text text-[#9CA3AF] mt-0.5 max-lg:text-[9px]">
+                  Rating
+                </span>
                 <Sparkline color="#38BDF8" />
               </div>
               <div className="h-10 w-px bg-white/[0.08] hidden sm:block" />
               <div className="flex-1 min-w-[70px] text-center px-1 flex flex-col items-center">
-                <span className="font-bold text-white text-[10px] min-[375px]:text-xs sm:text-xs max-lg:text-base">Worldwide</span>
-                <span className="text-[9px] sm:text-badge-text text-[#9CA3AF] mt-0.5 max-lg:text-[9px]">Global Reach</span>
+                <span className="font-bold text-white text-[10px] min-[375px]:text-xs sm:text-xs max-lg:text-base">
+                  Worldwide
+                </span>
+                <span className="text-[9px] sm:text-badge-text text-[#9CA3AF] mt-0.5 max-lg:text-[9px]">
+                  Global Reach
+                </span>
                 <Sparkline color="#3B82F6" />
               </div>
             </motion.div>

@@ -29,7 +29,9 @@ export function Results() {
               <div className="font-sans font-black text-2xl min-[375px]:text-3xl sm:text-5xl text-gradient-brand lg:text-6xl">
                 <AnimatedCounter to={s.to} suffix={s.suffix} />
               </div>
-              <div className="mt-1.5 sm:mt-3 text-[9px] sm:text-badge-text text-muted-foreground">{s.label}</div>
+              <div className="mt-1.5 sm:mt-3 text-[9px] sm:text-badge-text text-muted-foreground">
+                {s.label}
+              </div>
             </div>
           ))}
         </div>

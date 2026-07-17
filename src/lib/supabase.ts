@@ -30,7 +30,7 @@ if (
 ) {
   console.warn(
     "Supabase configuration warning: Using placeholder environment variables or missing configuration. " +
-      "Please make sure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set in your Vercel deployment variables."
+      "Please make sure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set in your Vercel deployment variables.",
   );
 }
 

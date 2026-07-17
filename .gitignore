@@ -37,3 +37,7 @@ data/*.sqlite-wal
 *.njsproj
 *.sln
 *.sw?
+
+# Vercel
+.vercel/
+

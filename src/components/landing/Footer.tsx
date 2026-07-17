@@ -47,8 +47,6 @@ export function Footer() {
             links={[
               { label: "Portfolio", href: "#work" },
               { label: "About", href: "#about" },
-              { label: "Process", href: "#process" },
-              { label: "Results", href: "#results" },
             ]}
           />
           <FooterCol

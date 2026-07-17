@@ -115,8 +115,6 @@ function AnimatedCounter({ value, className }: { value: string; className?: stri
   );
 }
 
-
-
 // Reusable premium spring-loaded Magnetic Button Wrapper
 function MagneticButton({
   children,
@@ -172,8 +170,6 @@ export function Hero() {
   });
 
   const scrollRef = useRef<HTMLDivElement>(null);
-
-
 
   return (
     <section
@@ -232,8 +228,6 @@ export function Hero() {
       {/* Grid overlay for digital alignment */}
       <div className="hero-grid absolute inset-0 opacity-[0.015] pointer-events-none" />
 
-
-
       {/* ── MAIN HERO LAYOUT CONTAINER ── */}
       <div className="relative z-10 mx-auto w-full max-w-[1440px] pl-6 pr-6 md:pl-8 md:pr-8 lg:pl-12 lg:pr-12 xl:pl-16 xl:pr-16 pt-8 lg:pt-12 pb-6 lg:pb-8 flex-grow flex flex-col justify-center">
         {/* Two-Column Grid: Left Column has structured copy, Right Column is empty to expose background image */}
@@ -253,14 +247,14 @@ export function Hero() {
                 boxShadow: [
                   "0 4px 20px rgba(59,130,246,0.15)",
                   "0 4px 30px rgba(34,211,238,0.4)",
-                  "0 4px 20px rgba(59,130,246,0.15)"
-                ]
+                  "0 4px 20px rgba(59,130,246,0.15)",
+                ],
               }}
               whileHover={{ scale: 1.05 }}
               transition={{
                 opacity: { duration: 0.6 },
                 scale: { duration: 4, repeat: Infinity, ease: "easeInOut" },
-                boxShadow: { duration: 4, repeat: Infinity, ease: "easeInOut" }
+                boxShadow: { duration: 4, repeat: Infinity, ease: "easeInOut" },
               }}
               className="relative inline-flex items-center gap-2 rounded-full p-[1.5px] mb-5 lg:mb-6 select-none bg-gradient-to-r from-[#3B82F6] via-[#22d3ee] to-[#a855f7] bg-[length:200%_auto] animate-gradient-text"
             >
@@ -273,7 +267,7 @@ export function Hero() {
                   ✦
                 </motion.span>
                 <span className="text-badge-text text-white font-black tracking-wider uppercase bg-clip-text text-transparent bg-gradient-to-r from-[#a5f3fc] via-[#ffffff] to-[#a5f3fc] bg-[length:200%_auto] animate-gradient-text">
-                  CINEMATIC VIDEO EDITOR
+                  PROFESSIONAL VIDEO EDITOR
                 </span>
               </div>
             </motion.div>
@@ -472,7 +466,7 @@ export function Hero() {
               exit={{ opacity: 0, scale: 0.95, y: 16 }}
               transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
               onClick={(e) => e.stopPropagation()}
-              className="relative aspect-video w-full max-w-5xl overflow-hidden rounded-3xl border border-white/10 bg-black shadow-[0_0_80px_rgba(0,0,0,0.95)]"
+              className="relative aspect-[9/16] w-full max-w-[380px] max-h-[85vh] overflow-hidden rounded-3xl border border-white/10 bg-black shadow-[0_0_80px_rgba(0,0,0,0.95)]"
             >
               <button
                 onClick={() => setShowreelOpen(false)}

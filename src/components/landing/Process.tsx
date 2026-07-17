@@ -66,9 +66,15 @@ export function Process() {
                 <s.icon className="size-4 sm:size-5 text-electric" />
               </div>
               <div className="rounded-xl sm:rounded-2xl glass p-4 sm:p-6 hover-card-premium">
-                <div className="text-[9px] sm:text-badge-text text-muted-foreground">Step {i + 1}</div>
-                <h3 className="mt-1 sm:mt-2 text-xs min-[375px]:text-sm sm:text-card-title text-white font-semibold">{s.title}</h3>
-                <p className="mt-1 sm:mt-2 text-[10px] min-[375px]:text-xs sm:text-small-body text-neutral-400 leading-normal">{s.desc}</p>
+                <div className="text-[9px] sm:text-badge-text text-muted-foreground">
+                  Step {i + 1}
+                </div>
+                <h3 className="mt-1 sm:mt-2 text-xs min-[375px]:text-sm sm:text-card-title text-white font-semibold">
+                  {s.title}
+                </h3>
+                <p className="mt-1 sm:mt-2 text-[10px] min-[375px]:text-xs sm:text-small-body text-neutral-400 leading-normal">
+                  {s.desc}
+                </p>
               </div>
             </motion.div>
           ))}

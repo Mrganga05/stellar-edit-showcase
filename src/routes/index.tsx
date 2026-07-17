@@ -7,10 +7,7 @@ import { Portfolio } from "@/components/landing/Portfolio";
 import { About } from "@/components/landing/About";
 import { Services } from "@/components/landing/Services";
 import { WhyChooseMe } from "@/components/landing/WhyChooseMe";
-import { Process } from "@/components/landing/Process";
-import { Results } from "@/components/landing/Results";
 import { Testimonials } from "@/components/landing/Testimonials";
-import { FreeSample } from "@/components/landing/FreeSample";
 import { FAQ } from "@/components/landing/FAQ";
 import { Contact } from "@/components/landing/Contact";
 import { Footer } from "@/components/landing/Footer";
@@ -56,13 +53,7 @@ function LandingPage() {
       {divider}
       <WhyChooseMe />
       {divider}
-      <Process />
-      {divider}
-      <Results />
-      {divider}
       <Testimonials />
-      {divider}
-      <FreeSample />
       {divider}
       <FAQ />
       {divider}

@@ -77,7 +77,7 @@ function Card({ p, onOpen }: { p: Project; onOpen: () => void }) {
       onClick={onOpen}
       onMouseEnter={() => {
         setHover(true);
-        videoRef.current?.play().catch(() => { });
+        videoRef.current?.play().catch(() => {});
       }}
       onMouseLeave={() => {
         setHover(false);
@@ -139,7 +139,9 @@ function Card({ p, onOpen }: { p: Project; onOpen: () => void }) {
       <div className="absolute inset-x-0 bottom-0 p-3.5 sm:p-5 z-10 flex flex-col justify-end">
         {/* Client name */}
         {p.clientName && (
-          <span className="text-[9px] sm:text-badge-text text-electric mb-1 font-bold">{p.clientName}</span>
+          <span className="text-[9px] sm:text-badge-text text-electric mb-1 font-bold">
+            {p.clientName}
+          </span>
         )}
         <h3 className="text-xs sm:text-card-title font-semibold text-white group-hover:text-electric transition-colors duration-300 line-clamp-2 leading-tight">
           {p.title}
@@ -159,19 +161,19 @@ export function Portfolio() {
   const projectsToRender =
     dbProjects && dbProjects.length > 0
       ? dbProjects.map((p) => ({
-        id: p.id,
-        title: p.title,
-        category: p.category,
-        description: p.description,
-        thumb: p.thumbnail,
-        video: p.videoUrl,
-        overview: p.overview,
-        techniques: p.techniques,
-        results: p.results,
-        tools: p.tools,
-        clientName: p.clientName || "",
-        metric: p.metric || "",
-      }))
+          id: p.id,
+          title: p.title,
+          category: p.category,
+          description: p.description,
+          thumb: p.thumbnail,
+          video: p.videoUrl,
+          overview: p.overview,
+          techniques: p.techniques,
+          results: p.results,
+          tools: p.tools,
+          clientName: p.clientName || "",
+          metric: p.metric || "",
+        }))
       : mockProjects;
 
   return (
@@ -261,16 +263,16 @@ export function Portfolio() {
       <div className="relative z-10 mt-16 grid gap-3 sm:gap-6 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {isLoading && !dbProjects
           ? Array.from({ length: 8 }).map((_, i) => (
-            <div
-              key={i}
-              className="aspect-[9/16] w-full animate-pulse rounded-2xl bg-surface/50 border border-white/5"
-            />
-          ))
+              <div
+                key={i}
+                className="aspect-[9/16] w-full animate-pulse rounded-2xl bg-surface/50 border border-white/5"
+              />
+            ))
           : projectsToRender.map((p, i) => (
-            <Reveal key={p.id} delay={(i % 4) * 0.05}>
-              <Card p={p} onOpen={() => setOpen(p)} />
-            </Reveal>
-          ))}
+              <Reveal key={p.id} delay={(i % 4) * 0.05}>
+                <Card p={p} onOpen={() => setOpen(p)} />
+              </Reveal>
+            ))}
       </div>
 
       <AnimatePresence>
@@ -320,7 +322,9 @@ export function Portfolio() {
                       {open.clientName && <span className="text-white/20">•</span>}
                       <span className="text-badge-text text-muted-foreground">{open.category}</span>
                     </div>
-                    <h3 className="mt-2 text-sm sm:text-card-title text-white font-bold">{open.title}</h3>
+                    <h3 className="mt-2 text-sm sm:text-card-title text-white font-bold">
+                      {open.title}
+                    </h3>
                     <p className="mt-2 text-xs sm:text-small-body text-white/60 leading-relaxed">
                       {open.overview}
                     </p>

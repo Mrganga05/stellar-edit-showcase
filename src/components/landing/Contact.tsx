@@ -176,8 +176,12 @@ export function Contact() {
                   <c.icon className="size-4 sm:size-5" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="text-[9px] sm:text-badge-text text-muted-foreground font-semibold uppercase">{c.label}</div>
-                  <div className="truncate text-xs sm:text-base font-semibold text-white mt-0.5">{c.value}</div>
+                  <div className="text-[9px] sm:text-badge-text text-muted-foreground font-semibold uppercase">
+                    {c.label}
+                  </div>
+                  <div className="truncate text-xs sm:text-base font-semibold text-white mt-0.5">
+                    {c.value}
+                  </div>
                 </div>
                 <ArrowRight className="size-4 -translate-x-1 opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100 hidden sm:block" />
               </a>
@@ -203,7 +207,9 @@ function Field({
 }) {
   return (
     <label className={`block ${className}`}>
-      <span className="mb-1.5 block text-[10px] sm:text-badge-text text-muted-foreground font-bold uppercase tracking-wider">{label}</span>
+      <span className="mb-1.5 block text-[10px] sm:text-badge-text text-muted-foreground font-bold uppercase tracking-wider">
+        {label}
+      </span>
       {children}
     </label>
   );

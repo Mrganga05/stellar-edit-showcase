@@ -37,8 +37,12 @@ export function WhyChooseMe() {
           <Reveal key={it.title} delay={(i % 4) * 0.05}>
             <div className="h-full rounded-xl sm:rounded-2xl border border-white/8 bg-surface p-3.5 sm:p-6 hover-card-premium flex flex-col justify-start">
               <it.icon className="size-4 sm:size-5 text-electric shrink-0" />
-              <h3 className="mt-3 sm:mt-5 text-xs min-[375px]:text-sm sm:text-card-title text-white font-semibold">{it.title}</h3>
-              <p className="mt-1 sm:mt-2 text-[10px] min-[375px]:text-xs sm:text-small-body text-neutral-400 leading-normal">{it.desc}</p>
+              <h3 className="mt-3 sm:mt-5 text-xs min-[375px]:text-sm sm:text-card-title text-white font-semibold">
+                {it.title}
+              </h3>
+              <p className="mt-1 sm:mt-2 text-[10px] min-[375px]:text-xs sm:text-small-body text-neutral-400 leading-normal">
+                {it.desc}
+              </p>
             </div>
           </Reveal>
         ))}

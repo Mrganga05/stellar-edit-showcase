@@ -92,7 +92,7 @@ function AdminPage() {
     file: File,
     folder: "portfolio" | "avatars",
     setUploadingState: React.Dispatch<React.SetStateAction<boolean>>,
-    setUrlState: React.Dispatch<React.SetStateAction<string>>
+    setUrlState: React.Dispatch<React.SetStateAction<string>>,
   ) => {
     setUploadingState(true);
     try {
@@ -106,9 +106,9 @@ function AdminPage() {
 
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from("portfolio")
-        .getPublicUrl(filePath);
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("portfolio").getPublicUrl(filePath);
 
       setUrlState(publicUrl);
       toast.success("File uploaded successfully!");
@@ -177,8 +177,6 @@ function AdminPage() {
 
       if (testimonialErr) throw testimonialErr;
       setTestimonials(testimonialData || []);
-
-
     } catch (err: any) {
       console.error(err);
       toast.error("Failed to load requests from Supabase", {
@@ -196,7 +194,9 @@ function AdminPage() {
     setTestCompany("");
     setTestRating(5);
     setTestReview("");
-    setTestProfileImage("https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80");
+    setTestProfileImage(
+      "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80",
+    );
     setTestSortOrder(testimonials.length);
     setTestIsPublished(true);
     setIsTestimonialModalOpen(true);
@@ -223,7 +223,9 @@ function AdminPage() {
       company: testCompany,
       rating: Number(testRating),
       review: testReview,
-      profileImage: testProfileImage || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80",
+      profileImage:
+        testProfileImage ||
+        "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80",
       sortOrder: Number(testSortOrder),
       isPublished: testIsPublished,
       updatedAt: new Date().toISOString(),
@@ -467,8 +469,6 @@ function AdminPage() {
       });
     }
   }
-
-
 
   // Filtered queries
   const filteredContacts = contacts.filter(
@@ -966,7 +966,9 @@ function AdminPage() {
                     >
                       <div className="space-y-3 flex-1">
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className="font-semibold text-lg text-foreground">{t.clientName}</span>
+                          <span className="font-semibold text-lg text-foreground">
+                            {t.clientName}
+                          </span>
                           <span className="text-muted-foreground text-sm">({t.company})</span>
                           <div className="flex gap-0.5 ml-2">
                             {Array.from({ length: t.rating }).map((_, i) => (
@@ -986,7 +988,9 @@ function AdminPage() {
                             alt={t.clientName}
                             className="size-8 rounded-full object-cover border border-white/10"
                           />
-                          <span className="text-xs text-muted-foreground break-all">{t.profileImage}</span>
+                          <span className="text-xs text-muted-foreground break-all">
+                            {t.profileImage}
+                          </span>
                         </div>
                       </div>
 
@@ -1003,13 +1007,18 @@ function AdminPage() {
                                 const isPub = e.target.value === "published";
                                 const { error } = await supabase
                                   .from("testimonials")
-                                  .update({ isPublished: isPub, updatedAt: new Date().toISOString() })
+                                  .update({
+                                    isPublished: isPub,
+                                    updatedAt: new Date().toISOString(),
+                                  })
                                   .eq("id", t.id);
                                 if (error) throw error;
                                 toast.success("Status updated");
                                 fetchData();
                               } catch (err: any) {
-                                toast.error("Failed to update status", { description: err.message });
+                                toast.error("Failed to update status", {
+                                  description: err.message,
+                                });
                               }
                             }}
                             className="bg-black/40 border border-white/10 rounded-lg text-xs text-foreground px-2.5 py-1.5 focus:outline-none focus:border-electric"
@@ -1039,8 +1048,6 @@ function AdminPage() {
                   ))}
                 </div>
               ))}
-
-
           </div>
         )}
       </div>
@@ -1132,13 +1139,21 @@ function AdminPage() {
                       accept="image/*"
                       onChange={(e) => {
                         const file = e.target.files?.[0];
-                        if (file) handleUploadFile(file, "portfolio", setUploadingThumbnail, setProjThumbnail);
+                        if (file)
+                          handleUploadFile(
+                            file,
+                            "portfolio",
+                            setUploadingThumbnail,
+                            setProjThumbnail,
+                          );
                       }}
                       className="w-full text-xs text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-white/10 file:text-foreground hover:file:bg-white/20 file:cursor-pointer"
                       disabled={uploadingThumbnail}
                     />
                     {uploadingThumbnail && (
-                      <div className="text-xs text-electric animate-pulse">Uploading thumbnail...</div>
+                      <div className="text-xs text-electric animate-pulse">
+                        Uploading thumbnail...
+                      </div>
                     )}
                     <input
                       required
@@ -1160,7 +1175,8 @@ function AdminPage() {
                       accept="video/*"
                       onChange={(e) => {
                         const file = e.target.files?.[0];
-                        if (file) handleUploadFile(file, "portfolio", setUploadingVideo, setProjVideoUrl);
+                        if (file)
+                          handleUploadFile(file, "portfolio", setUploadingVideo, setProjVideoUrl);
                       }}
                       className="w-full text-xs text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-white/10 file:text-foreground hover:file:bg-white/20 file:cursor-pointer"
                       disabled={uploadingVideo}
@@ -1371,7 +1387,13 @@ function AdminPage() {
                     accept="image/*"
                     onChange={(e) => {
                       const file = e.target.files?.[0];
-                      if (file) handleUploadFile(file, "avatars", setUploadingTestimonialAvatar, setTestProfileImage);
+                      if (file)
+                        handleUploadFile(
+                          file,
+                          "avatars",
+                          setUploadingTestimonialAvatar,
+                          setTestProfileImage,
+                        );
                     }}
                     className="w-full text-xs text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-white/10 file:text-foreground hover:file:bg-white/20 file:cursor-pointer"
                     disabled={uploadingTestimonialAvatar}

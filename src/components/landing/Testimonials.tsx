@@ -20,10 +20,10 @@ export function Testimonials() {
   const prev = useCallback(() => embla?.scrollPrev(), [embla]);
   const next = useCallback(() => embla?.scrollNext(), [embla]);
   const { data: dbTestimonials, isLoading, refetch } = useTestimonials();
-  
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   // Form fields
   const [clientName, setClientName] = useState("");
   const [company, setCompany] = useState("");
@@ -54,9 +54,9 @@ export function Testimonials() {
 
       if (uploadError) throw uploadError;
 
-      const { data: { publicUrl } } = supabase.storage
-        .from("portfolio")
-        .getPublicUrl(filePath);
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("portfolio").getPublicUrl(filePath);
 
       setCustomAvatarUrl(publicUrl);
       setSelectedAvatarIdx(-1);
@@ -88,10 +88,11 @@ export function Testimonials() {
       toast.error("Please fill out all fields");
       return;
     }
-    
+
     setIsSubmitting(true);
     try {
-      const avatarUrl = selectedAvatarIdx === -1 ? customAvatarUrl : defaultAvatars[selectedAvatarIdx];
+      const avatarUrl =
+        selectedAvatarIdx === -1 ? customAvatarUrl : defaultAvatars[selectedAvatarIdx];
       if (!avatarUrl) {
         toast.error("Please select or upload an avatar image.");
         setIsSubmitting(false);
@@ -108,20 +109,20 @@ export function Testimonials() {
           sortOrder: testimonialsToRender.length,
         },
       ]);
-      
+
       if (error) throw error;
-      
+
       toast.success("Review submitted!", {
         description: "Thank you for sharing your experience!",
       });
-      
+
       // Reset form
       setClientName("");
       setCompany("");
       setRating(5);
       setReview("");
       setIsModalOpen(false);
-      
+
       // Refresh list
       refetch();
     } catch (err: any) {
@@ -193,7 +194,9 @@ export function Testimonials() {
                 >
                   <div className="flex h-full flex-col rounded-[20px] sm:rounded-3xl glass-strong p-4.5 sm:p-7">
                     <Quote className="size-5 sm:size-7 text-electric shrink-0" />
-                    <p className="mt-3 sm:mt-5 text-xs sm:text-body-text text-neutral-300 leading-normal">"{t.quote}"</p>
+                    <p className="mt-3 sm:mt-5 text-xs sm:text-body-text text-neutral-300 leading-normal">
+                      "{t.quote}"
+                    </p>
                     <div className="mt-auto flex items-center gap-2.5 sm:gap-4 pt-5 sm:pt-8">
                       <img
                         src={t.avatar}
@@ -204,12 +207,19 @@ export function Testimonials() {
                         className="size-10 sm:size-14 rounded-full object-cover border border-white/10 shrink-0"
                       />
                       <div className="min-w-0 flex-1">
-                        <div className="font-semibold text-xs sm:text-base text-white">{t.name}</div>
-                        <div className="truncate text-[10px] sm:text-sm text-muted-foreground">{t.company}</div>
+                        <div className="font-semibold text-xs sm:text-base text-white">
+                          {t.name}
+                        </div>
+                        <div className="truncate text-[10px] sm:text-sm text-muted-foreground">
+                          {t.company}
+                        </div>
                       </div>
                       <div className="flex gap-0.5 shrink-0">
                         {Array.from({ length: t.rating }).map((_, i) => (
-                          <Star key={i} className="size-2.5 sm:size-3.5 fill-electric text-electric" />
+                          <Star
+                            key={i}
+                            className="size-2.5 sm:size-3.5 fill-electric text-electric"
+                          />
                         ))}
                       </div>
                     </div>
@@ -285,19 +295,25 @@ export function Testimonials() {
                         "size-12 rounded-full border-2 overflow-hidden transition-all",
                         selectedAvatarIdx === idx
                           ? "border-electric scale-105 shadow-[0_0_10px_rgba(34,211,238,0.4)]"
-                          : "border-transparent opacity-60 hover:opacity-100"
+                          : "border-transparent opacity-60 hover:opacity-100",
                       )}
                     >
-                      <img src={url} alt={`Avatar option ${idx + 1}`} className="size-full object-cover" />
+                      <img
+                        src={url}
+                        alt={`Avatar option ${idx + 1}`}
+                        className="size-full object-cover"
+                      />
                     </button>
                   ))}
 
-                  <label className={cn(
-                    "size-12 rounded-full border border-dashed flex flex-col items-center justify-center cursor-pointer transition-all hover:bg-white/5 relative overflow-hidden",
-                    selectedAvatarIdx === -1 && customAvatarUrl
-                      ? "border-electric scale-105 shadow-[0_0_10px_rgba(34,211,238,0.4)]"
-                      : "border-white/20"
-                  )}>
+                  <label
+                    className={cn(
+                      "size-12 rounded-full border border-dashed flex flex-col items-center justify-center cursor-pointer transition-all hover:bg-white/5 relative overflow-hidden",
+                      selectedAvatarIdx === -1 && customAvatarUrl
+                        ? "border-electric scale-105 shadow-[0_0_10px_rgba(34,211,238,0.4)]"
+                        : "border-white/20",
+                    )}
+                  >
                     <input
                       type="file"
                       accept="image/*"
@@ -308,7 +324,11 @@ export function Testimonials() {
                     {uploadingAvatar ? (
                       <span className="text-[10px] text-electric animate-pulse font-bold">...</span>
                     ) : customAvatarUrl ? (
-                      <img src={customAvatarUrl} alt="Uploaded avatar" className="size-full object-cover" />
+                      <img
+                        src={customAvatarUrl}
+                        alt="Uploaded avatar"
+                        className="size-full object-cover"
+                      />
                     ) : (
                       <Plus className="size-5 text-muted-foreground" />
                     )}
@@ -334,7 +354,7 @@ export function Testimonials() {
                       <Star
                         className={cn(
                           "size-6 transition-colors",
-                          star <= rating ? "fill-electric text-electric" : "text-white/20"
+                          star <= rating ? "fill-electric text-electric" : "text-white/20",
                         )}
                       />
                     </button>

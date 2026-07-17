@@ -83,8 +83,12 @@ export function Services() {
                     <div className="grid size-9 sm:size-12 place-items-center rounded-lg sm:rounded-xl bg-gradient-to-br from-electric/20 to-violet-glow/20 text-electric">
                       <s.icon className="size-4 sm:size-5" />
                     </div>
-                    <h3 className="mt-3 sm:mt-5 text-xs min-[375px]:text-sm sm:text-card-title text-white font-semibold">{s.title}</h3>
-                    <p className="mt-1 sm:mt-2 text-[10px] min-[375px]:text-xs sm:text-small-body text-neutral-400 leading-normal">{s.desc}</p>
+                    <h3 className="mt-3 sm:mt-5 text-xs min-[375px]:text-sm sm:text-card-title text-white font-semibold">
+                      {s.title}
+                    </h3>
+                    <p className="mt-1 sm:mt-2 text-[10px] min-[375px]:text-xs sm:text-small-body text-neutral-400 leading-normal">
+                      {s.desc}
+                    </p>
                   </div>
                 </div>
               </Reveal>
