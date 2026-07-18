@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 import {
   Lock,
   User,
@@ -99,6 +100,10 @@ function AdminPage() {
   const [savingShowreel, setSavingShowreel] = useState(false);
   const [uploadingShowreelVideo, setUploadingShowreelVideo] = useState(false);
 
+  // Source type choice states
+  const [showreelSourceType, setShowreelSourceType] = useState<"file" | "url">("url");
+  const [projVideoSourceType, setProjVideoSourceType] = useState<"file" | "url">("url");
+
   const handleUploadFile = async (
     file: File,
     folder: "portfolio" | "avatars",
@@ -189,10 +194,17 @@ function AdminPage() {
         if (!heroErr && heroSettings && heroSettings.length > 0) {
           const hs = heroSettings[0];
           setHeroId(hs.id);
-          setShowreelUrl(hs.showreelVideoUrl || "");
+          const reelUrl = hs.showreelVideoUrl || "";
+          setShowreelUrl(reelUrl);
           setShowreelTitle(hs.showreelTitle || "");
           setShowreelDescription(hs.showreelDescription || "");
           setShowreelVideoAspect(hs.videoAspect || "portrait");
+
+          if (reelUrl.includes(".supabase.co") || reelUrl.includes("supabase.in")) {
+            setShowreelSourceType("file");
+          } else {
+            setShowreelSourceType("url");
+          }
         }
       } catch (e) {
         console.error("Error fetching hero settings:", e);
@@ -427,6 +439,7 @@ function AdminPage() {
     setProjClientName("");
     setProjMetric("");
     setProjVideoAspect("portrait");
+    setProjVideoSourceType("url");
     setIsProjectModalOpen(true);
   }
 
@@ -447,6 +460,13 @@ function AdminPage() {
     setProjClientName(project.clientName || "");
     setProjMetric(project.metric || "");
     setProjVideoAspect(project.videoAspect || "portrait");
+    
+    if (project.videoUrl && (project.videoUrl.includes(".supabase.co") || project.videoUrl.includes("supabase.in"))) {
+      setProjVideoSourceType("file");
+    } else {
+      setProjVideoSourceType("url");
+    }
+    
     setIsProjectModalOpen(true);
   }
 
@@ -1076,39 +1096,72 @@ function AdminPage() {
                       </div>
 
                       <div>
-                        <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5 font-bold">
-                          Showreel Video File / URL
+                        <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-2.5 font-bold">
+                          Showreel Video Source
                         </label>
+                        <div className="flex gap-2 p-1 bg-black/45 border border-white/5 rounded-xl mb-4 max-w-[280px]">
+                          <button
+                            type="button"
+                            onClick={() => setShowreelSourceType("file")}
+                            className={cn(
+                              "flex-1 py-1.5 px-3 rounded-lg text-[10px] uppercase tracking-wider font-bold transition cursor-pointer text-center",
+                              showreelSourceType === "file" ? "bg-white/10 text-white" : "text-muted-foreground hover:text-white"
+                            )}
+                          >
+                            Upload File
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setShowreelSourceType("url")}
+                            className={cn(
+                              "flex-1 py-1.5 px-3 rounded-lg text-[10px] uppercase tracking-wider font-bold transition cursor-pointer text-center",
+                              showreelSourceType === "url" ? "bg-white/10 text-white" : "text-muted-foreground hover:text-white"
+                            )}
+                          >
+                            Enter Link/URL
+                          </button>
+                        </div>
+
                         <div className="space-y-2">
-                          <input
-                            type="file"
-                            accept="video/*"
-                            onChange={(e) => {
-                              const file = e.target.files?.[0];
-                              if (file)
-                                handleUploadFile(
-                                  file,
-                                  "portfolio",
-                                  setUploadingShowreelVideo,
-                                  setShowreelUrl
-                                );
-                            }}
-                            className="w-full text-xs text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-white/10 file:text-foreground hover:file:bg-white/20 file:cursor-pointer"
-                            disabled={uploadingShowreelVideo}
-                          />
-                          {uploadingShowreelVideo && (
-                            <div className="text-xs text-electric animate-pulse">
-                              Uploading showreel video...
+                          {showreelSourceType === "file" ? (
+                            <div className="space-y-2">
+                              <input
+                                type="file"
+                                accept="video/*"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0];
+                                  if (file)
+                                    handleUploadFile(
+                                      file,
+                                      "portfolio",
+                                      setUploadingShowreelVideo,
+                                      setShowreelUrl
+                                    );
+                                }}
+                                className="w-full text-xs text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-white/10 file:text-foreground hover:file:bg-white/20 file:cursor-pointer"
+                                disabled={uploadingShowreelVideo}
+                              />
+                              {uploadingShowreelVideo && (
+                                <div className="text-xs text-electric animate-pulse">
+                                  Uploading showreel video...
+                                </div>
+                              )}
+                              {showreelUrl && !uploadingShowreelVideo && (
+                                <div className="text-[10px] text-emerald-400 font-semibold bg-emerald-500/5 border border-emerald-500/10 rounded-lg p-2 truncate">
+                                  ✓ Uploaded: {showreelUrl}
+                                </div>
+                              )}
                             </div>
+                          ) : (
+                            <input
+                              required
+                              type="url"
+                              value={showreelUrl}
+                              onChange={(e) => setShowreelUrl(e.target.value)}
+                              placeholder="https://commondatastorage.googleapis.com/..."
+                              className="w-full rounded-xl border border-white/10 bg-white/[0.03] p-3.5 text-sm text-foreground focus:border-electric focus:outline-none focus:ring-1 focus:ring-electric/30 transition text-white/90"
+                            />
                           )}
-                          <input
-                            required
-                            type="url"
-                            value={showreelUrl}
-                            onChange={(e) => setShowreelUrl(e.target.value)}
-                            placeholder="https://commondatastorage.googleapis.com/..."
-                            className="w-full rounded-xl border border-white/10 bg-white/[0.03] p-3 text-sm text-foreground focus:border-electric focus:outline-none focus:ring-1 focus:ring-electric/30 transition"
-                          />
                         </div>
                       </div>
 
@@ -1323,32 +1376,65 @@ function AdminPage() {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5">
-                    Video File / URL
+                  <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-2.5 font-bold">
+                    Video Source Type
                   </label>
+                  <div className="flex gap-2 p-1 bg-black/45 border border-white/5 rounded-xl mb-3 max-w-[260px]">
+                    <button
+                      type="button"
+                      onClick={() => setProjVideoSourceType("file")}
+                      className={cn(
+                        "flex-1 py-1 px-2.5 rounded-lg text-[10px] uppercase tracking-wider font-bold transition cursor-pointer text-center",
+                        projVideoSourceType === "file" ? "bg-white/10 text-white" : "text-muted-foreground hover:text-white"
+                      )}
+                    >
+                      Upload File
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setProjVideoSourceType("url")}
+                      className={cn(
+                        "flex-1 py-1 px-2.5 rounded-lg text-[10px] uppercase tracking-wider font-bold transition cursor-pointer text-center",
+                        projVideoSourceType === "url" ? "bg-white/10 text-white" : "text-muted-foreground hover:text-white"
+                      )}
+                    >
+                      Enter Link/URL
+                    </button>
+                  </div>
+
                   <div className="space-y-2">
-                    <input
-                      type="file"
-                      accept="video/*"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file)
-                          handleUploadFile(file, "portfolio", setUploadingVideo, setProjVideoUrl);
-                      }}
-                      className="w-full text-xs text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-white/10 file:text-foreground hover:file:bg-white/20 file:cursor-pointer"
-                      disabled={uploadingVideo}
-                    />
-                    {uploadingVideo && (
-                      <div className="text-xs text-electric animate-pulse">Uploading video...</div>
+                    {projVideoSourceType === "file" ? (
+                      <div className="space-y-2">
+                        <input
+                          type="file"
+                          accept="video/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file)
+                              handleUploadFile(file, "portfolio", setUploadingVideo, setProjVideoUrl);
+                          }}
+                          className="w-full text-xs text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-white/10 file:text-foreground hover:file:bg-white/20 file:cursor-pointer"
+                          disabled={uploadingVideo}
+                        />
+                        {uploadingVideo && (
+                          <div className="text-xs text-electric animate-pulse">Uploading video...</div>
+                        )}
+                        {projVideoUrl && !uploadingVideo && (
+                          <div className="text-[10px] text-emerald-400 font-semibold bg-emerald-500/5 border border-emerald-500/10 rounded-lg p-2 truncate">
+                            ✓ Uploaded: {projVideoUrl}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <input
+                        required
+                        type="url"
+                        value={projVideoUrl}
+                        onChange={(e) => setProjVideoUrl(e.target.value)}
+                        placeholder="https://commondatastorage.googleapis.com/..."
+                        className="w-full rounded-xl border border-white/10 bg-white/[0.03] p-3 text-sm text-foreground focus:border-electric focus:outline-none focus:ring-1 focus:ring-electric/30 transition text-white/90"
+                      />
                     )}
-                    <input
-                      required
-                      type="url"
-                      value={projVideoUrl}
-                      onChange={(e) => setProjVideoUrl(e.target.value)}
-                      placeholder="https://commondatastorage.googleapis.com/..."
-                      className="w-full rounded-xl border border-white/10 bg-white/[0.03] p-3 text-sm text-foreground focus:border-electric focus:outline-none focus:ring-1 focus:ring-electric/30 transition"
-                    />
                   </div>
                 </div>
               </div>
