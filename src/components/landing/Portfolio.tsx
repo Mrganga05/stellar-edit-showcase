@@ -178,7 +178,10 @@ export function Portfolio() {
           metric: p.metric || "",
           videoAspect: p.videoAspect || "portrait",
         }))
-      : mockProjects;
+      : mockProjects.map((p) => ({
+          ...p,
+          videoAspect: p.videoAspect || "portrait",
+        }));
 
   return (
     <section
@@ -299,7 +302,7 @@ export function Portfolio() {
               transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
               onClick={(e) => e.stopPropagation()}
               className={cn(
-                "relative w-full overflow-hidden rounded-3xl glass-strong border border-white/10 shadow-2xl flex flex-col md:grid",
+                "relative w-full overflow-y-auto md:overflow-hidden rounded-3xl glass-strong border border-white/10 shadow-2xl flex flex-col md:grid",
                 open.videoAspect === "landscape"
                   ? "max-w-sm md:max-w-5xl h-[92vh] md:h-[75vh] md:grid-cols-[1.4fr_1fr]"
                   : "max-w-sm md:max-w-4xl h-[92vh] md:h-[80vh] md:grid-cols-[auto_1fr]"
@@ -315,40 +318,70 @@ export function Portfolio() {
 
               {/* Video Player — portrait on mobile, landscape fill on desktop */}
               <div className={cn(
-                "relative w-full bg-black overflow-hidden flex items-center justify-center flex-shrink-0",
+                "relative w-full bg-black border-b md:border-b-0 md:border-r border-white/10 flex items-center justify-center flex-shrink-0 p-4 overflow-hidden group/video-container",
                 open.videoAspect === "landscape"
-                  ? "aspect-video md:aspect-auto md:h-full"
-                  : "md:w-[380px] aspect-[9/16] md:aspect-auto md:h-full"
+                  ? "aspect-video md:aspect-auto md:h-full max-h-[40vh] md:max-h-none"
+                  : "aspect-[9/16] md:w-[380px] md:aspect-auto md:h-full max-h-[50vh] md:max-h-none"
               )}>
-                <video
-                  src={open.video}
-                  controls
-                  autoPlay
-                  playsInline
-                  className="w-full h-full object-contain"
-                />
+                {/* Phone/Monitor mockup styled frame */}
+                <div className={cn(
+                  "relative w-full rounded-2xl overflow-hidden border border-white/10 bg-black flex items-center justify-center shadow-inner",
+                  open.videoAspect === "landscape" ? "aspect-video" : "w-full h-full"
+                )}>
+                  {/* Glowing neon animated border */}
+                  <div className="absolute inset-0 z-0 p-[1.5px] rounded-2xl overflow-hidden pointer-events-none">
+                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 via-purple-500 to-cyan-500 opacity-60 animate-gradient-text" />
+                  </div>
+
+                  <video
+                    src={open.video}
+                    controls
+                    autoPlay
+                    playsInline
+                    className={cn(
+                      "relative z-10 w-full h-full rounded-2xl",
+                      open.videoAspect === "landscape" ? "object-contain" : "object-cover"
+                    )}
+                  />
+                </div>
               </div>
 
               {/* Project Details Panel — scrollable below video on mobile */}
-              <div className="flex flex-col flex-1 overflow-y-auto p-5 sm:p-6 md:p-8 bg-[#0B1224]/75 backdrop-blur-md border-t md:border-t-0 md:border-l border-white/[0.08] min-h-0">
-                <div className="space-y-5">
+              <div className="flex flex-col flex-1 overflow-y-visible md:overflow-y-auto p-6 md:p-8 lg:p-10 bg-gradient-to-b from-[#0b1224]/80 to-[#040612]/95 backdrop-blur-md min-h-0 relative border-t md:border-t-0 md:border-l border-white/[0.08]">
+                {/* Glow accents */}
+                <div className="absolute top-0 right-0 size-[200px] rounded-full bg-[#22d3ee]/5 blur-[80px] pointer-events-none" />
+
+                <div className="space-y-6 flex-grow flex flex-col justify-start relative z-10">
                   <div>
-                    <div className="flex items-center gap-2 flex-wrap">
+                    <div className="flex items-center gap-2 flex-wrap mb-3">
                       {open.clientName && (
-                        <span className="text-badge-text text-electric">{open.clientName}</span>
+                        <div className="inline-flex items-center gap-1 rounded-full border border-cyan-500/20 bg-cyan-500/5 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-cyan-400">
+                          {open.clientName}
+                        </div>
                       )}
-                      {open.clientName && <span className="text-white/20">•</span>}
-                      <span className="text-badge-text text-muted-foreground">{open.category}</span>
+                      <div className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.02] px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
+                        {open.category}
+                      </div>
+                      {open.metric && (
+                        <div className="inline-flex items-center gap-1 rounded-full border border-emerald-500/20 bg-emerald-500/5 px-2.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-emerald-400">
+                          {open.metric}
+                        </div>
+                      )}
                     </div>
-                    <h3 className="mt-2 text-sm sm:text-card-title text-white font-bold">
+
+                    <h3 className="text-xl font-bold tracking-tight text-white font-display text-left">
                       {open.title}
                     </h3>
-                    <p className="mt-2 text-xs sm:text-small-body text-white/60 leading-relaxed">
+
+                    {/* Thin Glowing Divider */}
+                    <div className="h-[2px] w-24 bg-gradient-to-r from-[#22d3ee] to-[#a855f7] rounded-full my-4" />
+
+                    <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed whitespace-pre-wrap font-sans text-left mt-2">
                       {open.overview}
                     </p>
                   </div>
 
-                  <div className="space-y-4 border-t border-white/5 pt-4">
+                  <div className="space-y-4 border-t border-white/5 pt-4 text-left">
                     <Detail label="Techniques" items={open.techniques} />
                     <Detail label="Results" items={open.results} />
                     <Detail label="Tools" items={open.tools} />

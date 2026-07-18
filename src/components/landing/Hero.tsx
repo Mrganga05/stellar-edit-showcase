@@ -163,11 +163,6 @@ function MagneticButton({
 
 export function Hero() {
   const [showreelOpen, setShowreelOpen] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
-  const [showDetailsOnMobile, setShowDetailsOnMobile] = useState(false);
-  const [isLiked, setIsLiked] = useState(false);
-  const [isBookmarked, setIsBookmarked] = useState(false);
-  const [likesCount, setLikesCount] = useState(15420);
 
   const [heroData, setHeroData] = useState({
     showreelVideoUrl: "",
@@ -502,7 +497,7 @@ export function Hero() {
               transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
               onClick={(e) => e.stopPropagation()}
               className={cn(
-                "relative w-full overflow-hidden rounded-[32px] border border-white/10 bg-[#040612]/90 shadow-[0_0_80px_rgba(0,0,0,0.9)] backdrop-blur-xl flex flex-col md:grid",
+                "relative w-full overflow-y-auto md:overflow-hidden rounded-[32px] border border-white/10 bg-[#040612]/90 shadow-[0_0_80px_rgba(0,0,0,0.9)] backdrop-blur-xl flex flex-col md:grid",
                 heroData.videoAspect === "landscape"
                   ? "max-w-sm md:max-w-5xl h-[92vh] md:h-[75vh] max-h-[700px] md:grid-cols-[1.4fr_1fr]"
                   : "max-w-sm md:max-w-4xl h-[92vh] md:h-[80vh] max-h-[750px] md:grid-cols-[auto_1fr]"
@@ -521,157 +516,36 @@ export function Hero() {
               <div className={cn(
                 "relative w-full bg-black border-b md:border-b-0 md:border-r border-white/10 flex items-center justify-center flex-shrink-0 p-4 overflow-hidden group/video-container",
                 heroData.videoAspect === "landscape"
-                  ? "aspect-video md:aspect-auto md:h-full"
-                  : "md:w-[380px] aspect-[9/16] md:aspect-auto md:h-full"
+                  ? "aspect-video md:aspect-auto md:h-full max-h-[40vh] md:max-h-none"
+                  : "aspect-[9/16] md:w-[380px] md:aspect-auto md:h-full max-h-[50vh] md:max-h-none"
               )}>
-                {/* Phone mockup styled frame */}
-                <div className="relative w-full h-full rounded-2xl overflow-hidden border border-white/10 bg-black flex items-center justify-center shadow-inner">
+                {/* Phone/Monitor mockup styled frame */}
+                <div className={cn(
+                  "relative w-full rounded-2xl overflow-hidden border border-white/10 bg-black flex items-center justify-center shadow-inner",
+                  heroData.videoAspect === "landscape" ? "aspect-video" : "w-full h-full"
+                )}>
                   
-                  {/* Glowing neon animated border border beam */}
+                  {/* Glowing neon animated border */}
                   <div className="absolute inset-0 z-0 p-[1.5px] rounded-2xl overflow-hidden pointer-events-none">
                     <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 via-purple-500 to-cyan-500 opacity-60 animate-gradient-text" />
                   </div>
 
                   <video
                     src={showreelUrl}
-                    controls={false}
+                    controls
                     autoPlay
                     loop
-                    muted={isMuted}
                     playsInline
                     className={cn(
                       "relative z-10 w-full h-full rounded-2xl",
                       heroData.videoAspect === "landscape" ? "object-contain" : "object-cover"
                     )}
                   />
-
-                  {/* Volume Control Overlay */}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setIsMuted(!isMuted);
-                    }}
-                    className="absolute top-4 left-4 z-20 grid size-9 place-items-center rounded-full bg-black/50 text-white/90 border border-white/10 hover:bg-black/75 transition backdrop-blur-md cursor-pointer"
-                  >
-                    {isMuted ? <VolumeX className="size-4.5" /> : <Volume2 className="size-4.5" />}
-                  </button>
-
-                  {/* Playback Indicator Glow (Hover/Tap UI) */}
-                  <div className="absolute inset-0 z-15 bg-gradient-to-b from-black/20 via-transparent to-black/60 pointer-events-none rounded-2xl" />
-
-                  {/* ── MOBILE OVERLAYS: INSTAGRAM STYLE ── */}
-                  <div className="absolute inset-x-0 bottom-0 z-20 p-4 flex flex-col justify-end text-left md:hidden bg-gradient-to-t from-black/80 via-black/30 to-transparent pt-12">
-                    
-                    {/* User profile section */}
-                    <div className="flex items-center gap-2 mb-2">
-                      <div className="size-8 rounded-full border border-white/20 bg-gradient-to-tr from-cyan-500 to-purple-500 p-[1px]">
-                        <div className="size-full rounded-full bg-[#050816] flex items-center justify-center text-[10px] font-black text-white">R</div>
-                      </div>
-                      <div className="flex flex-col">
-                        <div className="flex items-center gap-1">
-                          <span className="text-xs font-bold text-white tracking-wide">raqvine.edits</span>
-                          <span className="grid size-3.5 place-items-center rounded-full bg-[#22d3ee] text-black text-[8px] font-black">✓</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Showreel Title & Snippet Description */}
-                    <h4 className="text-xs font-bold text-white mb-1">
-                      {heroData.showreelTitle}
-                    </h4>
-                    <p className="text-[10px] text-white/80 line-clamp-2 leading-relaxed pr-8">
-                      {heroData.showreelDescription}
-                    </p>
-
-                    {/* Expand Details Trigger */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setShowDetailsOnMobile(true);
-                      }}
-                      className="text-[9px] font-bold text-[#22d3ee] hover:underline text-left mt-1.5 flex items-center gap-1 cursor-pointer"
-                    >
-                      <Info className="size-3" /> View Full Showreel Details
-                    </button>
-
-                    {/* Music Ticker Marquee */}
-                    <div className="flex items-center gap-1.5 mt-3 pt-2 border-t border-white/5 overflow-hidden w-[80%]">
-                      <Music className="size-3 text-white/50 shrink-0" />
-                      <div className="text-[9px] text-white/50 whitespace-nowrap animate-marquee">
-                        original audio - Raqvine Edits • original audio - Raqvine Edits
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Mobile Right Action Tray */}
-                  <div className="absolute right-3 bottom-24 z-20 flex flex-col gap-4 items-center md:hidden">
-                    {/* Like button */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setIsLiked(!isLiked);
-                        setLikesCount(isLiked ? likesCount - 1 : likesCount + 1);
-                      }}
-                      className="flex flex-col items-center gap-1 group/btn"
-                    >
-                      <div className={cn(
-                        "grid size-10 place-items-center rounded-full transition-all border border-white/10 backdrop-blur-md cursor-pointer",
-                        isLiked ? "bg-red-500 text-white border-red-500 scale-110" : "bg-black/45 text-white hover:bg-black/60"
-                      )}>
-                        <Heart className={cn("size-4.5", isLiked && "fill-current")} />
-                      </div>
-                      <span className="text-[9px] font-bold text-white/90">{likesCount.toLocaleString()}</span>
-                    </button>
-
-                    {/* Save/Bookmark */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setIsBookmarked(!isBookmarked);
-                      }}
-                      className="flex flex-col items-center gap-1"
-                    >
-                      <div className={cn(
-                        "grid size-10 place-items-center rounded-full transition-all border border-white/10 backdrop-blur-md cursor-pointer",
-                        isBookmarked ? "bg-yellow-500 text-black border-yellow-500 scale-110" : "bg-black/45 text-white hover:bg-black/60"
-                      )}>
-                        <Bookmark className={cn("size-4.5", isBookmarked && "fill-current")} />
-                      </div>
-                      <span className="text-[9px] font-bold text-white/90">Save</span>
-                    </button>
-
-                    {/* Info button */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setShowDetailsOnMobile(true);
-                      }}
-                      className="flex flex-col items-center gap-1"
-                    >
-                      <div className="grid size-10 place-items-center rounded-full bg-black/45 text-white border border-white/10 hover:bg-black/60 backdrop-blur-md cursor-pointer">
-                        <Info className="size-4.5" />
-                      </div>
-                      <span className="text-[9px] font-bold text-white/90">Info</span>
-                    </button>
-                  </div>
-
-                  {/* Style block for marquee effect */}
-                  <style>{`
-                    @keyframes marquee {
-                      0% { transform: translateX(0%); }
-                      100% { transform: translateX(-50%); }
-                    }
-                    .animate-marquee {
-                      display: inline-block;
-                      animation: marquee 12s linear infinite;
-                    }
-                  `}</style>
-
                 </div>
               </div>
 
-              {/* ──────────────── RIGHT COLUMN: DETAILS BOARD (DESKTOP) ──────────────── */}
-              <div className="hidden md:flex flex-col h-full overflow-y-auto p-8 lg:p-10 bg-gradient-to-b from-[#0b1224]/80 to-[#040612]/95 backdrop-blur-md min-h-0 relative">
+              {/* ──────────────── DETAILS BOARD (SCROLLABLE ON MOBILE & DESKTOP) ──────────────── */}
+              <div className="flex flex-col flex-1 overflow-y-visible md:overflow-y-auto p-6 md:p-8 lg:p-10 bg-gradient-to-b from-[#0b1224]/80 to-[#040612]/95 backdrop-blur-md min-h-0 relative border-t md:border-t-0 border-white/5">
                 {/* Glow accents */}
                 <div className="absolute top-0 right-0 size-[200px] rounded-full bg-[#22d3ee]/5 blur-[80px] pointer-events-none" />
 
@@ -692,7 +566,7 @@ export function Hero() {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.15 }}
-                      className="text-2xl font-bold tracking-tight text-white font-display"
+                      className="text-2xl font-bold tracking-tight text-white font-display text-left"
                     >
                       {heroData.showreelTitle}
                     </motion.h3>
@@ -704,7 +578,7 @@ export function Hero() {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: 0.2 }}
-                      className="text-sm text-neutral-300 leading-relaxed whitespace-pre-wrap font-sans mt-2"
+                      className="text-sm text-neutral-300 leading-relaxed whitespace-pre-wrap font-sans mt-2 text-left"
                     >
                       {heroData.showreelDescription}
                     </motion.p>
@@ -714,7 +588,7 @@ export function Hero() {
                   <div className="grid gap-4 sm:grid-cols-2 pt-2 border-t border-white/[0.08] mt-2">
                     {[
                       { icon: Film, label: "Editing Style", desc: "Retention-focused pacing" },
-                      { icon: Users, label: "Platform Fit", desc: "9:16 portrait native" },
+                      { icon: Users, label: "Platform Fit", desc: "Native layout optimization" },
                       { icon: Sliders, label: "VFX & Graphics", desc: "Kinetic titles & SFX" },
                       { icon: Star, label: "Resolution", desc: "4K ultra-sharp grade" },
                     ].map((item, idx) => {
@@ -725,7 +599,7 @@ export function Hero() {
                           initial={{ opacity: 0, y: 10 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.25 + idx * 0.05 }}
-                          className="flex items-start gap-3 p-3.5 rounded-xl bg-white/[0.02] border border-white/5 hover:border-white/10 hover:bg-white/[0.04] transition duration-300"
+                          className="flex items-start gap-3 p-3.5 rounded-xl bg-white/[0.02] border border-white/5 hover:border-white/10 hover:bg-white/[0.04] transition duration-300 text-left"
                         >
                           <div className="grid size-8 place-items-center rounded-lg border border-cyan-500/20 text-cyan-400 bg-cyan-500/5 shrink-0">
                             <Icon className="size-4" />
@@ -740,9 +614,9 @@ export function Hero() {
                   </div>
 
                   {/* Action row */}
-                  <div className="pt-6 border-t border-white/[0.08] flex items-center justify-between mt-auto">
-                    <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">
-                      Format: Instagram Reel / YouTube Short
+                  <div className="pt-6 border-t border-white/[0.08] flex items-center justify-between mt-auto gap-4">
+                    <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold text-left hidden sm:inline">
+                      Format: Instagram Reel / YouTube Short / Video Edit
                     </span>
                     <a
                       href="#contact"
@@ -755,69 +629,6 @@ export function Hero() {
                   </div>
                 </div>
               </div>
-
-              {/* ── MOBILE OVERLAY FULL DETAILS DRAWER ── */}
-              <AnimatePresence>
-                {showDetailsOnMobile && (
-                  <motion.div
-                    initial={{ opacity: 0, y: "100%" }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: "100%" }}
-                    transition={{ type: "spring", damping: 25, stiffness: 220 }}
-                    className="absolute inset-x-0 bottom-0 z-50 bg-[#050816]/95 border-t border-white/10 rounded-t-[24px] p-6 text-left md:hidden flex flex-col max-h-[70%] overflow-y-auto"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <div className="w-12 h-1 bg-white/20 rounded-full mx-auto mb-4" />
-                    
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-bold text-white font-display">Showreel Info</h3>
-                      <button
-                        onClick={() => setShowDetailsOnMobile(false)}
-                        className="text-xs font-bold text-cyan-400 uppercase tracking-widest cursor-pointer"
-                      >
-                        Done
-                      </button>
-                    </div>
-
-                    <div className="space-y-4">
-                      <div>
-                        <h4 className="text-sm font-semibold text-white">{heroData.showreelTitle}</h4>
-                        <p className="text-xs text-neutral-300 leading-relaxed mt-2 whitespace-pre-wrap">
-                          {heroData.showreelDescription}
-                        </p>
-                      </div>
-
-                      <div className="h-px bg-white/5 my-2" />
-
-                      <div className="space-y-3">
-                        <div className="flex gap-3 items-center text-xs text-neutral-300">
-                          <Film className="size-4 text-cyan-400" />
-                          <span><strong>Editing Style:</strong> Retention-focused pacing</span>
-                        </div>
-                        <div className="flex gap-3 items-center text-xs text-neutral-300">
-                          <Sliders className="size-4 text-cyan-400" />
-                          <span><strong>Graphics:</strong> Kinetic titles & custom SFX</span>
-                        </div>
-                        <div className="flex gap-3 items-center text-xs text-neutral-300">
-                          <Star className="size-4 text-cyan-400" />
-                          <span><strong>Resolution:</strong> 4K ultra-sharp grade</span>
-                        </div>
-                      </div>
-
-                      <a
-                        href="#contact"
-                        onClick={() => {
-                          setShowDetailsOnMobile(false);
-                          setShowreelOpen(false);
-                        }}
-                        className="w-full text-center mt-4 bg-gradient-to-r from-cyan-500 to-blue-600 py-3 rounded-xl text-xs font-bold uppercase tracking-wider text-white inline-block cursor-pointer"
-                      >
-                        Book a Strategy Call
-                      </a>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
 
             </motion.div>
           </motion.div>
