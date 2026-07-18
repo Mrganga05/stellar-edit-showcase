@@ -41,6 +41,7 @@ export const portfolioInputSchema = z.object({
   techniques: z.array(z.string().trim().min(1).max(160)).max(30).default([]),
   results: z.array(z.string().trim().min(1).max(160)).max(30).default([]),
   tools: z.array(z.string().trim().min(1).max(120)).max(30).default([]),
+  videoAspect: z.enum(["portrait", "landscape"]).default("portrait").optional(),
   ...displayFields,
 });
 

@@ -1,46 +1,89 @@
-import { Youtube, Smartphone, Instagram, Mic, Wand2, Palette, Megaphone, Hash } from "lucide-react";
+import {
+  Clapperboard,
+  Youtube,
+  Sparkles,
+  Megaphone,
+  Film,
+  Wand2,
+  Globe,
+  Box,
+  Bot,
+  Mic,
+  Smartphone,
+  Instagram,
+  Palette,
+  Hash,
+} from "lucide-react";
 import { SectionHeading, Reveal } from "./primitives";
 import { useServices } from "@/lib/api/hooks";
 
 const ICON_MAP: Record<string, React.ComponentType<any>> = {
+  Clapperboard,
   Youtube,
+  Sparkles,
+  Megaphone,
+  Film,
+  Wand2,
+  Globe,
+  Box,
+  Bot,
+  Mic,
   Smartphone,
   Instagram,
-  Mic,
-  Wand2,
   Palette,
-  Megaphone,
   Hash,
 };
 
 const mockServices = [
   {
+    icon: Clapperboard,
+    title: "Short-Form Editing",
+    desc: "High-retention vertical edits engineered to stop scrolling and maximize engagement.",
+  },
+  {
     icon: Youtube,
-    title: "YouTube Editing",
-    desc: "Long-form retention-first edits that grow channels.",
+    title: "Long-Form Editing",
+    desc: "Retention-first YouTube editing designed to increase watch time and audience growth.",
   },
   {
-    icon: Smartphone,
-    title: "Shorts Editing",
-    desc: "Hook-first vertical edits engineered to loop.",
+    icon: Sparkles,
+    title: "Motion Graphics",
+    desc: "Premium animations, kinetic typography, branded graphics, and visual storytelling.",
   },
-  {
-    icon: Instagram,
-    title: "Reels Editing",
-    desc: "Editorial reels with kinetic motion and grade.",
-  },
-  { icon: Mic, title: "Podcast Editing", desc: "Multi-cam + broadcast-grade audio mastering." },
-  { icon: Wand2, title: "Motion Graphics", desc: "Custom animation, lower thirds, kinetic type." },
-  { icon: Palette, title: "Color Grading", desc: "Cinematic LUTs and bespoke color science." },
   {
     icon: Megaphone,
     title: "Commercial Ads",
-    desc: "30s spots built to convert on every platform.",
+    desc: "High-converting ad creatives built for Meta, Google, YouTube, and TikTok.",
   },
   {
-    icon: Hash,
-    title: "Social Content",
-    desc: "TikTok, X, LinkedIn — native edits, native results.",
+    icon: Film,
+    title: "Cinematic Editing",
+    desc: "Luxury cinematic edits with professional color grading and premium finishing.",
+  },
+  {
+    icon: Wand2,
+    title: "AI Editing",
+    desc: "AI-assisted editing workflows that accelerate production without sacrificing quality.",
+  },
+  {
+    icon: Globe,
+    title: "Website Development",
+    desc: "Fast, responsive, SEO-optimized websites built to convert visitors into customers.",
+  },
+  {
+    icon: Box,
+    title: "3D Web Experiences",
+    desc: "Immersive interactive websites powered by modern 3D technologies and smooth animations.",
+  },
+  {
+    icon: Bot,
+    title: "AI Automation",
+    desc: "Automate repetitive workflows, lead management, and business operations using AI.",
+  },
+  {
+    icon: Mic,
+    title: "AI Voice Agents",
+    desc: "24/7 AI voice assistants for sales, customer support, bookings, and lead qualification.",
   },
 ];
 
@@ -62,21 +105,21 @@ export function Services() {
         eyebrow="Services"
         title={
           <>
-            One editor. <span className="text-gradient-brand">Every surface</span>.
+            One partner. <span className="text-gradient-brand">Every digital solution.</span>
           </>
         }
-        subtitle="A full creative service for serious operators — from one-off cuts to monthly retainers."
+        subtitle="A premium creative and AI technology studio helping brands scale through world-class content, intelligent automation, and modern digital experiences."
       />
-      <div className="mt-16 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+      <div className="mt-16 grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-6">
         {isLoading && !dbServices
-          ? Array.from({ length: 4 }).map((_, i) => (
+          ? Array.from({ length: 5 }).map((_, i) => (
               <div
                 key={i}
                 className="h-44 animate-pulse rounded-2xl bg-surface/50 border border-white/5"
               />
             ))
           : servicesToRender.map((s, i) => (
-              <Reveal key={s.title} delay={(i % 4) * 0.05}>
+              <Reveal key={s.title} delay={(i % 5) * 0.05}>
                 <div className="group relative h-full overflow-hidden rounded-xl sm:rounded-2xl glass p-3.5 sm:p-6 transition-all duration-500 hover:-translate-y-1 hover:border-white/20 hover:glow-blue">
                   <div className="pointer-events-none absolute -right-12 -top-12 size-32 rounded-full bg-electric/20 opacity-0 blur-3xl transition-opacity duration-500 group-hover:opacity-100" />
                   <div className="relative">
@@ -97,3 +140,4 @@ export function Services() {
     </section>
   );
 }
+

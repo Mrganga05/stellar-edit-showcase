@@ -143,14 +143,16 @@ CREATE POLICY "Allow public full access to hero_settings" ON hero_settings
 
 -- Insert Seed Data (Optional helper for initial setup)
 INSERT INTO services (id, title, slug, description, "iconKey", "sortOrder", "isActive") VALUES
-  ('a1e73e6a-72ef-4d6d-88f5-bfa33dbb48c1', 'YouTube Editing', 'youtube-editing', 'Long-form retention-first edits that grow channels.', 'Youtube', 0, true),
-  ('a1e73e6a-72ef-4d6d-88f5-bfa33dbb48c2', 'Shorts Editing', 'shorts-editing', 'Hook-first vertical edits engineered to loop.', 'Smartphone', 1, true),
-  ('a1e73e6a-72ef-4d6d-88f5-bfa33dbb48c3', 'Reels Editing', 'reels-editing', 'Editorial reels with kinetic motion and grade.', 'Instagram', 2, true),
-  ('a1e73e6a-72ef-4d6d-88f5-bfa33dbb48c4', 'Podcast Editing', 'podcast-editing', 'Multi-cam + broadcast-grade audio mastering.', 'Mic', 3, true),
-  ('a1e73e6a-72ef-4d6d-88f5-bfa33dbb48c5', 'Motion Graphics', 'motion-graphics', 'Custom animation, lower thirds, kinetic type.', 'Wand2', 4, true),
-  ('a1e73e6a-72ef-4d6d-88f5-bfa33dbb48c6', 'Color Grading', 'color-grading', 'Cinematic LUTs and bespoke color science.', 'Palette', 5, true),
-  ('a1e73e6a-72ef-4d6d-88f5-bfa33dbb48c7', 'Commercial Ads', 'commercial-ads', '30s spots built to convert on every platform.', 'Megaphone', 6, true),
-  ('a1e73e6a-72ef-4d6d-88f5-bfa33dbb48c8', 'Social Content', 'social-content', 'TikTok, X, LinkedIn — native edits, native results.', 'Hash', 7, true)
+  ('a1e73e6a-72ef-4d6d-88f5-bfa33dbb48c2', 'Short-Form Editing', 'short-form-editing', 'High-retention vertical edits engineered to stop scrolling and maximize engagement.', 'Clapperboard', 0, true),
+  ('a1e73e6a-72ef-4d6d-88f5-bfa33dbb48c1', 'Long-Form Editing', 'long-form-editing', 'Retention-first YouTube editing designed to increase watch time and audience growth.', 'Youtube', 1, true),
+  ('a1e73e6a-72ef-4d6d-88f5-bfa33dbb48c5', 'Motion Graphics', 'motion-graphics', 'Premium animations, kinetic typography, branded graphics, and visual storytelling.', 'Sparkles', 2, true),
+  ('a1e73e6a-72ef-4d6d-88f5-bfa33dbb48c7', 'Commercial Ads', 'commercial-ads', 'High-converting ad creatives built for Meta, Google, YouTube, and TikTok.', 'Megaphone', 3, true),
+  ('a1e73e6a-72ef-4d6d-88f5-bfa33dbb48c3', 'Cinematic Editing', 'cinematic-editing', 'Luxury cinematic edits with professional color grading and premium finishing.', 'Film', 4, true),
+  ('a1e73e6a-72ef-4d6d-88f5-bfa33dbb48c6', 'AI Editing', 'ai-editing', 'AI-assisted editing workflows that accelerate production without sacrificing quality.', 'Wand2', 5, true),
+  ('a1e73e6a-72ef-4d6d-88f5-bfa33dbb48c9', 'Website Development', 'website-development', 'Fast, responsive, SEO-optimized websites built to convert visitors into customers.', 'Globe', 6, true),
+  ('a1e73e6a-72ef-4d6d-88f5-bfa33dbb48ca', '3D Web Experiences', '3d-web-experiences', 'Immersive interactive websites powered by modern 3D technologies and smooth animations.', 'Box', 7, true),
+  ('a1e73e6a-72ef-4d6d-88f5-bfa33dbb48c8', 'AI Automation', 'ai-automation', 'Automate repetitive workflows, lead management, and business operations using AI.', 'Bot', 8, true),
+  ('a1e73e6a-72ef-4d6d-88f5-bfa33dbb48c4', 'AI Voice Agents', 'ai-voice-agents', '24/7 AI voice assistants for sales, customer support, bookings, and lead qualification.', 'Mic', 9, true)
 ON CONFLICT (slug) DO UPDATE SET
   title = EXCLUDED.title,
   description = EXCLUDED.description,

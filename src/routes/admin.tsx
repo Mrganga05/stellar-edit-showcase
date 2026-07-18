@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import {
@@ -35,10 +36,11 @@ export const Route = createFileRoute("/admin")({
 });
 
 function AdminPage() {
+  const queryClient = useQueryClient();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [usernameInput, setUsernameInput] = useState("");
   const [passwordInput, setPasswordInput] = useState("");
-  const [activeTab, setActiveTab] = useState<"contact" | "sample" | "portfolio" | "testimonials">(
+  const [activeTab, setActiveTab] = useState<"contact" | "portfolio" | "testimonials" | "showreel">(
     "contact",
   );
   const [loading, setLoading] = useState(false);
@@ -46,7 +48,6 @@ function AdminPage() {
 
   // Data states
   const [contacts, setContacts] = useState<any[]>([]);
-  const [samples, setSamples] = useState<any[]>([]);
   const [portfolioProjects, setPortfolioProjects] = useState<any[]>([]);
   const [services, setServices] = useState<any[]>([]);
   const [testimonials, setTestimonials] = useState<any[]>([]);
@@ -70,6 +71,7 @@ function AdminPage() {
   const [projServiceId, setProjServiceId] = useState("");
   const [projClientName, setProjClientName] = useState("");
   const [projMetric, setProjMetric] = useState("");
+  const [projVideoAspect, setProjVideoAspect] = useState<"portrait" | "landscape">("portrait");
 
   // Testimonials form states
   const [editingTestimonial, setEditingTestimonial] = useState<any | null>(null);
@@ -87,6 +89,15 @@ function AdminPage() {
   const [uploadingThumbnail, setUploadingThumbnail] = useState(false);
   const [uploadingVideo, setUploadingVideo] = useState(false);
   const [uploadingTestimonialAvatar, setUploadingTestimonialAvatar] = useState(false);
+
+  // Showreel settings states
+  const [heroId, setHeroId] = useState("71e73e6a-72ef-4d6d-88f5-bfa33dbb48c1");
+  const [showreelUrl, setShowreelUrl] = useState("");
+  const [showreelTitle, setShowreelTitle] = useState("");
+  const [showreelDescription, setShowreelDescription] = useState("");
+  const [showreelVideoAspect, setShowreelVideoAspect] = useState<"portrait" | "landscape">("portrait");
+  const [savingShowreel, setSavingShowreel] = useState(false);
+  const [uploadingShowreelVideo, setUploadingShowreelVideo] = useState(false);
 
   const handleUploadFile = async (
     file: File,
@@ -142,15 +153,6 @@ function AdminPage() {
       if (contactErr) throw contactErr;
       setContacts(contactData || []);
 
-      // Fetch sample requests
-      const { data: sampleData, error: sampleErr } = await supabase
-        .from("sample_edit_requests")
-        .select("*")
-        .order("createdAt", { ascending: false });
-
-      if (sampleErr) throw sampleErr;
-      setSamples(sampleData || []);
-
       // Fetch portfolio projects
       const { data: portfolioData, error: portfolioErr } = await supabase
         .from("portfolio_projects")
@@ -177,6 +179,24 @@ function AdminPage() {
 
       if (testimonialErr) throw testimonialErr;
       setTestimonials(testimonialData || []);
+
+      // Fetch hero/showreel settings
+      try {
+        const { data: heroSettings, error: heroErr } = await supabase
+          .from("hero_settings")
+          .select("*");
+        
+        if (!heroErr && heroSettings && heroSettings.length > 0) {
+          const hs = heroSettings[0];
+          setHeroId(hs.id);
+          setShowreelUrl(hs.showreelVideoUrl || "");
+          setShowreelTitle(hs.showreelTitle || "");
+          setShowreelDescription(hs.showreelDescription || "");
+          setShowreelVideoAspect(hs.videoAspect || "portrait");
+        }
+      } catch (e) {
+        console.error("Error fetching hero settings:", e);
+      }
     } catch (err: any) {
       console.error(err);
       toast.error("Failed to load requests from Supabase", {
@@ -248,6 +268,7 @@ function AdminPage() {
         if (error) throw error;
         toast.success("Testimonial added successfully");
       }
+      queryClient.invalidateQueries({ queryKey: ["testimonials"] });
       setIsTestimonialModalOpen(false);
       fetchData();
     } catch (err: any) {
@@ -269,12 +290,56 @@ function AdminPage() {
       const { error } = await supabase.from("testimonials").delete().eq("id", id);
       if (error) throw error;
       toast.success("Testimonial deleted successfully");
+      queryClient.invalidateQueries({ queryKey: ["testimonials"] });
       fetchData();
     } catch (err: any) {
       console.error(err);
       toast.error("Failed to delete testimonial", {
         description: err.message,
       });
+    }
+  }
+
+  async function handleSaveShowreel(e: React.FormEvent) {
+    e.preventDefault();
+    setSavingShowreel(true);
+
+    const payload = {
+      showreelVideoUrl: showreelUrl,
+      showreelTitle: showreelTitle,
+      showreelDescription: showreelDescription,
+      videoAspect: showreelVideoAspect,
+      updatedAt: new Date().toISOString(),
+    };
+
+    try {
+      // Check if row exists
+      const { data: existing, error: checkErr } = await supabase.from("hero_settings").select("id");
+      
+      if (!checkErr && existing && existing.length > 0) {
+        const { error } = await supabase
+          .from("hero_settings")
+          .update(payload)
+          .eq("id", existing[0].id);
+
+        if (error) throw error;
+        toast.success("Showreel settings updated successfully");
+      } else {
+        const { error } = await supabase
+          .from("hero_settings")
+          .insert([payload]);
+
+        if (error) throw error;
+        toast.success("Showreel settings saved successfully");
+      }
+      fetchData();
+    } catch (err: any) {
+      console.error(err);
+      toast.error("Failed to save showreel settings", {
+        description: err.message,
+      });
+    } finally {
+      setSavingShowreel(false);
     }
   }
 
@@ -305,7 +370,7 @@ function AdminPage() {
   }
 
   async function updateStatus(
-    table: "contact_requests" | "sample_edit_requests",
+    table: "contact_requests",
     id: string,
     newStatus: string,
   ) {
@@ -326,7 +391,7 @@ function AdminPage() {
     }
   }
 
-  async function deleteRequest(table: "contact_requests" | "sample_edit_requests", id: string) {
+  async function deleteRequest(table: "contact_requests", id: string) {
     if (!confirm("Are you sure you want to delete this submission? This action is permanent.")) {
       return;
     }
@@ -361,6 +426,7 @@ function AdminPage() {
     setProjServiceId(services[0]?.id || "");
     setProjClientName("");
     setProjMetric("");
+    setProjVideoAspect("portrait");
     setIsProjectModalOpen(true);
   }
 
@@ -380,6 +446,7 @@ function AdminPage() {
     setProjServiceId(project.serviceId || "");
     setProjClientName(project.clientName || "");
     setProjMetric(project.metric || "");
+    setProjVideoAspect(project.videoAspect || "portrait");
     setIsProjectModalOpen(true);
   }
 
@@ -417,6 +484,7 @@ function AdminPage() {
       updatedAt: new Date().toISOString(),
       clientName: projClientName,
       metric: projMetric,
+      videoAspect: projVideoAspect,
     };
 
     try {
@@ -437,6 +505,7 @@ function AdminPage() {
         toast.success("New portfolio project added successfully");
       }
 
+      queryClient.invalidateQueries({ queryKey: ["portfolio-projects"] });
       setIsProjectModalOpen(false);
       fetchData();
     } catch (err: any) {
@@ -461,6 +530,7 @@ function AdminPage() {
 
       if (error) throw error;
       toast.success("Portfolio project deleted successfully");
+      queryClient.invalidateQueries({ queryKey: ["portfolio-projects"] });
       fetchData();
     } catch (err: any) {
       console.error(err);
@@ -479,12 +549,7 @@ function AdminPage() {
       c.details?.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  const filteredSamples = samples.filter(
-    (s) =>
-      s.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.message?.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
+
 
   const filteredProjects = portfolioProjects.filter(
     (p) =>
@@ -581,17 +646,17 @@ function AdminPage() {
       title: "Project Inquiries",
       desc: "Manage client submissions stored directly on Supabase.",
     },
-    sample: {
-      title: "Free Sample Requests",
-      desc: "Manage client free sample submissions stored on Supabase.",
-    },
     portfolio: {
       title: "Featured Work Manager",
-      desc: "Manage the portfolio projects shown on the homepage (9:16 aspect ratio edits).",
+      desc: "Manage the portfolio projects shown on the homepage (9:16 portrait and 16:9 landscape edits).",
     },
     testimonials: {
       title: "Client Testimonials",
       desc: "Manage client testimonials and reviews shown on the homepage.",
+    },
+    showreel: {
+      title: "Showreel Settings",
+      desc: "Manage the main watch showreel video and details.",
     },
   };
 
@@ -615,12 +680,6 @@ function AdminPage() {
                 Inquiries
               </button>
               <button
-                onClick={() => setActiveTab("sample")}
-                className={`text-sm font-medium px-3 py-1.5 rounded-lg transition ${activeTab === "sample" ? "bg-white/10 text-foreground" : "text-muted-foreground hover:text-foreground"}`}
-              >
-                Free Samples
-              </button>
-              <button
                 onClick={() => setActiveTab("portfolio")}
                 className={`text-sm font-medium px-3 py-1.5 rounded-lg transition ${activeTab === "portfolio" ? "bg-white/10 text-foreground" : "text-muted-foreground hover:text-foreground"}`}
               >
@@ -631,6 +690,12 @@ function AdminPage() {
                 className={`text-sm font-medium px-3 py-1.5 rounded-lg transition ${activeTab === "testimonials" ? "bg-white/10 text-foreground" : "text-muted-foreground hover:text-foreground"}`}
               >
                 Testimonials
+              </button>
+              <button
+                onClick={() => setActiveTab("showreel")}
+                className={`text-sm font-medium px-3 py-1.5 rounded-lg transition ${activeTab === "showreel" ? "bg-white/10 text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              >
+                Showreel
               </button>
             </nav>
           </div>
@@ -660,12 +725,6 @@ function AdminPage() {
             Inquiries
           </button>
           <button
-            onClick={() => setActiveTab("sample")}
-            className={`whitespace-nowrap px-4 py-2.5 rounded-xl font-medium text-sm border transition ${activeTab === "sample" ? "bg-foreground text-background border-foreground" : "border-white/10 text-muted-foreground"}`}
-          >
-            Free Samples
-          </button>
-          <button
             onClick={() => setActiveTab("portfolio")}
             className={`whitespace-nowrap px-4 py-2.5 rounded-xl font-medium text-sm border transition ${activeTab === "portfolio" ? "bg-foreground text-background border-foreground" : "border-white/10 text-muted-foreground"}`}
           >
@@ -676,6 +735,12 @@ function AdminPage() {
             className={`whitespace-nowrap px-4 py-2.5 rounded-xl font-medium text-sm border transition ${activeTab === "testimonials" ? "bg-foreground text-background border-foreground" : "border-white/10 text-muted-foreground"}`}
           >
             Testimonials
+          </button>
+          <button
+            onClick={() => setActiveTab("showreel")}
+            className={`whitespace-nowrap px-4 py-2.5 rounded-xl font-medium text-sm border transition ${activeTab === "showreel" ? "bg-foreground text-background border-foreground" : "border-white/10 text-muted-foreground"}`}
+          >
+            Showreel
           </button>
         </div>
 
@@ -805,81 +870,6 @@ function AdminPage() {
                 </div>
               ))}
 
-            {activeTab === "sample" &&
-              (filteredSamples.length === 0 ? (
-                <EmptyState icon={Video} text="No sample edit requests found" />
-              ) : (
-                <div className="grid gap-4">
-                  {filteredSamples.map((s) => (
-                    <div
-                      key={s.id}
-                      className="rounded-2xl border border-white/8 bg-surface/40 p-5 flex flex-col gap-4 md:flex-row md:items-start md:justify-between transition-colors hover:border-white/15"
-                    >
-                      <div className="space-y-3">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className="font-semibold text-lg text-foreground">{s.name}</span>
-                          <span className="text-muted-foreground text-sm">({s.email})</span>
-                        </div>
-
-                        {/* Footage link button/display */}
-                        <div className="pt-1">
-                          <a
-                            href={s.footageLink}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex items-center gap-1.5 rounded-lg bg-electric/10 border border-electric/25 px-3 py-2 text-xs font-semibold text-electric transition hover:bg-electric/20"
-                          >
-                            <Video className="size-3.5" />
-                            Open Footage Link <ChevronRight className="size-3" />
-                          </a>
-                          <span className="ml-2 text-xs text-muted-foreground break-all">
-                            {s.footageLink}
-                          </span>
-                        </div>
-
-                        <p className="text-sm text-foreground/80 leading-relaxed max-w-3xl whitespace-pre-wrap">
-                          {s.message}
-                        </p>
-
-                        <div className="text-xs text-muted-foreground pt-1">
-                          Submitted: <strong>{new Date(s.createdAt).toLocaleString()}</strong>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-3 self-end md:self-start pt-2 md:pt-0">
-                        {/* Status Select */}
-                        <div className="flex items-center gap-2">
-                          <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
-                            Status:
-                          </span>
-                          <select
-                            value={s.status}
-                            onChange={(e) =>
-                              updateStatus("sample_edit_requests", s.id, e.target.value)
-                            }
-                            className="bg-black/40 border border-white/10 rounded-lg text-xs text-foreground px-2.5 py-1.5 focus:outline-none focus:border-electric"
-                          >
-                            <option value="new">New</option>
-                            <option value="reviewing">Reviewing</option>
-                            <option value="in_progress">In Progress</option>
-                            <option value="completed">Completed</option>
-                            <option value="rejected">Rejected</option>
-                          </select>
-                        </div>
-                        {/* Delete Button */}
-                        <button
-                          onClick={() => deleteRequest("sample_edit_requests", s.id)}
-                          className="grid size-9 place-items-center rounded-xl border border-white/10 bg-white/[0.03] text-muted-foreground hover:text-red-400 hover:border-red-400/20 transition"
-                          title="Delete submission"
-                        >
-                          <Trash2 className="size-4" />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ))}
-
             {activeTab === "portfolio" &&
               (filteredProjects.length === 0 ? (
                 <EmptyState icon={Video} text="No portfolio projects found" />
@@ -890,7 +880,7 @@ function AdminPage() {
                       key={p.id}
                       className="relative rounded-2xl border border-white/8 bg-surface/40 overflow-hidden flex flex-col group hover:border-white/15 transition-colors"
                     >
-                      <div className="aspect-[9/16] relative bg-black">
+                      <div className={`relative bg-black ${p.videoAspect === "landscape" ? "aspect-video" : "aspect-[9/16]"}`}>
                         <img
                           src={p.thumbnail}
                           alt={p.title}
@@ -899,7 +889,7 @@ function AdminPage() {
                         <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent" />
                         <div className="absolute top-3 left-3 right-3 flex items-center justify-between pointer-events-none z-10">
                           <span className="inline-flex items-center gap-1.5 rounded-full glass px-2.5 py-0.5 text-[9px] uppercase tracking-[0.18em] text-foreground/80">
-                            {p.category}
+                            {p.category} {p.videoAspect === "landscape" ? "(16:9)" : "(9:16)"}
                           </span>
                           <div className="flex gap-1.5">
                             {!p.isPublished && (
@@ -1048,6 +1038,173 @@ function AdminPage() {
                   ))}
                 </div>
               ))}
+
+            {activeTab === "showreel" && (
+              <div className="rounded-3xl border border-white/8 bg-surface/30 p-6 md:p-8 backdrop-blur-md">
+                <div className="grid gap-8 lg:grid-cols-[1fr_400px]">
+                  {/* Left Column: Form Settings */}
+                  <form onSubmit={handleSaveShowreel} className="space-y-6">
+                    <div className="space-y-4">
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div>
+                          <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5 font-bold">
+                            Showreel Title
+                          </label>
+                          <input
+                            required
+                            type="text"
+                            value={showreelTitle}
+                            onChange={(e) => setShowreelTitle(e.target.value)}
+                            placeholder="e.g. Raqvine Signature Showreel"
+                            className="w-full rounded-xl border border-white/10 bg-white/[0.03] p-3.5 text-sm text-foreground focus:border-electric focus:outline-none focus:ring-1 focus:ring-electric/30 transition"
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5 font-bold">
+                            Video Aspect Ratio / Layout
+                          </label>
+                          <select
+                            value={showreelVideoAspect}
+                            onChange={(e) => setShowreelVideoAspect(e.target.value as "portrait" | "landscape")}
+                            className="w-full rounded-xl border border-white/10 bg-black p-3.5 text-sm text-foreground focus:border-electric focus:outline-none focus:ring-1 focus:ring-electric/30 transition"
+                          >
+                            <option value="portrait">Portrait (Instagram Reel - 9:16)</option>
+                            <option value="landscape">Landscape (YouTube Video - 16:9)</option>
+                          </select>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5 font-bold">
+                          Showreel Video File / URL
+                        </label>
+                        <div className="space-y-2">
+                          <input
+                            type="file"
+                            accept="video/*"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file)
+                                handleUploadFile(
+                                  file,
+                                  "portfolio",
+                                  setUploadingShowreelVideo,
+                                  setShowreelUrl
+                                );
+                            }}
+                            className="w-full text-xs text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-white/10 file:text-foreground hover:file:bg-white/20 file:cursor-pointer"
+                            disabled={uploadingShowreelVideo}
+                          />
+                          {uploadingShowreelVideo && (
+                            <div className="text-xs text-electric animate-pulse">
+                              Uploading showreel video...
+                            </div>
+                          )}
+                          <input
+                            required
+                            type="url"
+                            value={showreelUrl}
+                            onChange={(e) => setShowreelUrl(e.target.value)}
+                            placeholder="https://commondatastorage.googleapis.com/..."
+                            className="w-full rounded-xl border border-white/10 bg-white/[0.03] p-3 text-sm text-foreground focus:border-electric focus:outline-none focus:ring-1 focus:ring-electric/30 transition"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5 font-bold">
+                          Showreel Description / Details
+                        </label>
+                        <textarea
+                          required
+                          value={showreelDescription}
+                          onChange={(e) => setShowreelDescription(e.target.value)}
+                          rows={4}
+                          placeholder="Provide details about the editing style, techniques, or outcomes featured in this showreel."
+                          className="w-full rounded-xl border border-white/10 bg-white/[0.03] p-3.5 text-sm text-foreground focus:border-electric focus:outline-none focus:ring-1 focus:ring-electric/30 transition resize-y"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="pt-4 flex justify-start gap-3 border-t border-white/5">
+                      <button
+                        type="submit"
+                        disabled={savingShowreel || uploadingShowreelVideo}
+                        className="inline-flex items-center justify-center gap-2 rounded-xl bg-foreground px-6 py-3 text-xs font-semibold text-background hover:scale-[1.01] transition-transform disabled:opacity-50 cursor-pointer"
+                      >
+                        <Save className="size-4" />
+                        {savingShowreel ? "Saving Settings..." : "Save Showreel Settings"}
+                      </button>
+                    </div>
+                  </form>
+
+                  {/* Right Column: Live Mockup Preview */}
+                  <div className="space-y-6">
+                    <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground font-bold">
+                      Real-Time UI Preview
+                    </label>
+
+                    <div className="rounded-2xl border border-white/10 bg-[#050816] overflow-hidden shadow-2xl relative">
+                      {/* Fake Browser window header */}
+                      <div className="bg-white/[0.02] border-b border-white/5 px-4 py-2.5 flex items-center gap-1.5">
+                        <div className="size-2.5 rounded-full bg-red-500/60" />
+                        <div className="size-2.5 rounded-full bg-yellow-500/60" />
+                        <div className="size-2.5 rounded-full bg-green-500/60" />
+                        <div className="text-[10px] text-muted-foreground/60 ml-2 font-mono truncate">
+                          raqvine.com/showreel
+                        </div>
+                      </div>
+
+                      {/* Mockup Layout */}
+                      <div className="p-4 space-y-4">
+                        {/* Title Mockup */}
+                        <div className="space-y-1">
+                          <span className="text-[8px] font-bold text-electric uppercase tracking-wider block">
+                            ✦ Showreel Preview
+                          </span>
+                          <h4 className="text-xs font-semibold text-white truncate">
+                            {showreelTitle || "Raqvine Signature Showreel"}
+                          </h4>
+                        </div>
+
+                        {/* Video Aspect Frame */}
+                        <div className={`relative mx-auto rounded-xl border border-white/10 bg-black overflow-hidden flex items-center justify-center transition-all duration-300 ${showreelVideoAspect === "landscape" ? "aspect-video w-full max-w-[260px]" : "aspect-[9/16] w-full max-w-[180px]"}`}>
+                          {showreelUrl ? (
+                            <video
+                              src={showreelUrl}
+                              className={`size-full opacity-80 ${showreelVideoAspect === "landscape" ? "object-contain" : "object-cover"}`}
+                              muted
+                              playsInline
+                            />
+                          ) : (
+                            <div className="text-[10px] text-muted-foreground text-center p-3">
+                              No video URL set
+                            </div>
+                          )}
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex flex-col justify-end p-2 text-left pointer-events-none">
+                            <span className="text-[7px] text-white/50">@raqvine.edits</span>
+                            <span className="text-[8px] font-bold text-white line-clamp-1">
+                              {showreelTitle || "Showreel"}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Description Mockup */}
+                        <div className="bg-white/[0.02] border border-white/5 rounded-xl p-3 space-y-1.5 text-left">
+                          <span className="text-[7px] font-bold text-muted-foreground uppercase tracking-widest block">
+                            Showreel Details
+                          </span>
+                          <p className="text-[9px] text-white/75 leading-relaxed line-clamp-3 whitespace-pre-wrap">
+                            {showreelDescription || "No description set yet."}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -1263,7 +1420,20 @@ function AdminPage() {
                 </div>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-3 items-center pt-2">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5 font-bold">
+                    Video Aspect Ratio / Layout
+                  </label>
+                  <select
+                    value={projVideoAspect}
+                    onChange={(e) => setProjVideoAspect(e.target.value as "portrait" | "landscape")}
+                    className="w-full rounded-xl border border-white/10 bg-black p-3 text-sm text-foreground focus:border-electric focus:outline-none focus:ring-1 focus:ring-electric/30 transition"
+                  >
+                    <option value="portrait">Portrait (9:16)</option>
+                    <option value="landscape">Landscape (16:9)</option>
+                  </select>
+                </div>
                 <div>
                   <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5">
                     Sort Order
@@ -1275,7 +1445,9 @@ function AdminPage() {
                     className="w-full rounded-xl border border-white/10 bg-white/[0.03] p-3 text-sm text-foreground focus:border-electric focus:outline-none focus:ring-1 focus:ring-electric/30 transition"
                   />
                 </div>
+              </div>
 
+              <div className="grid gap-4 sm:grid-cols-2 items-center">
                 <div>
                   <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5">
                     Link to Service

@@ -43,6 +43,7 @@ export type Project = {
   tools: string[];
   clientName?: string;
   metric?: string;
+  videoAspect?: "portrait" | "landscape";
 };
 
 export const projects: Project[] = [

@@ -84,7 +84,10 @@ function Card({ p, onOpen }: { p: Project; onOpen: () => void }) {
         videoRef.current?.pause();
         if (videoRef.current) videoRef.current.currentTime = 0;
       }}
-      className="group relative aspect-[9/16] w-full overflow-hidden rounded-2xl border border-white/8 bg-surface text-left transition-all duration-500 hover:scale-[1.03] hover:border-electric/40 hover:shadow-[0_0_25px_rgba(0,212,255,0.15)] focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/50"
+      className={cn(
+        "group relative w-full overflow-hidden rounded-2xl border border-white/8 bg-surface text-left transition-all duration-500 hover:scale-[1.03] hover:border-electric/40 hover:shadow-[0_0_25px_rgba(0,212,255,0.15)] focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/50",
+        p.videoAspect === "landscape" ? "aspect-video" : "aspect-[9/16]",
+      )}
     >
       <img
         src={p.thumb}
@@ -173,6 +176,7 @@ export function Portfolio() {
           tools: p.tools,
           clientName: p.clientName || "",
           metric: p.metric || "",
+          videoAspect: p.videoAspect || "portrait",
         }))
       : mockProjects;
 
@@ -269,7 +273,11 @@ export function Portfolio() {
               />
             ))
           : projectsToRender.map((p, i) => (
-              <Reveal key={p.id} delay={(i % 4) * 0.05}>
+              <Reveal
+                key={p.id}
+                delay={(i % 4) * 0.05}
+                className={p.videoAspect === "landscape" ? "col-span-2 md:col-span-2" : "col-span-1"}
+              >
                 <Card p={p} onOpen={() => setOpen(p)} />
               </Reveal>
             ))}
@@ -290,7 +298,12 @@ export function Portfolio() {
               exit={{ opacity: 0, scale: 0.96, y: 20 }}
               transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
               onClick={(e) => e.stopPropagation()}
-              className="relative w-full max-w-sm md:max-w-4xl h-[92vh] md:h-[80vh] overflow-hidden rounded-3xl glass-strong border border-white/10 shadow-2xl flex flex-col md:grid md:grid-cols-[1.15fr_1fr]"
+              className={cn(
+                "relative w-full overflow-hidden rounded-3xl glass-strong border border-white/10 shadow-2xl flex flex-col md:grid",
+                open.videoAspect === "landscape"
+                  ? "max-w-sm md:max-w-5xl h-[92vh] md:h-[75vh] md:grid-cols-[1.4fr_1fr]"
+                  : "max-w-sm md:max-w-4xl h-[92vh] md:h-[80vh] md:grid-cols-[auto_1fr]"
+              )}
             >
               <button
                 onClick={() => setOpen(null)}
@@ -301,13 +314,18 @@ export function Portfolio() {
               </button>
 
               {/* Video Player — portrait on mobile, landscape fill on desktop */}
-              <div className="relative w-full bg-black overflow-hidden flex items-center justify-center flex-shrink-0 aspect-[9/16] md:aspect-auto md:h-full">
+              <div className={cn(
+                "relative w-full bg-black overflow-hidden flex items-center justify-center flex-shrink-0",
+                open.videoAspect === "landscape"
+                  ? "aspect-video md:aspect-auto md:h-full"
+                  : "md:w-[380px] aspect-[9/16] md:aspect-auto md:h-full"
+              )}>
                 <video
                   src={open.video}
                   controls
                   autoPlay
                   playsInline
-                  className="w-full h-full object-contain md:object-cover"
+                  className="w-full h-full object-contain"
                 />
               </div>
 
