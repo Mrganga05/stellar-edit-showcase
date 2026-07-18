@@ -192,7 +192,7 @@ const FeatureCard = ({ title, desc, icon, delay = 0 }: FeatureCardProps) => {
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, margin: "-30px" }}
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay }}
-      className="group relative overflow-hidden rounded-[18px] border border-white/[0.08] bg-white/[0.03] p-4 sm:p-5 lg:p-6 backdrop-blur-md flex flex-col gap-3 lg:h-[150px] transition-all duration-[450ms] ease-out hover:border-[#38BDF8]/40 hover:-translate-y-1.5 hover:shadow-[0_10px_25px_rgba(56,189,248,0.06)]"
+      className="group relative overflow-hidden rounded-[18px] border border-white/[0.08] bg-[#0c1224]/80 p-4 sm:p-5 lg:p-6 flex flex-col gap-3 lg:h-[150px] transition-all duration-[450ms] ease-out hover:border-[#38BDF8]/40 hover:-translate-y-1.5 hover:shadow-[0_10px_25px_rgba(56,189,248,0.06)]"
     >
       <div className="absolute inset-0 bg-gradient-to-br from-[#38BDF8]/0 to-[#38BDF8]/[0.03] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
 
@@ -225,7 +225,7 @@ const FloatingBadge = ({
   return (
     <div
       className={cn(
-        "rounded-full border border-white/[0.08] bg-[#0B1224]/60 px-3 py-1.5 text-xs font-semibold text-white/80 backdrop-blur-md shadow-md cursor-default hover:border-[#38BDF8]/20 hover:text-white transition-all duration-300 flex items-center gap-1.5 whitespace-nowrap",
+        "rounded-full border border-white/[0.08] bg-[#0B1224]/90 px-3 py-1.5 text-xs font-semibold text-white/80 shadow-md cursor-default hover:border-[#38BDF8]/20 hover:text-white transition-all duration-300 flex items-center gap-1.5 whitespace-nowrap",
         className,
       )}
     >
@@ -311,7 +311,7 @@ export function About() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5 }}
-              className="h-[42px] rounded-full border border-white/[0.08] bg-white/[0.04] px-[18px] flex items-center gap-2 self-center lg:self-start backdrop-blur-md hover:border-[#38BDF8]/30 hover:shadow-[0_0_15px_rgba(56,189,248,0.15)] transition-all duration-300 cursor-default"
+              className="h-[42px] rounded-full border border-white/[0.08] bg-[#0B1224]/90 px-[18px] flex items-center gap-2 self-center lg:self-start hover:border-[#38BDF8]/30 hover:shadow-[0_0_15px_rgba(56,189,248,0.15)] transition-all duration-300 cursor-default"
             >
               <span className="size-1.5 rounded-full bg-[#38BDF8] animate-pulse" />
               <span className="text-badge-text text-white/80">ABOUT THE EDITOR</span>
@@ -393,7 +393,7 @@ export function About() {
             </div>
 
             {/* CTA Card (60% width on desktop) */}
-            <div className="w-full sm:w-[60%] rounded-[24px] border border-white/[0.08] bg-white/[0.03] p-4.5 sm:p-6 xl:p-8 backdrop-blur-md flex flex-col justify-between space-y-4 sm:space-y-5 max-lg:w-full max-lg:mt-10 max-lg:rounded-[20px] max-lg:p-5">
+            <div className="w-full sm:w-[60%] rounded-[24px] border border-white/[0.08] bg-[#0c1224]/90 p-4.5 sm:p-6 xl:p-8 flex flex-col justify-between space-y-4 sm:space-y-5 max-lg:w-full max-lg:mt-10 max-lg:rounded-[20px] max-lg:p-5">
               <div className="space-y-1 sm:space-y-2">
                 <span className="text-[9px] sm:text-badge-text text-[#38BDF8] font-bold">
                   READY TO COLLABORATE?
@@ -509,7 +509,7 @@ export function About() {
                 whileInView={{ opacity: 1 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.8 }}
-                className="group relative z-10 flex flex-col rounded-[34px] border border-white/[0.08] bg-white/[0.03] backdrop-blur-xl shadow-[0_20px_50px_rgba(24,182,255,0.1)] hover:shadow-[0_25px_65px_rgba(24,182,255,0.2)] overflow-hidden animate-border-beam w-full h-full transition-shadow duration-500"
+                className="group relative z-10 flex flex-col rounded-[34px] border border-white/[0.08] bg-[#0c1224]/90 shadow-[0_20px_50px_rgba(24,182,255,0.1)] hover:shadow-[0_25px_65px_rgba(24,182,255,0.2)] overflow-hidden animate-border-beam w-full h-full transition-shadow duration-500"
               >
                 {/* Main Portrait Image (Full show, no cropping, luxury border) - Original colors and full clarity */}
                 <div className="relative w-full h-full overflow-hidden rounded-[34px] bg-[#050810]">
@@ -533,7 +533,7 @@ export function About() {
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="mt-6 grid grid-cols-2 sm:flex sm:flex-row items-center sm:justify-between gap-y-4 gap-x-2 rounded-2xl border border-white/[0.08] bg-white/[0.03] px-2 py-5 sm:py-3.5 text-xs text-[#9CA3AF] backdrop-blur-md shadow-md shrink-0 w-full max-lg:order-4 max-lg:w-full max-lg:max-w-[360px] max-lg:mx-auto max-lg:mt-6 max-lg:py-4 max-lg:px-3 max-lg:gap-y-3"
+              className="mt-6 grid grid-cols-2 sm:flex sm:flex-row items-center sm:justify-between gap-y-4 gap-x-2 rounded-2xl border border-white/[0.08] bg-[#0c1224]/90 px-2 py-5 sm:py-3.5 text-xs text-[#9CA3AF] shadow-md shrink-0 w-full max-lg:order-4 max-lg:w-full max-lg:max-w-[360px] max-lg:mx-auto max-lg:mt-6 max-lg:py-4 max-lg:px-3 max-lg:gap-y-3"
             >
               <div className="flex-1 min-w-[70px] text-center px-1 flex flex-col items-center">
                 <span className="font-bold text-white text-sm min-[375px]:text-base sm:text-lg max-lg:text-xl">

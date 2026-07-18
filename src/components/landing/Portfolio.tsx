@@ -214,7 +214,7 @@ export function Portfolio() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="inline-flex items-center gap-2 rounded-full border border-[#38BDF8]/25 bg-white/[0.03] backdrop-blur-md px-4.5 py-1.5 shadow-[0_0_15px_rgba(56,189,248,0.08)] mb-6 sm:mb-8 hover:border-[#38BDF8]/40 transition-colors duration-300 select-none"
+          className="inline-flex items-center gap-2 rounded-full border border-[#38BDF8]/25 bg-[#0c1224]/90 px-4.5 py-1.5 shadow-[0_0_15px_rgba(56,189,248,0.08)] mb-6 sm:mb-8 hover:border-[#38BDF8]/40 transition-colors duration-300 select-none"
         >
           {/* Blue Glowing Dot */}
           <span className="size-2 rounded-full bg-[#38BDF8] animate-pulse shadow-[0_0_8px_rgba(56,189,248,0.6)]" />

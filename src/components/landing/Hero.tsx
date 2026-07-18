@@ -422,7 +422,7 @@ export function Hero() {
               <div
                 key={label}
                 className={cn(
-                  "group relative flex flex-row items-center gap-2 sm:gap-4 rounded-[12px] border border-white/[0.05] bg-[#050810]/40 p-2.5 sm:p-4 lg:p-6 transition-all duration-500 hover:-translate-y-1.5 overflow-hidden cursor-default w-full backdrop-blur-xl card-tech-grid",
+                  "group relative flex flex-row items-center gap-2 sm:gap-4 rounded-[12px] border border-white/[0.05] bg-[#0c1224]/85 p-2.5 sm:p-4 lg:p-6 transition-all duration-500 hover:-translate-y-1.5 overflow-hidden cursor-default w-full card-tech-grid",
                   borderBeamClass,
                 )}
               >
