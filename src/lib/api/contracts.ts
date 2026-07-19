@@ -17,6 +17,9 @@ export type PortfolioProject = {
   clientName?: string;
   metric?: string;
   videoAspect?: "portrait" | "landscape";
+  duration?: number;
+  resolution?: string;
+  fileSize?: number;
 };
 
 export type BeforeAfterProject = {

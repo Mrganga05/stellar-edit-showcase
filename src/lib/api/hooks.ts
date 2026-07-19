@@ -68,7 +68,8 @@ const initialServices: Service[] = [
     id: "s1",
     title: "Short-Form Editing",
     slug: "short-form-editing",
-    description: "High-retention vertical edits engineered to stop scrolling and maximize engagement.",
+    description:
+      "High-retention vertical edits engineered to stop scrolling and maximize engagement.",
     iconKey: "Clapperboard",
     sortOrder: 0,
     isActive: true,
@@ -79,7 +80,8 @@ const initialServices: Service[] = [
     id: "s2",
     title: "Long-Form Editing",
     slug: "long-form-editing",
-    description: "Retention-first YouTube editing designed to increase watch time and audience growth.",
+    description:
+      "Retention-first YouTube editing designed to increase watch time and audience growth.",
     iconKey: "Youtube",
     sortOrder: 1,
     isActive: true,
@@ -90,7 +92,8 @@ const initialServices: Service[] = [
     id: "s3",
     title: "Motion Graphics",
     slug: "motion-graphics",
-    description: "Premium animations, kinetic typography, branded graphics, and visual storytelling.",
+    description:
+      "Premium animations, kinetic typography, branded graphics, and visual storytelling.",
     iconKey: "Sparkles",
     sortOrder: 2,
     isActive: true,
@@ -123,7 +126,8 @@ const initialServices: Service[] = [
     id: "s6",
     title: "AI Editing",
     slug: "ai-editing",
-    description: "AI-assisted editing workflows that accelerate production without sacrificing quality.",
+    description:
+      "AI-assisted editing workflows that accelerate production without sacrificing quality.",
     iconKey: "Wand2",
     sortOrder: 5,
     isActive: true,
@@ -134,7 +138,8 @@ const initialServices: Service[] = [
     id: "s7",
     title: "Website Development",
     slug: "website-development",
-    description: "Fast, responsive, SEO-optimized websites built to convert visitors into customers.",
+    description:
+      "Fast, responsive, SEO-optimized websites built to convert visitors into customers.",
     iconKey: "Globe",
     sortOrder: 6,
     isActive: true,
@@ -145,7 +150,8 @@ const initialServices: Service[] = [
     id: "s8",
     title: "3D Web Experiences",
     slug: "3d-web-experiences",
-    description: "Immersive interactive websites powered by modern 3D technologies and smooth animations.",
+    description:
+      "Immersive interactive websites powered by modern 3D technologies and smooth animations.",
     iconKey: "Box",
     sortOrder: 7,
     isActive: true,
@@ -156,7 +162,8 @@ const initialServices: Service[] = [
     id: "s9",
     title: "AI Automation",
     slug: "ai-automation",
-    description: "Automate repetitive workflows, lead management, and business operations using AI.",
+    description:
+      "Automate repetitive workflows, lead management, and business operations using AI.",
     iconKey: "Bot",
     sortOrder: 8,
     isActive: true,
@@ -167,7 +174,8 @@ const initialServices: Service[] = [
     id: "s10",
     title: "AI Voice Agents",
     slug: "ai-voice-agents",
-    description: "24/7 AI voice assistants for sales, customer support, bookings, and lead qualification.",
+    description:
+      "24/7 AI voice assistants for sales, customer support, bookings, and lead qualification.",
     iconKey: "Mic",
     sortOrder: 9,
     isActive: true,

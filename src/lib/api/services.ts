@@ -1,4 +1,5 @@
 import { supabase } from "../supabase";
+import type { PostgrestError } from "@supabase/supabase-js";
 import type {
   BeforeAfterProject,
   ContactInquiry,
@@ -11,7 +12,9 @@ import type {
 import type { ContactCreateInput, SampleRequestCreateInput } from "./schemas";
 import { ApiClientError } from "./http";
 
-async function handleSupabaseResponse<T>(promise: any): Promise<T> {
+async function handleSupabaseResponse<T>(
+  promise: PromiseLike<{ data: T | null; error: PostgrestError | null }>,
+): Promise<T> {
   const { data, error } = await promise;
   if (error) {
     throw new ApiClientError(400, {

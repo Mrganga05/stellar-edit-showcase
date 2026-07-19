@@ -19,7 +19,7 @@ export function SectionHeading({
     <motion.div
       initial={{ opacity: 0, y: 24 }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-80px" }}
+      viewport={{ once: true, amount: 0.1, margin: "-20px" }}
       transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
       className={cn(
         "max-w-3xl",
@@ -82,7 +82,7 @@ export function Reveal({
     <motion.div
       initial={{ opacity: 0, y }}
       whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-60px" }}
+      viewport={{ once: true, amount: 0.1, margin: "-15px" }}
       transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay }}
       className={className}
     >
@@ -103,7 +103,7 @@ export function AnimatedCounter({
   const ref = useRef<HTMLSpanElement>(null);
   const mv = useMotionValue(0);
   const rounded = useTransform(mv, (v) => Math.floor(v).toLocaleString());
-  const inView = useInView(ref, { once: true, margin: "-80px" });
+  const inView = useInView(ref, { once: true, amount: 0.1, margin: "-20px" });
   useEffect(() => {
     if (!inView) return;
     const controls = animate(mv, to, { duration, ease: [0.16, 1, 0.3, 1] });

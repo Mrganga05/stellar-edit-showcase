@@ -1,13 +1,4 @@
-import {
-  Target,
-  Rocket,
-  Zap,
-  Handshake,
-  Film,
-  TrendingUp,
-  Gem,
-  Flame,
-} from "lucide-react";
+import { Target, Rocket, Zap, Handshake, Film, TrendingUp, Gem, Flame } from "lucide-react";
 import { SectionHeading, Reveal } from "./primitives";
 
 const items = [

@@ -19,7 +19,7 @@ const Counter = ({
   decimals?: number;
 }) => {
   const nodeRef = useRef<HTMLSpanElement>(null);
-  const inView = useInView(nodeRef, { once: true, margin: "-100px" });
+  const inView = useInView(nodeRef, { once: true, amount: 0.1, margin: "-20px" });
 
   useEffect(() => {
     if (!inView) return;
@@ -73,7 +73,8 @@ function Card({ p, onOpen }: { p: Project; onOpen: () => void }) {
   const displayMetric = p.metric || (p.results && p.results[0]) || "";
 
   return (
-    <button
+    <motion.button
+      whileTap={{ scale: 0.97 }}
       onClick={onOpen}
       onMouseEnter={() => {
         setHover(true);
@@ -85,7 +86,7 @@ function Card({ p, onOpen }: { p: Project; onOpen: () => void }) {
         if (videoRef.current) videoRef.current.currentTime = 0;
       }}
       className={cn(
-        "group relative w-full overflow-hidden rounded-2xl border border-white/8 bg-surface text-left transition-all duration-500 hover:scale-[1.03] hover:border-electric/40 hover:shadow-[0_0_25px_rgba(0,212,255,0.15)] focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/50",
+        "group relative w-full overflow-hidden rounded-2xl border border-white/8 bg-surface text-left transition-all duration-500 hover:scale-[1.03] hover:border-electric/40 hover:shadow-[0_0_25px_rgba(0,212,255,0.15)] focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/50 cursor-pointer",
         p.videoAspect === "landscape" ? "aspect-video" : "aspect-[9/16]",
       )}
     >
@@ -106,7 +107,9 @@ function Card({ p, onOpen }: { p: Project; onOpen: () => void }) {
         muted
         loop
         playsInline
-        preload="none"
+        preload="metadata"
+        controlsList="nodownload"
+        poster={p.thumb}
         className={cn(
           "absolute inset-0 size-full object-cover transition-opacity duration-500",
           hover ? "opacity-100" : "opacity-0",
@@ -153,7 +156,7 @@ function Card({ p, onOpen }: { p: Project; onOpen: () => void }) {
           {p.description}
         </p>
       </div>
-    </button>
+    </motion.button>
   );
 }
 
@@ -279,7 +282,9 @@ export function Portfolio() {
               <Reveal
                 key={p.id}
                 delay={(i % 4) * 0.05}
-                className={p.videoAspect === "landscape" ? "col-span-2 md:col-span-2" : "col-span-1"}
+                className={
+                  p.videoAspect === "landscape" ? "col-span-2 md:col-span-2" : "col-span-1"
+                }
               >
                 <Card p={p} onOpen={() => setOpen(p)} />
               </Reveal>
@@ -302,10 +307,10 @@ export function Portfolio() {
               transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
               onClick={(e) => e.stopPropagation()}
               className={cn(
-                "relative w-full overflow-y-auto md:overflow-hidden rounded-3xl glass-strong border border-white/10 shadow-2xl flex flex-col md:grid",
+                "relative w-[calc(100vw-1.5rem)] overflow-y-auto md:overflow-hidden rounded-[28px] md:rounded-3xl glass-strong border border-white/10 shadow-2xl flex flex-col md:grid",
                 open.videoAspect === "landscape"
-                  ? "max-w-sm md:max-w-5xl h-[92vh] md:h-[75vh] md:grid-cols-[1.4fr_1fr]"
-                  : "max-w-sm md:max-w-4xl h-[92vh] md:h-[80vh] md:grid-cols-[auto_1fr]"
+                  ? "max-w-sm md:max-w-5xl h-[90vh] md:h-[75vh] md:grid-cols-[1.4fr_1fr]"
+                  : "max-w-sm md:max-w-4xl h-[90vh] md:h-[80vh] md:grid-cols-[auto_1fr]",
               )}
             >
               <button
@@ -317,17 +322,21 @@ export function Portfolio() {
               </button>
 
               {/* Video Player — portrait on mobile, landscape fill on desktop */}
-              <div className={cn(
-                "relative w-full bg-black border-b md:border-b-0 md:border-r border-white/10 flex items-center justify-center flex-shrink-0 p-4 overflow-hidden group/video-container",
-                open.videoAspect === "landscape"
-                  ? "aspect-video md:aspect-auto md:h-full max-h-[40vh] md:max-h-none"
-                  : "aspect-[9/16] md:w-[380px] md:aspect-auto md:h-full max-h-[50vh] md:max-h-none"
-              )}>
+              <div
+                className={cn(
+                  "relative w-full bg-black border-b md:border-b-0 md:border-r border-white/10 flex items-center justify-center flex-shrink-0 p-4 overflow-hidden group/video-container",
+                  open.videoAspect === "landscape"
+                    ? "aspect-video md:aspect-auto md:h-full max-h-[40vh] md:max-h-none"
+                    : "aspect-[9/16] md:w-[380px] md:aspect-auto md:h-full max-h-[50vh] md:max-h-none",
+                )}
+              >
                 {/* Phone/Monitor mockup styled frame */}
-                <div className={cn(
-                  "relative w-full rounded-2xl overflow-hidden border border-white/10 bg-black flex items-center justify-center shadow-inner",
-                  open.videoAspect === "landscape" ? "aspect-video" : "w-full h-full"
-                )}>
+                <div
+                  className={cn(
+                    "relative w-full rounded-2xl overflow-hidden border border-white/10 bg-black flex items-center justify-center shadow-inner",
+                    open.videoAspect === "landscape" ? "aspect-video" : "w-full h-full",
+                  )}
+                >
                   {/* Glowing neon animated border */}
                   <div className="absolute inset-0 z-0 p-[1.5px] rounded-2xl overflow-hidden pointer-events-none">
                     <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 via-purple-500 to-cyan-500 opacity-60 animate-gradient-text" />
@@ -338,9 +347,12 @@ export function Portfolio() {
                     controls
                     autoPlay
                     playsInline
+                    preload="metadata"
+                    controlsList="nodownload"
+                    poster={open.thumb}
                     className={cn(
                       "relative z-10 w-full h-full rounded-2xl",
-                      open.videoAspect === "landscape" ? "object-contain" : "object-cover"
+                      open.videoAspect === "landscape" ? "object-contain" : "object-cover",
                     )}
                   />
                 </div>

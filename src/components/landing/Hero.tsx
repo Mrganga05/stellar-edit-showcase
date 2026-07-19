@@ -1,5 +1,23 @@
 import { motion, AnimatePresence, useInView } from "motion/react";
-import { ArrowRight, Play, X, Eye, Briefcase, Users, Star, Heart, Share2, Bookmark, Info, Volume2, VolumeX, Sparkles, Film, Sliders, Music } from "lucide-react";
+import {
+  ArrowRight,
+  Play,
+  X,
+  Eye,
+  Briefcase,
+  Users,
+  Star,
+  Heart,
+  Share2,
+  Bookmark,
+  Info,
+  Volume2,
+  VolumeX,
+  Sparkles,
+  Film,
+  Sliders,
+  Music,
+} from "lucide-react";
 import { useRef, useState, useEffect } from "react";
 import { HERO_VIDEO } from "@/lib/portfolio-data";
 import heroBgImg from "@/assets/hero-bg.png";
@@ -76,7 +94,7 @@ function TypeAnimation({ sequence, speed, className }: TypeAnimationProps) {
 // Ease-out smooth animated counter for stats cards
 function AnimatedCounter({ value, className }: { value: string; className?: string }) {
   const ref = useRef<HTMLSpanElement>(null);
-  const isInView = useInView(ref, { once: true, amount: 0.2 });
+  const isInView = useInView(ref, { once: true, amount: 0.1 });
   const num = parseInt(value.replace(/[^0-9]/g, ""));
   const suffix = value.replace(/[0-9]/g, "");
   const [count, setCount] = useState(0);
@@ -166,9 +184,11 @@ export function Hero() {
 
   const [heroData, setHeroData] = useState({
     showreelVideoUrl: "",
+    thumbnailUrl: "",
     showreelTitle: "Raqvine Signature Showreel",
-    showreelDescription: "A compilation of our finest edits, showcasing pacing, storytelling, sound design, and grading.",
-    videoAspect: "portrait"
+    showreelDescription:
+      "A compilation of our finest edits, showcasing pacing, storytelling, sound design, and grading.",
+    videoAspect: "portrait",
   });
 
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -176,16 +196,17 @@ export function Hero() {
   useEffect(() => {
     async function loadHeroSettings() {
       try {
-        const { data, error } = await supabase
-          .from("hero_settings")
-          .select("*");
+        const { data, error } = await supabase.from("hero_settings").select("*");
         if (!error && data && data.length > 0) {
           const row = data[0];
           setHeroData({
             showreelVideoUrl: row.showreelVideoUrl || "",
+            thumbnailUrl: row.thumbnailUrl || "",
             showreelTitle: row.showreelTitle || "Raqvine Signature Showreel",
-            showreelDescription: row.showreelDescription || "A compilation of our finest edits, showcasing pacing, storytelling, sound design, and grading.",
-            videoAspect: row.videoAspect || "portrait"
+            showreelDescription:
+              row.showreelDescription ||
+              "A compilation of our finest edits, showcasing pacing, storytelling, sound design, and grading.",
+            videoAspect: row.videoAspect || "portrait",
           });
         }
       } catch (err) {
@@ -304,7 +325,7 @@ export function Hero() {
                 initial={{ opacity: 0, y: 28 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.75, ease: [0.19, 1, 0.22, 1] }}
-                className="text-hero-title max-w-[820px] text-center lg:text-left pr-6 font-display"
+                className="text-hero-title max-w-[820px] text-center lg:text-left lg:pr-6 font-display"
               >
                 <span className="block">TURNING RAW FOOTAGE</span>
                 <span className="block">INTO CONTENT</span>
@@ -328,7 +349,8 @@ export function Hero() {
               transition={{ duration: 0.7, delay: 0.12 }}
               className="mt-6 max-w-[540px] text-hero-subtitle text-center lg:text-left mb-8 text-white/80 leading-relaxed font-sans"
             >
-              Helping creators, startups, and brands transform raw footage into cinematic content that captures attention, builds credibility, and delivers measurable results.
+              Helping creators, startups, and brands transform raw footage into cinematic content
+              that captures attention, builds credibility, and delivers measurable results.
             </motion.p>
 
             {/* CTA Buttons */}
@@ -350,7 +372,8 @@ export function Hero() {
                 </span>
               </MagneticButton>
 
-              <button
+              <motion.button
+                whileTap={{ scale: 0.96 }}
                 onClick={() => setShowreelOpen(true)}
                 className="group btn-secondary-glow inline-flex items-center justify-center gap-2.5 rounded-full px-9 h-[54px] text-button-text uppercase text-white overflow-hidden cursor-pointer w-full sm:w-auto"
               >
@@ -360,7 +383,7 @@ export function Hero() {
                   <Play className="size-4.5 fill-white/10 text-white group-hover:fill-[#22d3ee]/20 group-hover:text-[#22d3ee] transition-colors" />
                   <span>WATCH SHOWREEL</span>
                 </span>
-              </button>
+              </motion.button>
             </motion.div>
           </div>
 
@@ -497,10 +520,10 @@ export function Hero() {
               transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
               onClick={(e) => e.stopPropagation()}
               className={cn(
-                "relative w-full overflow-y-auto md:overflow-hidden rounded-[32px] border border-white/10 bg-[#040612]/90 shadow-[0_0_80px_rgba(0,0,0,0.9)] backdrop-blur-xl flex flex-col md:grid",
+                "relative w-[calc(100vw-1.5rem)] overflow-y-auto md:overflow-hidden rounded-[28px] md:rounded-[32px] border border-white/10 bg-[#040612]/90 shadow-[0_0_80px_rgba(0,0,0,0.9)] backdrop-blur-xl flex flex-col md:grid",
                 heroData.videoAspect === "landscape"
-                  ? "max-w-sm md:max-w-5xl h-[92vh] md:h-[75vh] max-h-[700px] md:grid-cols-[1.4fr_1fr]"
-                  : "max-w-sm md:max-w-4xl h-[92vh] md:h-[80vh] max-h-[750px] md:grid-cols-[auto_1fr]"
+                  ? "max-w-sm md:max-w-5xl h-[90vh] md:h-[75vh] max-h-[700px] md:grid-cols-[1.4fr_1fr]"
+                  : "max-w-sm md:max-w-4xl h-[90vh] md:h-[80vh] max-h-[750px] md:grid-cols-[auto_1fr]",
               )}
             >
               {/* Close Button */}
@@ -513,18 +536,21 @@ export function Hero() {
               </button>
 
               {/* ──────────────── LEFT COLUMN: VIDEO PLAYER (PORTRAIT 9:16 vs LANDSCAPE 16:9) ──────────────── */}
-              <div className={cn(
-                "relative w-full bg-black border-b md:border-b-0 md:border-r border-white/10 flex items-center justify-center flex-shrink-0 p-4 overflow-hidden group/video-container",
-                heroData.videoAspect === "landscape"
-                  ? "aspect-video md:aspect-auto md:h-full max-h-[40vh] md:max-h-none"
-                  : "aspect-[9/16] md:w-[380px] md:aspect-auto md:h-full max-h-[50vh] md:max-h-none"
-              )}>
+              <div
+                className={cn(
+                  "relative w-full bg-black border-b md:border-b-0 md:border-r border-white/10 flex items-center justify-center flex-shrink-0 p-4 overflow-hidden group/video-container",
+                  heroData.videoAspect === "landscape"
+                    ? "aspect-video md:aspect-auto md:h-full max-h-[40vh] md:max-h-none"
+                    : "aspect-[9/16] md:w-[380px] md:aspect-auto md:h-full max-h-[50vh] md:max-h-none",
+                )}
+              >
                 {/* Phone/Monitor mockup styled frame */}
-                <div className={cn(
-                  "relative w-full rounded-2xl overflow-hidden border border-white/10 bg-black flex items-center justify-center shadow-inner",
-                  heroData.videoAspect === "landscape" ? "aspect-video" : "w-full h-full"
-                )}>
-                  
+                <div
+                  className={cn(
+                    "relative w-full rounded-2xl overflow-hidden border border-white/10 bg-black flex items-center justify-center shadow-inner",
+                    heroData.videoAspect === "landscape" ? "aspect-video" : "w-full h-full",
+                  )}
+                >
                   {/* Glowing neon animated border */}
                   <div className="absolute inset-0 z-0 p-[1.5px] rounded-2xl overflow-hidden pointer-events-none">
                     <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 via-purple-500 to-cyan-500 opacity-60 animate-gradient-text" />
@@ -536,9 +562,12 @@ export function Hero() {
                     autoPlay
                     loop
                     playsInline
+                    preload="metadata"
+                    controlsList="nodownload"
+                    poster={heroData.thumbnailUrl || undefined}
                     className={cn(
                       "relative z-10 w-full h-full rounded-2xl",
-                      heroData.videoAspect === "landscape" ? "object-contain" : "object-cover"
+                      heroData.videoAspect === "landscape" ? "object-contain" : "object-cover",
                     )}
                   />
                 </div>
@@ -605,8 +634,12 @@ export function Hero() {
                             <Icon className="size-4" />
                           </div>
                           <div className="flex flex-col text-left">
-                            <span className="text-[10px] font-black text-white/50 uppercase tracking-widest leading-none">{item.label}</span>
-                            <span className="text-xs text-neutral-200 mt-1 font-semibold leading-tight">{item.desc}</span>
+                            <span className="text-[10px] font-black text-white/50 uppercase tracking-widest leading-none">
+                              {item.label}
+                            </span>
+                            <span className="text-xs text-neutral-200 mt-1 font-semibold leading-tight">
+                              {item.desc}
+                            </span>
                           </div>
                         </motion.div>
                       );
@@ -629,7 +662,6 @@ export function Hero() {
                   </div>
                 </div>
               </div>
-
             </motion.div>
           </motion.div>
         )}

@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { MessageCircle, Instagram, Linkedin, Youtube, ArrowRight } from "lucide-react";
+import { motion } from "motion/react";
 import { SectionHeading, Reveal } from "./primitives";
 import { contactApi } from "@/lib/api/services";
 import { contactCreateSchema } from "@/lib/api/schemas";
@@ -53,8 +54,8 @@ export function Contact() {
 
     const name = formData.get("name") as string;
     const email = formData.get("email") as string;
-    const projectType = formData.get("type") as any;
-    const timeline = formData.get("timeline") as any;
+    const projectType = formData.get("type") as string;
+    const timeline = formData.get("timeline") as string;
     const details = formData.get("details") as string;
 
     const validationResult = contactCreateSchema.safeParse({
@@ -82,10 +83,12 @@ export function Contact() {
       toast.success("Project request received", {
         description: "I'll be in touch within 12 hours.",
       });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
+      const message =
+        err instanceof Error ? err.message : "Something went wrong. Please try again.";
       toast.error("Failed to submit request", {
-        description: err.message || "Something went wrong. Please try again.",
+        description: message,
       });
     } finally {
       setLoading(false);
@@ -120,21 +123,25 @@ export function Contact() {
               </Field>
               <Field label="Project Type">
                 <select required name="type" className={inputCls} defaultValue="">
-                  <option value="" disabled>
+                  <option value="" disabled className="bg-[#050816] text-white">
                     Choose one
                   </option>
                   {projectTypes.map((p) => (
-                    <option key={p}>{p}</option>
+                    <option key={p} className="bg-[#050816] text-white">
+                      {p}
+                    </option>
                   ))}
                 </select>
               </Field>
               <Field label="Timeline">
                 <select required name="timeline" className={inputCls} defaultValue="">
-                  <option value="" disabled>
+                  <option value="" disabled className="bg-[#050816] text-white">
                     Choose one
                   </option>
                   {timelines.map((p) => (
-                    <option key={p}>{p}</option>
+                    <option key={p} className="bg-[#050816] text-white">
+                      {p}
+                    </option>
                   ))}
                 </select>
               </Field>
@@ -150,7 +157,7 @@ export function Contact() {
             </div>
             <button
               disabled={loading}
-              className="mt-6 sm:mt-8 inline-flex items-center justify-center gap-2 rounded-full btn-primary-glow px-6 sm:px-7 h-[42px] sm:h-[48px] text-xs sm:text-button-text text-white disabled:opacity-60 w-full sm:w-auto"
+              className="mt-6 sm:mt-8 inline-flex items-center justify-center gap-2 rounded-full btn-primary-glow px-6 sm:px-7 h-[48px] sm:h-[52px] text-xs sm:text-button-text text-white disabled:opacity-60 w-full sm:w-auto active:scale-95 cursor-pointer"
             >
               {loading ? (
                 "Sending…"
@@ -165,11 +172,12 @@ export function Contact() {
         <Reveal delay={0.1}>
           <div className="grid grid-cols-2 lg:flex lg:flex-col gap-3 lg:gap-4 h-full">
             {channels.map((c) => (
-              <a
+              <motion.a
                 key={c.label}
                 href={c.href}
                 target="_blank"
                 rel="noreferrer"
+                whileTap={{ scale: 0.98 }}
                 className="group flex items-center gap-2.5 sm:gap-4 rounded-xl sm:rounded-2xl glass p-3.5 sm:p-6 hover-card-premium"
               >
                 <div className="grid size-9 sm:size-12 place-items-center rounded-xl bg-gradient-to-br from-electric/20 to-violet-glow/20 text-electric shrink-0">
@@ -184,7 +192,7 @@ export function Contact() {
                   </div>
                 </div>
                 <ArrowRight className="size-4 -translate-x-1 opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100 hidden sm:block" />
-              </a>
+              </motion.a>
             ))}
           </div>
         </Reveal>
@@ -194,7 +202,7 @@ export function Contact() {
 }
 
 const inputCls =
-  "w-full rounded-xl border border-white/10 bg-white/[0.03] px-3.5 py-2.5 sm:px-4 sm:py-3 text-xs sm:text-sm text-foreground placeholder:text-muted-foreground focus:border-electric focus:outline-none focus:ring-2 focus:ring-electric/30 transition";
+  "w-full rounded-xl border border-white/10 bg-[#050816]/90 px-3.5 py-3 sm:px-4 sm:py-3 text.16px md:text-sm text-foreground placeholder:text-muted-foreground focus:border-electric focus:outline-none focus:ring-2 focus:ring-electric/30 transition text-[16px] md:text-sm";
 
 function Field({
   label,

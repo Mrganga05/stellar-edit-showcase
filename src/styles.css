@@ -91,10 +91,12 @@
 @layer base {
   * {
     border-color: var(--color-border);
+    -webkit-tap-highlight-color: transparent;
   }
 
   html {
     scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
   }
 
   /* Offset anchor-scroll targets so fixed nav (64px) doesn't cover the top of the section */

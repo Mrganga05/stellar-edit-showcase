@@ -34,6 +34,18 @@ export function Nav() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
+
   // Close menu on outside click
   useEffect(() => {
     if (!open) return;
@@ -109,7 +121,7 @@ export function Nav() {
           <button
             id="mobile-nav-btn"
             onClick={() => setOpen((v) => !v)}
-            className="grid size-11 place-items-center rounded-full border border-white/10 bg-white/5 md:hidden text-white transition-colors hover:bg-white/10 cursor-pointer"
+            className="grid size-11 place-items-center rounded-full border border-white/10 bg-white/5 md:hidden text-white transition-colors hover:bg-white/10 active:scale-95 cursor-pointer"
             aria-label="Menu"
           >
             <AnimatePresence mode="wait" initial={false}>
@@ -139,48 +151,62 @@ export function Nav() {
         </div>
       </header>
 
-      {/* Mobile Dropdown — rendered outside header to avoid clipping */}
+      {/* Mobile Dropdown & Backdrop Overlay */}
       <AnimatePresence>
         {open && (
-          <motion.div
-            id="mobile-nav-menu"
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed top-[64px] left-0 right-0 z-[49] md:hidden border-b border-white/[0.05] bg-[#050816]/98 backdrop-blur-2xl shadow-[0_12px_40px_rgba(0,0,0,0.5)]"
-          >
-            <div className="px-4 py-4 flex flex-col gap-1">
-              {links.map((l, i) => (
-                <motion.button
-                  key={l.href}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -10 }}
-                  transition={{ duration: 0.2, delay: i * 0.04 }}
-                  onClick={() => handleLink(l.href)}
-                  className="flex items-center w-full min-h-[50px] rounded-xl px-5 text-nav-menu uppercase text-[#a1a1aa] hover:bg-white/[0.06] hover:text-white transition-all text-left bg-transparent border-none cursor-pointer font-semibold tracking-widest"
-                >
-                  {l.label}
-                </motion.button>
-              ))}
+          <>
+            {/* Backdrop overlay */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={() => setOpen(false)}
+              className="fixed inset-0 top-[64px] z-[48] bg-black/60 backdrop-blur-md md:hidden"
+            />
 
-              <motion.button
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 8 }}
-                transition={{ duration: 0.22, delay: links.length * 0.04 }}
-                onClick={() => handleLink("contact")}
-                className="mt-2 group btn-primary-glow relative flex items-center justify-center gap-2 rounded-full px-6 h-[50px] text-button-text uppercase text-white overflow-hidden cursor-pointer border-none w-full"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out pointer-events-none" />
-                <span className="relative flex items-center gap-2 z-10">
-                  <span>Book Strategy Call</span>
-                  <span className="size-1.5 rounded-full bg-white animate-pulse" />
-                </span>
-              </motion.button>
-            </div>
-          </motion.div>
+            <motion.div
+              id="mobile-nav-menu"
+              initial={{ opacity: 0, y: -12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
+              className="fixed top-[64px] left-0 right-0 z-[49] md:hidden border-b border-white/[0.08] bg-[#050816]/98 backdrop-blur-2xl shadow-[0_16px_50px_rgba(0,0,0,0.6)]"
+            >
+              <div className="px-5 py-5 flex flex-col gap-1.5">
+                {links.map((l, i) => (
+                  <motion.button
+                    key={l.href}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -10 }}
+                    transition={{ duration: 0.2, delay: i * 0.04 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => handleLink(l.href)}
+                    className="flex items-center w-full min-h-[52px] rounded-xl px-5 text-nav-menu uppercase text-[#a1a1aa] hover:bg-white/[0.06] hover:text-white transition-all text-left bg-transparent border-none cursor-pointer font-semibold tracking-widest active:bg-white/10 active:text-white"
+                  >
+                    {l.label}
+                  </motion.button>
+                ))}
+
+                <motion.button
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 8 }}
+                  transition={{ duration: 0.22, delay: links.length * 0.04 }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={() => handleLink("contact")}
+                  className="mt-3 group btn-primary-glow relative flex items-center justify-center gap-2 rounded-full px-6 h-[52px] text-button-text uppercase text-white overflow-hidden cursor-pointer border-none w-full"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out pointer-events-none" />
+                  <span className="relative flex items-center gap-2 z-10">
+                    <span>Book Strategy Call</span>
+                    <span className="size-1.5 rounded-full bg-white animate-pulse" />
+                  </span>
+                </motion.button>
+              </div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
     </>

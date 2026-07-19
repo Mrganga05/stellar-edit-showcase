@@ -35,7 +35,7 @@ export function Footer() {
                   href={social.href}
                   target="_blank"
                   rel="noreferrer"
-                  className="grid size-10 place-items-center rounded-full glass hover:bg-white/10"
+                  className="grid size-11 place-items-center rounded-full glass hover:bg-white/10 active:scale-95 cursor-pointer"
                 >
                   <social.icon className="size-4" />
                 </a>
@@ -85,7 +85,7 @@ export function Footer() {
           </div>
           <a
             href="#top"
-            className="group inline-flex items-center gap-2 rounded-full glass px-4.5 py-2.5 text-badge-text text-muted-foreground hover:text-white transition-colors w-full sm:w-auto justify-center"
+            className="group inline-flex items-center gap-2 rounded-full glass px-5 h-[48px] text-badge-text text-muted-foreground hover:text-white transition-colors w-full sm:w-auto justify-center active:scale-95 cursor-pointer"
           >
             Back to top{" "}
             <ArrowUp className="size-3.5 transition-transform group-hover:-translate-y-0.5" />

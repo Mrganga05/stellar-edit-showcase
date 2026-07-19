@@ -107,7 +107,7 @@ const StaggeredTitle = () => {
       variants={containerVars}
       initial="hidden"
       whileInView="visible"
-      viewport={{ once: true, margin: "-100px" }}
+      viewport={{ once: true, amount: 0.1, margin: "-20px" }}
       className="text-section-heading text-lg min-[375px]:text-xl sm:text-2xl lg:text-section-heading mt-4 mb-5 flex flex-col items-center lg:items-start select-none max-lg:leading-[1.35]"
     >
       <span className="block py-1 relative">
@@ -190,8 +190,9 @@ const FeatureCard = ({ title, desc, icon, delay = 0 }: FeatureCardProps) => {
     <motion.div
       initial={{ opacity: 0, y: 20, scale: 0.98 }}
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
-      viewport={{ once: true, margin: "-30px" }}
+      viewport={{ once: true, amount: 0.1, margin: "-15px" }}
       transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1], delay }}
+      whileTap={{ scale: 0.97 }}
       className="group relative overflow-hidden rounded-[18px] border border-white/[0.08] bg-[#0c1224]/80 p-4 sm:p-5 lg:p-6 flex flex-col gap-3 lg:h-[150px] transition-all duration-[450ms] ease-out hover:border-[#38BDF8]/40 hover:-translate-y-1.5 hover:shadow-[0_10px_25px_rgba(56,189,248,0.06)]"
     >
       <div className="absolute inset-0 bg-gradient-to-br from-[#38BDF8]/0 to-[#38BDF8]/[0.03] opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
@@ -322,7 +323,7 @@ export function About() {
           </div>
 
           {/* 3 Premium Feature Cards — single col on mobile, 3-col on sm+ */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-5 w-full max-lg:order-5 max-lg:grid-cols-2 max-lg:gap-3 max-lg:w-full max-lg:max-w-[360px] max-lg:mx-auto max-lg:mt-7">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-5 w-full max-lg:order-5 max-lg:w-full max-lg:max-w-[420px] max-lg:mx-auto max-lg:mt-7">
             <FeatureCard
               title="Hook First"
               desc="Every edit is engineered to capture attention within the first three seconds."
@@ -440,7 +441,7 @@ export function About() {
             <motion.div
               initial="hidden"
               whileInView="visible"
-              viewport={{ once: true, margin: "-40px" }}
+              viewport={{ once: true, amount: 0.1, margin: "-15px" }}
               variants={{
                 hidden: {},
                 visible: { transition: { staggerChildren: 0.07, delayChildren: 0.1 } },

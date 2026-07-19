@@ -58,7 +58,7 @@ export function Process() {
               key={s.title}
               initial={{ opacity: 0, x: -20 }}
               whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true, margin: "-80px" }}
+              viewport={{ once: true, amount: 0.1, margin: "-20px" }}
               transition={{ duration: 0.6, delay: i * 0.05 }}
               className="relative grid grid-cols-[auto_1fr] items-start gap-3.5 sm:gap-8"
             >

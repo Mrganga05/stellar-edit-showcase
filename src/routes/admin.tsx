@@ -4,6 +4,9 @@ import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { VideoUploader } from "@/components/ui/video-uploader";
+import { deleteR2FileFn } from "@/lib/api/r2.functions";
+import type { ContactInquiry, PortfolioProject, Service, Testimonial } from "@/lib/api/contracts";
 import {
   Lock,
   User,
@@ -48,13 +51,13 @@ function AdminPage() {
   const [searchQuery, setSearchQuery] = useState("");
 
   // Data states
-  const [contacts, setContacts] = useState<any[]>([]);
-  const [portfolioProjects, setPortfolioProjects] = useState<any[]>([]);
-  const [services, setServices] = useState<any[]>([]);
-  const [testimonials, setTestimonials] = useState<any[]>([]);
+  const [contacts, setContacts] = useState<ContactInquiry[]>([]);
+  const [portfolioProjects, setPortfolioProjects] = useState<PortfolioProject[]>([]);
+  const [services, setServices] = useState<Service[]>([]);
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
 
   // Portfolio project form states
-  const [editingProject, setEditingProject] = useState<any | null>(null);
+  const [editingProject, setEditingProject] = useState<PortfolioProject | null>(null);
   const [isProjectModalOpen, setIsProjectModalOpen] = useState(false);
   const [savingProject, setSavingProject] = useState(false);
 
@@ -62,6 +65,17 @@ function AdminPage() {
   const [projCategory, setProjCategory] = useState("");
   const [projThumbnail, setProjThumbnail] = useState("");
   const [projVideoUrl, setProjVideoUrl] = useState("");
+
+  // Showreel metadata states
+  const [showreelThumbnailUrl, setShowreelThumbnailUrl] = useState("");
+  const [showreelDuration, setShowreelDuration] = useState<number | null>(null);
+  const [showreelResolution, setShowreelResolution] = useState("");
+  const [showreelFileSize, setShowreelFileSize] = useState<number | null>(null);
+
+  // Project metadata states
+  const [projDuration, setProjDuration] = useState<number | null>(null);
+  const [projResolution, setProjResolution] = useState("");
+  const [projFileSize, setProjFileSize] = useState<number | null>(null);
   const [projDescription, setProjDescription] = useState("");
   const [projOverview, setProjOverview] = useState("");
   const [projTechniques, setProjTechniques] = useState("");
@@ -75,7 +89,7 @@ function AdminPage() {
   const [projVideoAspect, setProjVideoAspect] = useState<"portrait" | "landscape">("portrait");
 
   // Testimonials form states
-  const [editingTestimonial, setEditingTestimonial] = useState<any | null>(null);
+  const [editingTestimonial, setEditingTestimonial] = useState<Testimonial | null>(null);
   const [isTestimonialModalOpen, setIsTestimonialModalOpen] = useState(false);
   const [savingTestimonial, setSavingTestimonial] = useState(false);
   const [testClientName, setTestClientName] = useState("");
@@ -96,7 +110,9 @@ function AdminPage() {
   const [showreelUrl, setShowreelUrl] = useState("");
   const [showreelTitle, setShowreelTitle] = useState("");
   const [showreelDescription, setShowreelDescription] = useState("");
-  const [showreelVideoAspect, setShowreelVideoAspect] = useState<"portrait" | "landscape">("portrait");
+  const [showreelVideoAspect, setShowreelVideoAspect] = useState<"portrait" | "landscape">(
+    "portrait",
+  );
   const [savingShowreel, setSavingShowreel] = useState(false);
   const [uploadingShowreelVideo, setUploadingShowreelVideo] = useState(false);
 
@@ -128,13 +144,150 @@ function AdminPage() {
 
       setUrlState(publicUrl);
       toast.success("File uploaded successfully!");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
+      const message = err instanceof Error ? err.message : "Failed to upload file";
       toast.error("Failed to upload file", {
-        description: err.message,
+        description: message,
       });
     } finally {
       setUploadingState(false);
+    }
+  };
+
+  const handleShowreelUploadComplete = async (
+    details: {
+      videoUrl: string;
+      thumbnailUrl: string;
+      duration: number;
+      resolution: string;
+      fileSize: number;
+    } | null,
+  ) => {
+    if (!details) {
+      setShowreelUrl("");
+      setShowreelThumbnailUrl("");
+      setShowreelDuration(null);
+      setShowreelResolution("");
+      setShowreelFileSize(null);
+      return;
+    }
+
+    const oldUrl = showreelUrl;
+    const oldThumbUrl = showreelThumbnailUrl;
+
+    setShowreelUrl(details.videoUrl);
+    setShowreelThumbnailUrl(details.thumbnailUrl);
+    setShowreelDuration(details.duration);
+    setShowreelResolution(details.resolution);
+    setShowreelFileSize(details.fileSize);
+
+    const payload = {
+      showreelVideoUrl: details.videoUrl,
+      thumbnailUrl: details.thumbnailUrl,
+      duration: details.duration,
+      resolution: details.resolution,
+      fileSize: details.fileSize,
+      showreelTitle: showreelTitle,
+      showreelDescription: showreelDescription,
+      videoAspect: showreelVideoAspect,
+      updatedAt: new Date().toISOString(),
+    };
+
+    try {
+      const { data: existing, error: checkErr } = await supabase.from("hero_settings").select("id");
+      if (!checkErr && existing && existing.length > 0) {
+        const { error } = await supabase
+          .from("hero_settings")
+          .update(payload)
+          .eq("id", existing[0].id);
+        if (error) throw error;
+        toast.success("Showreel video updated automatically!");
+      } else {
+        const { error } = await supabase.from("hero_settings").insert([payload]);
+        if (error) throw error;
+        toast.success("Showreel video saved automatically!");
+      }
+
+      if (oldUrl && oldUrl !== details.videoUrl) {
+        await deleteR2FileFn({ data: { url: oldUrl } });
+      }
+      if (oldThumbUrl && oldThumbUrl !== details.thumbnailUrl) {
+        await deleteR2FileFn({ data: { url: oldThumbUrl } });
+      }
+
+      fetchData();
+    } catch (err: unknown) {
+      console.error(err);
+      const message =
+        err instanceof Error ? err.message : "Failed to automatically save showreel settings";
+      toast.error("Failed to automatically save showreel settings", {
+        description: message,
+      });
+    }
+  };
+
+  const handleProjectVideoUploadComplete = async (
+    details: {
+      videoUrl: string;
+      thumbnailUrl: string;
+      duration: number;
+      resolution: string;
+      fileSize: number;
+    } | null,
+  ) => {
+    if (!details) {
+      setProjVideoUrl("");
+      setProjThumbnail("");
+      setProjDuration(null);
+      setProjResolution("");
+      setProjFileSize(null);
+      return;
+    }
+
+    const oldUrl = projVideoUrl;
+    const oldThumbUrl = projThumbnail;
+
+    setProjVideoUrl(details.videoUrl);
+    setProjThumbnail(details.thumbnailUrl);
+    setProjDuration(details.duration);
+    setProjResolution(details.resolution);
+    setProjFileSize(details.fileSize);
+
+    if (editingProject) {
+      try {
+        const { error } = await supabase
+          .from("portfolio_projects")
+          .update({
+            videoUrl: details.videoUrl,
+            thumbnail: details.thumbnailUrl,
+            duration: details.duration,
+            resolution: details.resolution,
+            fileSize: details.fileSize,
+            updatedAt: new Date().toISOString(),
+          })
+          .eq("id", editingProject.id);
+
+        if (error) throw error;
+        toast.success("Project video updated automatically!");
+
+        if (oldUrl && oldUrl !== details.videoUrl) {
+          await deleteR2FileFn({ data: { url: oldUrl } });
+        }
+        if (oldThumbUrl && oldThumbUrl !== details.thumbnailUrl) {
+          await deleteR2FileFn({ data: { url: oldThumbUrl } });
+        }
+
+        queryClient.invalidateQueries({ queryKey: ["portfolio-projects"] });
+        fetchData();
+      } catch (err: unknown) {
+        console.error(err);
+        const message =
+          err instanceof Error ? err.message : "Failed to automatically update project video";
+        toast.error("Failed to automatically update project video", {
+          description: message,
+        });
+      }
     }
   };
 
@@ -190,7 +343,7 @@ function AdminPage() {
         const { data: heroSettings, error: heroErr } = await supabase
           .from("hero_settings")
           .select("*");
-        
+
         if (!heroErr && heroSettings && heroSettings.length > 0) {
           const hs = heroSettings[0];
           setHeroId(hs.id);
@@ -199,6 +352,10 @@ function AdminPage() {
           setShowreelTitle(hs.showreelTitle || "");
           setShowreelDescription(hs.showreelDescription || "");
           setShowreelVideoAspect(hs.videoAspect || "portrait");
+          setShowreelThumbnailUrl(hs.thumbnailUrl || "");
+          setShowreelDuration(hs.duration || null);
+          setShowreelResolution(hs.resolution || "");
+          setShowreelFileSize(hs.fileSize || null);
 
           if (reelUrl.includes(".supabase.co") || reelUrl.includes("supabase.in")) {
             setShowreelSourceType("file");
@@ -209,10 +366,11 @@ function AdminPage() {
       } catch (e) {
         console.error("Error fetching hero settings:", e);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
+      const message = err instanceof Error ? err.message : "Database fetch failed.";
       toast.error("Failed to load requests from Supabase", {
-        description: err.message || "Database fetch failed.",
+        description: message,
       });
     } finally {
       setLoading(false);
@@ -234,7 +392,7 @@ function AdminPage() {
     setIsTestimonialModalOpen(true);
   }
 
-  function openEditTestimonialModal(t: any) {
+  function openEditTestimonialModal(t: Testimonial) {
     setEditingTestimonial(t);
     setTestClientName(t.clientName || "");
     setTestCompany(t.company || "");
@@ -283,10 +441,11 @@ function AdminPage() {
       queryClient.invalidateQueries({ queryKey: ["testimonials"] });
       setIsTestimonialModalOpen(false);
       fetchData();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
+      const message = err instanceof Error ? err.message : "Failed to save testimonial";
       toast.error("Failed to save testimonial", {
-        description: err.message,
+        description: message,
       });
     } finally {
       setSavingTestimonial(false);
@@ -304,10 +463,11 @@ function AdminPage() {
       toast.success("Testimonial deleted successfully");
       queryClient.invalidateQueries({ queryKey: ["testimonials"] });
       fetchData();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
+      const message = err instanceof Error ? err.message : "Failed to delete testimonial";
       toast.error("Failed to delete testimonial", {
-        description: err.message,
+        description: message,
       });
     }
   }
@@ -318,6 +478,10 @@ function AdminPage() {
 
     const payload = {
       showreelVideoUrl: showreelUrl,
+      thumbnailUrl: showreelThumbnailUrl,
+      duration: showreelDuration,
+      resolution: showreelResolution,
+      fileSize: showreelFileSize,
       showreelTitle: showreelTitle,
       showreelDescription: showreelDescription,
       videoAspect: showreelVideoAspect,
@@ -327,7 +491,7 @@ function AdminPage() {
     try {
       // Check if row exists
       const { data: existing, error: checkErr } = await supabase.from("hero_settings").select("id");
-      
+
       if (!checkErr && existing && existing.length > 0) {
         const { error } = await supabase
           .from("hero_settings")
@@ -337,18 +501,17 @@ function AdminPage() {
         if (error) throw error;
         toast.success("Showreel settings updated successfully");
       } else {
-        const { error } = await supabase
-          .from("hero_settings")
-          .insert([payload]);
+        const { error } = await supabase.from("hero_settings").insert([payload]);
 
         if (error) throw error;
         toast.success("Showreel settings saved successfully");
       }
       fetchData();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
+      const message = err instanceof Error ? err.message : "Failed to save showreel settings";
       toast.error("Failed to save showreel settings", {
-        description: err.message,
+        description: message,
       });
     } finally {
       setSavingShowreel(false);
@@ -381,11 +544,7 @@ function AdminPage() {
     });
   }
 
-  async function updateStatus(
-    table: "contact_requests",
-    id: string,
-    newStatus: string,
-  ) {
+  async function updateStatus(table: "contact_requests", id: string, newStatus: string) {
     try {
       const { error } = await supabase
         .from(table)
@@ -395,10 +554,11 @@ function AdminPage() {
       if (error) throw error;
       toast.success("Status updated");
       fetchData();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
+      const message = err instanceof Error ? err.message : "Failed to update status";
       toast.error("Failed to update status", {
-        description: err.message,
+        description: message,
       });
     }
   }
@@ -414,10 +574,11 @@ function AdminPage() {
       if (error) throw error;
       toast.success("Request deleted successfully");
       fetchData();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
+      const message = err instanceof Error ? err.message : "Failed to delete request";
       toast.error("Failed to delete request", {
-        description: err.message,
+        description: message,
       });
     }
   }
@@ -440,10 +601,13 @@ function AdminPage() {
     setProjMetric("");
     setProjVideoAspect("portrait");
     setProjVideoSourceType("url");
+    setProjDuration(null);
+    setProjResolution("");
+    setProjFileSize(null);
     setIsProjectModalOpen(true);
   }
 
-  function openEditProjectModal(project: any) {
+  function openEditProjectModal(project: PortfolioProject) {
     setEditingProject(project);
     setProjTitle(project.title || "");
     setProjCategory(project.category || "");
@@ -460,13 +624,19 @@ function AdminPage() {
     setProjClientName(project.clientName || "");
     setProjMetric(project.metric || "");
     setProjVideoAspect(project.videoAspect || "portrait");
-    
-    if (project.videoUrl && (project.videoUrl.includes(".supabase.co") || project.videoUrl.includes("supabase.in"))) {
+    setProjDuration(project.duration || null);
+    setProjResolution(project.resolution || "");
+    setProjFileSize(project.fileSize || null);
+
+    if (
+      project.videoUrl &&
+      (project.videoUrl.includes(".supabase.co") || project.videoUrl.includes("supabase.in"))
+    ) {
       setProjVideoSourceType("file");
     } else {
       setProjVideoSourceType("url");
     }
-    
+
     setIsProjectModalOpen(true);
   }
 
@@ -493,6 +663,9 @@ function AdminPage() {
       category: projCategory,
       thumbnail: projThumbnail,
       videoUrl: projVideoUrl,
+      duration: projDuration,
+      resolution: projResolution,
+      fileSize: projFileSize,
       description: projDescription,
       overview: projOverview,
       techniques: techniquesArr,
@@ -528,10 +701,11 @@ function AdminPage() {
       queryClient.invalidateQueries({ queryKey: ["portfolio-projects"] });
       setIsProjectModalOpen(false);
       fetchData();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
+      const message = err instanceof Error ? err.message : "Failed to save project";
       toast.error("Failed to save project", {
-        description: err.message,
+        description: message,
       });
     } finally {
       setSavingProject(false);
@@ -546,16 +720,28 @@ function AdminPage() {
     }
 
     try {
+      // Find the project to get its video and thumbnail URLs for R2 cleanup
+      const project = portfolioProjects.find((p) => p.id === id);
+      if (project) {
+        if (project.videoUrl) {
+          await deleteR2FileFn({ data: { url: project.videoUrl } });
+        }
+        if (project.thumbnail) {
+          await deleteR2FileFn({ data: { url: project.thumbnail } });
+        }
+      }
+
       const { error } = await supabase.from("portfolio_projects").delete().eq("id", id);
 
       if (error) throw error;
       toast.success("Portfolio project deleted successfully");
       queryClient.invalidateQueries({ queryKey: ["portfolio-projects"] });
       fetchData();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
+      const message = err instanceof Error ? err.message : "Failed to delete project";
       toast.error("Failed to delete project", {
-        description: err.message,
+        description: message,
       });
     }
   }
@@ -568,8 +754,6 @@ function AdminPage() {
       c.projectType?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       c.details?.toLowerCase().includes(searchQuery.toLowerCase()),
   );
-
-
 
   const filteredProjects = portfolioProjects.filter(
     (p) =>
@@ -900,7 +1084,9 @@ function AdminPage() {
                       key={p.id}
                       className="relative rounded-2xl border border-white/8 bg-surface/40 overflow-hidden flex flex-col group hover:border-white/15 transition-colors"
                     >
-                      <div className={`relative bg-black ${p.videoAspect === "landscape" ? "aspect-video" : "aspect-[9/16]"}`}>
+                      <div
+                        className={`relative bg-black ${p.videoAspect === "landscape" ? "aspect-video" : "aspect-[9/16]"}`}
+                      >
                         <img
                           src={p.thumbnail}
                           alt={p.title}
@@ -1025,9 +1211,11 @@ function AdminPage() {
                                 if (error) throw error;
                                 toast.success("Status updated");
                                 fetchData();
-                              } catch (err: any) {
+                              } catch (err: unknown) {
+                                const message =
+                                  err instanceof Error ? err.message : "Failed to update status";
                                 toast.error("Failed to update status", {
-                                  description: err.message,
+                                  description: message,
                                 });
                               }
                             }}
@@ -1086,7 +1274,9 @@ function AdminPage() {
                           </label>
                           <select
                             value={showreelVideoAspect}
-                            onChange={(e) => setShowreelVideoAspect(e.target.value as "portrait" | "landscape")}
+                            onChange={(e) =>
+                              setShowreelVideoAspect(e.target.value as "portrait" | "landscape")
+                            }
                             className="w-full rounded-xl border border-white/10 bg-black p-3.5 text-sm text-foreground focus:border-electric focus:outline-none focus:ring-1 focus:ring-electric/30 transition"
                           >
                             <option value="portrait">Portrait (Instagram Reel - 9:16)</option>
@@ -1105,7 +1295,9 @@ function AdminPage() {
                             onClick={() => setShowreelSourceType("file")}
                             className={cn(
                               "flex-1 py-1.5 px-3 rounded-lg text-[10px] uppercase tracking-wider font-bold transition cursor-pointer text-center",
-                              showreelSourceType === "file" ? "bg-white/10 text-white" : "text-muted-foreground hover:text-white"
+                              showreelSourceType === "file"
+                                ? "bg-white/10 text-white"
+                                : "text-muted-foreground hover:text-white",
                             )}
                           >
                             Upload File
@@ -1115,7 +1307,9 @@ function AdminPage() {
                             onClick={() => setShowreelSourceType("url")}
                             className={cn(
                               "flex-1 py-1.5 px-3 rounded-lg text-[10px] uppercase tracking-wider font-bold transition cursor-pointer text-center",
-                              showreelSourceType === "url" ? "bg-white/10 text-white" : "text-muted-foreground hover:text-white"
+                              showreelSourceType === "url"
+                                ? "bg-white/10 text-white"
+                                : "text-muted-foreground hover:text-white",
                             )}
                           >
                             Enter Link/URL
@@ -1124,34 +1318,13 @@ function AdminPage() {
 
                         <div className="space-y-2">
                           {showreelSourceType === "file" ? (
-                            <div className="space-y-2">
-                              <input
-                                type="file"
-                                accept="video/*"
-                                onChange={(e) => {
-                                  const file = e.target.files?.[0];
-                                  if (file)
-                                    handleUploadFile(
-                                      file,
-                                      "portfolio",
-                                      setUploadingShowreelVideo,
-                                      setShowreelUrl
-                                    );
-                                }}
-                                className="w-full text-xs text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-white/10 file:text-foreground hover:file:bg-white/20 file:cursor-pointer"
-                                disabled={uploadingShowreelVideo}
-                              />
-                              {uploadingShowreelVideo && (
-                                <div className="text-xs text-electric animate-pulse">
-                                  Uploading showreel video...
-                                </div>
-                              )}
-                              {showreelUrl && !uploadingShowreelVideo && (
-                                <div className="text-[10px] text-emerald-400 font-semibold bg-emerald-500/5 border border-emerald-500/10 rounded-lg p-2 truncate">
-                                  ✓ Uploaded: {showreelUrl}
-                                </div>
-                              )}
-                            </div>
+                            <VideoUploader
+                              value={showreelUrl}
+                              onChange={handleShowreelUploadComplete}
+                              onUploadStateChange={setUploadingShowreelVideo}
+                              folder="showreels"
+                              maxSizeMB={500}
+                            />
                           ) : (
                             <input
                               required
@@ -1222,7 +1395,9 @@ function AdminPage() {
                         </div>
 
                         {/* Video Aspect Frame */}
-                        <div className={`relative mx-auto rounded-xl border border-white/10 bg-black overflow-hidden flex items-center justify-center transition-all duration-300 ${showreelVideoAspect === "landscape" ? "aspect-video w-full max-w-[260px]" : "aspect-[9/16] w-full max-w-[180px]"}`}>
+                        <div
+                          className={`relative mx-auto rounded-xl border border-white/10 bg-black overflow-hidden flex items-center justify-center transition-all duration-300 ${showreelVideoAspect === "landscape" ? "aspect-video w-full max-w-[260px]" : "aspect-[9/16] w-full max-w-[180px]"}`}
+                        >
                           {showreelUrl ? (
                             <video
                               src={showreelUrl}
@@ -1385,7 +1560,9 @@ function AdminPage() {
                       onClick={() => setProjVideoSourceType("file")}
                       className={cn(
                         "flex-1 py-1 px-2.5 rounded-lg text-[10px] uppercase tracking-wider font-bold transition cursor-pointer text-center",
-                        projVideoSourceType === "file" ? "bg-white/10 text-white" : "text-muted-foreground hover:text-white"
+                        projVideoSourceType === "file"
+                          ? "bg-white/10 text-white"
+                          : "text-muted-foreground hover:text-white",
                       )}
                     >
                       Upload File
@@ -1395,7 +1572,9 @@ function AdminPage() {
                       onClick={() => setProjVideoSourceType("url")}
                       className={cn(
                         "flex-1 py-1 px-2.5 rounded-lg text-[10px] uppercase tracking-wider font-bold transition cursor-pointer text-center",
-                        projVideoSourceType === "url" ? "bg-white/10 text-white" : "text-muted-foreground hover:text-white"
+                        projVideoSourceType === "url"
+                          ? "bg-white/10 text-white"
+                          : "text-muted-foreground hover:text-white",
                       )}
                     >
                       Enter Link/URL
@@ -1404,27 +1583,13 @@ function AdminPage() {
 
                   <div className="space-y-2">
                     {projVideoSourceType === "file" ? (
-                      <div className="space-y-2">
-                        <input
-                          type="file"
-                          accept="video/*"
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file)
-                              handleUploadFile(file, "portfolio", setUploadingVideo, setProjVideoUrl);
-                          }}
-                          className="w-full text-xs text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-white/10 file:text-foreground hover:file:bg-white/20 file:cursor-pointer"
-                          disabled={uploadingVideo}
-                        />
-                        {uploadingVideo && (
-                          <div className="text-xs text-electric animate-pulse">Uploading video...</div>
-                        )}
-                        {projVideoUrl && !uploadingVideo && (
-                          <div className="text-[10px] text-emerald-400 font-semibold bg-emerald-500/5 border border-emerald-500/10 rounded-lg p-2 truncate">
-                            ✓ Uploaded: {projVideoUrl}
-                          </div>
-                        )}
-                      </div>
+                      <VideoUploader
+                        value={projVideoUrl}
+                        onChange={handleProjectVideoUploadComplete}
+                        onUploadStateChange={setUploadingVideo}
+                        folder="portfolio"
+                        maxSizeMB={500}
+                      />
                     ) : (
                       <input
                         required
@@ -1753,7 +1918,13 @@ function AdminPage() {
   );
 }
 
-function EmptyState({ icon: Icon, text }: { icon: React.ComponentType<any>; text: string }) {
+function EmptyState({
+  icon: Icon,
+  text,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  text: string;
+}) {
   return (
     <div className="rounded-3xl border border-white/5 bg-surface/20 py-20 px-4 flex flex-col items-center justify-center text-center">
       <div className="grid size-14 place-items-center rounded-2xl bg-white/[0.02] border border-white/5 text-muted-foreground mb-4">

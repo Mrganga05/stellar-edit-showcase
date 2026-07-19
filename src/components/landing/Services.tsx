@@ -1,3 +1,4 @@
+import { motion } from "motion/react";
 import {
   Clapperboard,
   Youtube,
@@ -17,7 +18,7 @@ import {
 import { SectionHeading, Reveal } from "./primitives";
 import { useServices } from "@/lib/api/hooks";
 
-const ICON_MAP: Record<string, React.ComponentType<any>> = {
+const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   Clapperboard,
   Youtube,
   Sparkles,
@@ -120,7 +121,10 @@ export function Services() {
             ))
           : servicesToRender.map((s, i) => (
               <Reveal key={s.title} delay={(i % 5) * 0.05}>
-                <div className="group relative h-full overflow-hidden rounded-xl sm:rounded-2xl glass p-3.5 sm:p-6 transition-all duration-500 hover:-translate-y-1 hover:border-white/20 hover:glow-blue">
+                <motion.div
+                  whileTap={{ scale: 0.97 }}
+                  className="group relative h-full overflow-hidden rounded-xl sm:rounded-2xl glass p-3.5 sm:p-6 transition-all duration-500 hover:-translate-y-1 hover:border-white/20 hover:glow-blue cursor-default"
+                >
                   <div className="pointer-events-none absolute -right-12 -top-12 size-32 rounded-full bg-electric/20 opacity-0 blur-3xl transition-opacity duration-500 group-hover:opacity-100" />
                   <div className="relative">
                     <div className="grid size-9 sm:size-12 place-items-center rounded-lg sm:rounded-xl bg-gradient-to-br from-electric/20 to-violet-glow/20 text-electric">
@@ -133,11 +137,10 @@ export function Services() {
                       {s.desc}
                     </p>
                   </div>
-                </div>
+                </motion.div>
               </Reveal>
             ))}
       </div>
     </section>
   );
 }
-

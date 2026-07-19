@@ -61,10 +61,11 @@ export function Testimonials() {
       setCustomAvatarUrl(publicUrl);
       setSelectedAvatarIdx(-1);
       toast.success("Avatar uploaded successfully!");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
+      const message = err instanceof Error ? err.message : "An unexpected error occurred.";
       toast.error("Failed to upload avatar", {
-        description: err.message,
+        description: message,
       });
     } finally {
       setUploadingAvatar(false);
@@ -125,10 +126,11 @@ export function Testimonials() {
 
       // Refresh list
       refetch();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
+      const message = err instanceof Error ? err.message : "Database insert failed.";
       toast.error("Failed to submit review", {
-        description: err.message || "Database insert failed.",
+        description: message,
       });
     } finally {
       setIsSubmitting(false);
@@ -150,10 +152,10 @@ export function Testimonials() {
             </>
           }
         />
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap sm:flex-nowrap w-full sm:w-auto justify-between sm:justify-end">
           <button
             onClick={() => setIsModalOpen(true)}
-            className="inline-flex items-center gap-1.5 rounded-full border border-white/10 hover:border-[#22d3ee]/30 bg-white/5 hover:bg-[#22d3ee]/10 text-xs font-semibold px-4 h-11 text-white transition-all cursor-pointer"
+            className="inline-flex items-center gap-1.5 rounded-full border border-white/10 hover:border-[#22d3ee]/30 bg-white/5 hover:bg-[#22d3ee]/10 text-xs font-semibold px-4 h-11 text-white transition-all cursor-pointer active:scale-95"
           >
             <Plus className="size-3.5" />
             <span>Write a Review</span>
@@ -161,14 +163,14 @@ export function Testimonials() {
           <div className="flex gap-2">
             <button
               onClick={prev}
-              className="grid size-11 place-items-center rounded-full glass hover:bg-white/10"
+              className="grid size-11 place-items-center rounded-full glass hover:bg-white/10 active:scale-95"
               aria-label="Previous"
             >
               <ArrowLeft className="size-4" />
             </button>
             <button
               onClick={next}
-              className="grid size-11 place-items-center rounded-full glass hover:bg-white/10"
+              className="grid size-11 place-items-center rounded-full glass hover:bg-white/10 active:scale-95"
               aria-label="Next"
             >
               <ArrowRight className="size-4" />
@@ -260,7 +262,7 @@ export function Testimonials() {
                   value={clientName}
                   onChange={(e) => setClientName(e.target.value)}
                   placeholder="David Dobrik"
-                  className="w-full rounded-xl border border-white/10 bg-white/[0.03] p-3 text-sm text-foreground focus:border-electric focus:outline-none focus:ring-1 focus:ring-electric/30 transition"
+                  className="w-full rounded-xl border border-white/10 bg-white/[0.03] p-3 text-[16px] md:text-sm text-foreground focus:border-electric focus:outline-none focus:ring-1 focus:ring-electric/30 transition"
                 />
               </div>
 
@@ -274,7 +276,7 @@ export function Testimonials() {
                   value={company}
                   onChange={(e) => setCompany(e.target.value)}
                   placeholder="YouTube Creator / Tech Startup"
-                  className="w-full rounded-xl border border-white/10 bg-white/[0.03] p-3 text-sm text-foreground focus:border-electric focus:outline-none focus:ring-1 focus:ring-electric/30 transition"
+                  className="w-full rounded-xl border border-white/10 bg-white/[0.03] p-3 text-[16px] md:text-sm text-foreground focus:border-electric focus:outline-none focus:ring-1 focus:ring-electric/30 transition"
                 />
               </div>
 
@@ -372,7 +374,7 @@ export function Testimonials() {
                   value={review}
                   onChange={(e) => setReview(e.target.value)}
                   placeholder="Tell us what you liked about our collaboration, timing, and cinematic style..."
-                  className="w-full rounded-xl border border-white/10 bg-white/[0.03] p-3 text-sm text-foreground focus:border-electric focus:outline-none focus:ring-1 focus:ring-electric/30 transition resize-none"
+                  className="w-full rounded-xl border border-white/10 bg-white/[0.03] p-3 text-[16px] md:text-sm text-foreground focus:border-electric focus:outline-none focus:ring-1 focus:ring-electric/30 transition resize-none"
                 />
               </div>
 
