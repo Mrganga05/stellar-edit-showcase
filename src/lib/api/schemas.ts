@@ -91,14 +91,7 @@ export const contactCreateSchema = z.object({
     .email("Please enter a valid email address")
     .max(254)
     .transform((value) => value.toLowerCase()),
-  projectType: z.enum([
-    "YouTube Long-form",
-    "Shorts / Reels",
-    "Podcast",
-    "Commercial Ad",
-    "Wedding / Event",
-    "Other",
-  ]),
+  projectType: z.string().trim().min(1, "Please select a project type").max(160),
   budget: z.string().optional().default("Not Specified"),
   timeline: z.enum(["ASAP / Urgent", "1–2 Weeks", "3–4 Weeks", "Ongoing Partnership"]),
   details: z.string().trim().min(20, "Project details must be at least 20 characters").max(5000),

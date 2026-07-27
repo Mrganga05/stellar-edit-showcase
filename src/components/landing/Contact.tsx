@@ -6,6 +6,8 @@ import { SectionHeading, Reveal } from "./primitives";
 import { contactApi } from "@/lib/api/services";
 import { contactCreateSchema } from "@/lib/api/schemas";
 
+import { useServices } from "@/lib/api/hooks";
+
 const channels = [
   {
     icon: MessageCircle,
@@ -33,18 +35,29 @@ const channels = [
   },
 ];
 
-const projectTypes = [
-  "YouTube Long-form",
-  "Shorts / Reels",
-  "Podcast",
-  "Commercial Ad",
-  "Wedding / Event",
+const defaultProjectTypes = [
+  "Short-Form Editing",
+  "Long-Form Editing",
+  "Motion Graphics",
+  "Commercial Ads",
+  "Cinematic Editing",
+  "AI Editing",
+  "Website Development",
+  "3D Web Experiences",
+  "AI Automation",
+  "AI Voice Agents",
   "Other",
 ];
 const timelines = ["ASAP / Urgent", "1–2 Weeks", "3–4 Weeks", "Ongoing Partnership"];
 
 export function Contact() {
   const [loading, setLoading] = useState(false);
+  const { data: dbServices } = useServices();
+
+  const projectTypes =
+    dbServices && dbServices.length > 0
+      ? Array.from(new Set([...dbServices.map((s) => s.title), "Other"]))
+      : defaultProjectTypes;
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
