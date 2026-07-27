@@ -24,91 +24,70 @@ import heroBgImg from "@/assets/hero-bg.png";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
 
-// ─── Fade-In Text animation for "THAT DEMANDS ATTENTION." ─────────────────
-interface FadeInTextProps {
-  text: string;
+// ─── Letter-by-letter animation for "THAT DEMANDS ATTENTION." ───────────────
+const prefersReducedMotion =
+  typeof window !== "undefined"
+    ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    : false;
+
+interface TypeAnimationProps {
+  sequence: (string | number)[];
+  speed: number;
   className?: string;
-  delay?: number;
-  staggerDuration?: number;
-  holdDuration?: number;
 }
 
-function FadeInText({
-  text,
-  className,
-  delay = 0.2,
-  staggerDuration = 0.04,
-  holdDuration = 4000,
-}: FadeInTextProps) {
-  const [animKey, setAnimKey] = useState(0);
-  const words = text.split(" ");
-  const totalLetters = text.replace(/\s/g, "").length;
-  const totalAnimDuration = (delay + totalLetters * staggerDuration + 0.6) * 1000;
+function TypeAnimation({ sequence, speed, className }: TypeAnimationProps) {
+  const [displayText, setDisplayText] = useState("");
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setAnimKey((prev) => prev + 1);
-    }, totalAnimDuration + holdDuration);
+    let isMounted = true;
+    let sequenceIndex = 0;
 
-    return () => clearTimeout(timer);
-  }, [animKey, totalAnimDuration, holdDuration]);
+    const runSequence = async () => {
+      while (isMounted) {
+        const currentVal = sequence[sequenceIndex];
 
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: staggerDuration,
-        delayChildren: delay,
-      },
-    },
-    exit: {
-      opacity: 0,
-      filter: "blur(10px)",
-      transition: { duration: 0.8, ease: "easeInOut" },
-    },
-  };
+        if (typeof currentVal === "string") {
+          // Type character by character
+          for (let i = 0; i <= currentVal.length; i++) {
+            if (!isMounted) return;
+            setDisplayText(currentVal.slice(0, i));
+            await new Promise((r) => setTimeout(r, speed));
+          }
+        } else if (typeof currentVal === "number") {
+          // Pause for the duration
+          await new Promise((r) => setTimeout(r, currentVal));
 
-  const letterVariants = {
-    hidden: {
-      opacity: 0,
-      y: 22,
-      filter: "blur(12px)",
-      scale: 0.85,
-    },
-    visible: {
-      opacity: 1,
-      y: 0,
-      filter: "blur(0px)",
-      scale: 1,
-      transition: {
-        duration: 0.55,
-        ease: [0.16, 1, 0.3, 1],
-      },
-    },
-  };
+          if (!isMounted) return;
+          // Erase character by character
+          const lastIndex = (sequenceIndex - 1 + sequence.length) % sequence.length;
+          const lastVal = sequence[lastIndex];
+          const textToErase = typeof lastVal === "string" ? lastVal : "";
+
+          for (let i = textToErase.length; i >= 0; i--) {
+            if (!isMounted) return;
+            setDisplayText(textToErase.slice(0, i));
+            await new Promise((r) => setTimeout(r, speed / 3)); // Erase 3x faster
+          }
+          await new Promise((r) => setTimeout(r, 400));
+        }
+
+        sequenceIndex = (sequenceIndex + 1) % sequence.length;
+      }
+    };
+
+    runSequence();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [sequence, speed]);
 
   return (
-    <AnimatePresence mode="wait">
-      <motion.span
-        key={animKey}
-        className={cn("inline-flex flex-wrap gap-x-[0.25em]", className)}
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        exit="exit"
-      >
-        {words.map((word, wordIdx) => (
-          <span key={wordIdx} className="inline-block whitespace-nowrap">
-            {Array.from(word).map((char, charIdx) => (
-              <motion.span key={charIdx} variants={letterVariants} className="inline-block">
-                {char}
-              </motion.span>
-            ))}
-          </span>
-        ))}
-      </motion.span>
-    </AnimatePresence>
+    <span className={className}>
+      {displayText}
+      <span className="animate-blink font-normal text-electric select-none">|</span>
+    </span>
   );
 }
 
@@ -351,8 +330,9 @@ export function Hero() {
                 <span className="block">TURNING RAW FOOTAGE</span>
                 <span className="block">INTO CONTENT</span>
                 <span className="block min-h-[2.2em] relative">
-                  <FadeInText
-                    text="THAT DEMANDS ATTENTION."
+                  <TypeAnimation
+                    sequence={["THAT DEMANDS ATTENTION.", 3000]}
+                    speed={110}
                     className="text-gradient-brand font-display italic font-black animate-gradient-text pr-2.5 inline-block filter drop-shadow-[0_0_15px_rgba(56,189,248,0.45)]"
                   />
                 </span>
