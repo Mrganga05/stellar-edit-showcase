@@ -77,14 +77,21 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "Raqvine — Professional Video Editor & Content Showcase" },
+      {
+        name: "description",
+        content:
+          "Helping creators, startups, and brands transform raw footage into retention-focused video edits that capture attention.",
+      },
+      { name: "author", content: "Raqvine" },
+      { property: "og:title", content: "Raqvine — Professional Video Editor & Content Showcase" },
+      {
+        property: "og:description",
+        content:
+          "Helping creators, startups, and brands transform raw footage into retention-focused video edits that capture attention.",
+      },
       { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },

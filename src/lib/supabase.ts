@@ -34,4 +34,32 @@ if (
   );
 }
 
+// Polyfill WebSocket constructor for Node.js < 22 SSR environments where native WebSocket is absent
+if (
+  typeof window === "undefined" &&
+  typeof (globalThis as Record<string, unknown>).WebSocket === "undefined"
+) {
+  class SSRWebSocket {
+    CONNECTING = 0;
+    OPEN = 1;
+    CLOSING = 2;
+    CLOSED = 3;
+    readyState = 3;
+    url = "";
+    protocol = "";
+    onopen = null;
+    onmessage = null;
+    onclose = null;
+    onerror = null;
+    constructor(url: string, _protocols?: string | string[]) {
+      this.url = url;
+    }
+    close() {}
+    send() {}
+    addEventListener() {}
+    removeEventListener() {}
+  }
+  (globalThis as Record<string, unknown>).WebSocket = SSRWebSocket;
+}
+
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
