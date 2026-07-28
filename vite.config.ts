@@ -7,22 +7,21 @@
 import { defineConfig } from "@lovable.dev/vite-tanstack-config";
 import { loadEnv } from "vite";
 
-export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode || "development", process.cwd(), "");
-  for (const key in env) {
-    if (!process.env[key]) {
-      process.env[key] = env[key];
-    }
+// Load environment variables into process.env at config evaluation time
+const env = loadEnv(process.env.NODE_ENV || "development", process.cwd(), "");
+for (const key in env) {
+  if (!process.env[key]) {
+    process.env[key] = env[key];
   }
+}
 
-  return {
-    tanstackStart: {
-      // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
-      // nitro/vite builds from this
-      server: { entry: "server" },
-    },
-    nitro: {
-      preset: process.env.VERCEL || process.env.VERCEL_ENV ? "vercel" : undefined,
-    },
-  };
+export default defineConfig({
+  nitro: {
+    preset: "vercel",
+  },
+  tanstackStart: {
+    // Redirect TanStack Start's bundled server entry to src/server.ts (our SSR error wrapper).
+    // nitro/vite builds from this
+    server: { entry: "server" },
+  },
 });
