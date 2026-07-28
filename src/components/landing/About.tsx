@@ -1,5 +1,5 @@
 import { useRef, useState, useEffect } from "react";
-import { motion, useMotionValue, useSpring, useInView, animate } from "motion/react";
+import { motion, useMotionValue, useSpring, useInView, animate, type Variants } from "motion/react";
 import { cn } from "@/lib/utils";
 import {
   Zap,
@@ -41,7 +41,7 @@ const Counter = ({
 
     const controls = animate(0, to, {
       duration: duration,
-      ease: [0.16, 1, 0.3, 1], // easeOutExpo
+      ease: "easeOut",
       onUpdate(value) {
         node.textContent = value.toFixed(decimals) + suffix;
       },
@@ -81,7 +81,7 @@ const Sparkline = ({ color = "#38BDF8" }) => {
 
 // Staggered Title words (3 lines exactly, compact size)
 const StaggeredTitle = () => {
-  const containerVars = {
+  const containerVars: Variants = {
     hidden: {},
     visible: {
       transition: {
@@ -90,14 +90,14 @@ const StaggeredTitle = () => {
     },
   };
 
-  const wordVars = {
+  const wordVars: Variants = {
     hidden: { opacity: 0, y: 25 },
     visible: {
       opacity: 1,
       y: 0,
       transition: {
         duration: 0.7,
-        ease: [0.215, 0.61, 0.355, 1] as const, // easeOutCubic
+        ease: "easeOut",
       },
     },
   };
@@ -191,7 +191,7 @@ const FeatureCard = ({ title, desc, icon, delay = 0 }: FeatureCardProps) => {
       initial={{ opacity: 0, y: 20, scale: 0.98 }}
       whileInView={{ opacity: 1, y: 0, scale: 1 }}
       viewport={{ once: true, amount: 0.1, margin: "-15px" }}
-      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] as const, delay }}
+      transition={{ duration: 0.6, ease: "easeOut", delay }}
       whileTap={{ scale: 0.97 }}
       className="group relative overflow-hidden rounded-[18px] border border-white/[0.08] bg-[#0c1224]/80 p-4 sm:p-5 lg:p-6 flex flex-col gap-3 lg:h-[150px] transition-all duration-[450ms] ease-out hover:border-[#38BDF8]/40 hover:-translate-y-1.5 hover:shadow-[0_10px_25px_rgba(56,189,248,0.06)]"
     >
@@ -463,7 +463,7 @@ export function About() {
                         opacity: 1,
                         scale: 1,
                         y: 0,
-                        transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] as const },
+                        transition: { duration: 0.45, ease: "easeOut" },
                       },
                     }}
                     whileHover={{ scale: 1.06, y: -2 }}
@@ -488,7 +488,7 @@ export function About() {
                         opacity: 1,
                         scale: 1,
                         y: 0,
-                        transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] as const },
+                        transition: { duration: 0.45, ease: "easeOut" },
                       },
                     }}
                     whileHover={{ scale: 1.06, y: -2 }}
