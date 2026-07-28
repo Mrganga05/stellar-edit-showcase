@@ -747,6 +747,49 @@ function AdminPage() {
 
   async function handleSaveProject(e: React.FormEvent) {
     e.preventDefault();
+
+    if (uploadingThumbnail || uploadingVideo) {
+      toast.error("Please wait for file upload to complete before saving.");
+      return;
+    }
+
+    const cleanTitle = projTitle.trim();
+    const cleanCategory = projCategory.trim();
+    let cleanThumbnail = projThumbnail.trim();
+    let cleanVideoUrl = projVideoUrl.trim();
+    const cleanDescription = projDescription.trim();
+    const cleanOverview = projOverview.trim();
+
+    // Check required fields
+    if (!cleanTitle) {
+      toast.error("Project Title is required");
+      return;
+    }
+    if (!cleanCategory) {
+      toast.error("Category is required");
+      return;
+    }
+    if (!cleanThumbnail) {
+      toast.error("Thumbnail image URL or file upload is required");
+      return;
+    }
+    if (!cleanVideoUrl) {
+      toast.error("Video URL or file upload is required");
+      return;
+    }
+    if (!cleanDescription) {
+      toast.error("Short Card Description is required");
+      return;
+    }
+
+    // Auto-fix URL protocols if missing http(s)://
+    if (cleanThumbnail && !/^https?:\/\//i.test(cleanThumbnail) && !cleanThumbnail.startsWith("/") && !cleanThumbnail.startsWith("data:")) {
+      cleanThumbnail = `https://${cleanThumbnail}`;
+    }
+    if (cleanVideoUrl && !/^https?:\/\//i.test(cleanVideoUrl) && !cleanVideoUrl.startsWith("/") && !cleanVideoUrl.startsWith("data:")) {
+      cleanVideoUrl = `https://${cleanVideoUrl}`;
+    }
+
     setSavingProject(true);
 
     // Parse newline-separated values
@@ -764,24 +807,24 @@ function AdminPage() {
       .filter(Boolean);
 
     const projectPayload = {
-      title: projTitle,
-      category: projCategory,
-      thumbnail: projThumbnail,
-      videoUrl: projVideoUrl,
+      title: cleanTitle,
+      category: cleanCategory,
+      thumbnail: cleanThumbnail,
+      videoUrl: cleanVideoUrl,
       duration: projDuration,
       resolution: projResolution,
       fileSize: projFileSize,
-      description: projDescription,
-      overview: projOverview,
+      description: cleanDescription,
+      overview: cleanOverview,
       techniques: techniquesArr,
       results: resultsArr,
       tools: toolsArr,
-      sortOrder: Number(projSortOrder),
+      sortOrder: Number(projSortOrder) || 0,
       isPublished: projIsPublished,
       serviceId: projServiceId || null,
       updatedAt: new Date().toISOString(),
-      clientName: projClientName,
-      metric: projMetric,
+      clientName: projClientName.trim(),
+      metric: projMetric.trim(),
       videoAspect: projVideoAspect,
     };
 
@@ -803,25 +846,24 @@ function AdminPage() {
         toast.success("New portfolio project added successfully");
       }
 
+      setIsProjectModalOpen(false);
+
       if (projectPayload.videoUrl) {
         setSavedReelPopup({
           isOpen: true,
           videoUrl: projectPayload.videoUrl,
           title: projectPayload.title || "Work Reel Project",
           aspect: (projectPayload.videoAspect as "portrait" | "landscape") || "portrait",
-          sourceType: "Work Reel (Portfolio)",
+          sourceType: "Featured Work (Portfolio)",
         });
       }
 
       queryClient.invalidateQueries({ queryKey: ["portfolio-projects"] });
-      setIsProjectModalOpen(false);
       fetchData();
     } catch (err: unknown) {
-      console.error(err);
+      console.error("Save project error:", err);
       const message = err instanceof Error ? err.message : "Failed to save project";
-      toast.error("Failed to save project", {
-        description: message,
-      });
+      toast.error(`Database Save Failed: ${message}`);
     } finally {
       setSavingProject(false);
     }
@@ -1575,12 +1617,13 @@ function AdminPage() {
 
             <form
               onSubmit={handleSaveProject}
+              noValidate
               className="space-y-4 max-h-[75vh] overflow-y-auto pr-2"
             >
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5">
-                    Project Title
+                    Project Title *
                   </label>
                   <input
                     required
@@ -1593,7 +1636,7 @@ function AdminPage() {
                 </div>
                 <div>
                   <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5">
-                    Category
+                    Category *
                   </label>
                   <input
                     required
@@ -1636,7 +1679,7 @@ function AdminPage() {
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5">
-                    Thumbnail Image File / URL
+                    Thumbnail Image File / URL *
                   </label>
                   <div className="space-y-2">
                     <input
@@ -1661,8 +1704,7 @@ function AdminPage() {
                       </div>
                     )}
                     <input
-                      required
-                      type="url"
+                      type="text"
                       value={projThumbnail}
                       onChange={(e) => setProjThumbnail(e.target.value)}
                       placeholder="https://images.unsplash.com/..."
@@ -1712,8 +1754,7 @@ function AdminPage() {
                       />
                     ) : (
                       <input
-                        required
-                        type="url"
+                        type="text"
                         value={projVideoUrl}
                         onChange={(e) => setProjVideoUrl(e.target.value)}
                         placeholder="https://commondatastorage.googleapis.com/..."
@@ -1726,7 +1767,7 @@ function AdminPage() {
 
               <div>
                 <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5">
-                  Short Card Description
+                  Short Card Description *
                 </label>
                 <input
                   required
@@ -1740,7 +1781,7 @@ function AdminPage() {
 
               <div>
                 <label className="block text-[10px] uppercase tracking-[0.2em] text-muted-foreground mb-1.5">
-                  Overview / Details (Popup)
+                  Overview / Details (Popup) *
                 </label>
                 <textarea
                   required
@@ -1858,16 +1899,20 @@ function AdminPage() {
                 <button
                   type="button"
                   onClick={() => setIsProjectModalOpen(false)}
-                  className="rounded-xl border border-white/10 px-5 py-2.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition"
+                  className="rounded-xl border border-white/10 px-5 py-2.5 text-xs font-semibold text-muted-foreground hover:text-foreground transition cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  disabled={savingProject}
-                  className="inline-flex items-center justify-center rounded-xl bg-foreground px-5 py-2.5 text-xs font-semibold text-background hover:scale-[1.01] transition-transform disabled:opacity-50"
+                  disabled={savingProject || uploadingThumbnail || uploadingVideo}
+                  className="inline-flex items-center justify-center rounded-xl bg-foreground px-5 py-2.5 text-xs font-semibold text-background hover:scale-[1.01] transition-transform disabled:opacity-50 cursor-pointer"
                 >
-                  {savingProject ? "Saving..." : "Save Project"}
+                  {savingProject
+                    ? "Saving..."
+                    : uploadingThumbnail || uploadingVideo
+                      ? "Uploading Media..."
+                      : "Save Project"}
                 </button>
               </div>
             </form>
