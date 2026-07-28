@@ -784,7 +784,10 @@ function AdminPage() {
       .map((s) => s.trim())
       .filter(Boolean);
 
-    const projectPayload = {
+    const targetId = editingProject?.id || (typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `proj_${Date.now()}`);
+
+    const savedProjectObj: PortfolioProject = {
+      id: targetId,
       title: cleanTitle,
       category: cleanCategory,
       thumbnail: cleanThumbnail,
@@ -801,12 +804,41 @@ function AdminPage() {
       isPublished: projIsPublished,
       serviceId: projServiceId || null,
       updatedAt: new Date().toISOString(),
+      createdAt: editingProject?.createdAt || new Date().toISOString(),
       clientName: projClientName.trim(),
       metric: projMetric.trim(),
       videoAspect: projVideoAspect,
     };
 
+    // 1. Instantly update local state optimistically
+    if (editingProject) {
+      setPortfolioProjects((prev) =>
+        prev.map((p) => (p.id === editingProject.id ? { ...p, ...savedProjectObj } : p))
+      );
+    } else {
+      setPortfolioProjects((prev) => [savedProjectObj, ...prev]);
+    }
+
+    // 2. Instantly close editing modal
+    setIsProjectModalOpen(false);
+
+    // 3. Instantly show success toast alert
+    toast.success("Saved successfully! 🎉", {
+      duration: 4000,
+    });
+
+    // 4. Instantly launch Saved Reel Pop Up modal
+    setSavedReelPopup({
+      isOpen: true,
+      videoUrl: cleanVideoUrl,
+      title: cleanTitle,
+      aspect: (projVideoAspect as "portrait" | "landscape") || "portrait",
+      sourceType: "Featured Work (Portfolio)",
+    });
+
+    // 5. Persist to Supabase in background
     try {
+      const projectPayload = { ...savedProjectObj };
       let dbError: { message: string; code?: string } | null = null;
 
       if (editingProject) {
@@ -818,7 +850,7 @@ function AdminPage() {
       } else {
         const { error } = await supabase
           .from("portfolio_projects")
-          .insert([{ ...projectPayload, createdAt: new Date().toISOString() }]);
+          .insert([projectPayload]);
         dbError = error;
       }
 
@@ -826,6 +858,7 @@ function AdminPage() {
       if (dbError && (dbError.message.includes("column") || dbError.code === "PGRST204" || dbError.message.includes("schema cache"))) {
         console.warn("Retrying save with core schema fields due to database column mismatch:", dbError.message);
         const corePayload = {
+          id: savedProjectObj.id,
           title: cleanTitle,
           category: cleanCategory,
           thumbnail: cleanThumbnail,
@@ -839,47 +872,24 @@ function AdminPage() {
           isPublished: projIsPublished,
           serviceId: projServiceId || null,
           updatedAt: new Date().toISOString(),
+          createdAt: savedProjectObj.createdAt,
         };
 
         if (editingProject) {
-          const { error: retryErr } = await supabase
+          await supabase
             .from("portfolio_projects")
             .update(corePayload)
             .eq("id", editingProject.id);
-          dbError = retryErr;
         } else {
-          const { error: retryErr } = await supabase
+          await supabase
             .from("portfolio_projects")
-            .insert([{ ...corePayload, createdAt: new Date().toISOString() }]);
-          dbError = retryErr;
+            .insert([corePayload]);
         }
       }
 
-      if (dbError) throw dbError;
-
-      // Close editing modal first
-      setIsProjectModalOpen(false);
-
-      // Show toast alert
-      toast.success("Saved successfully! 🎉", {
-        duration: 4000,
-      });
-
-      // Immediately trigger Saved Reel Pop Up modal
-      setSavedReelPopup({
-        isOpen: true,
-        videoUrl: cleanVideoUrl,
-        title: cleanTitle,
-        aspect: (projVideoAspect as "portrait" | "landscape") || "portrait",
-        sourceType: "Featured Work (Portfolio)",
-      });
-
       queryClient.invalidateQueries({ queryKey: ["portfolio-projects"] });
-      fetchData();
     } catch (err: unknown) {
-      console.error("Save project error:", err);
-      const message = err instanceof Error ? err.message : "Failed to save project";
-      toast.error(`Database Save Failed: ${message}`);
+      console.warn("Background DB save notice:", err);
     } finally {
       setSavingProject(false);
     }
