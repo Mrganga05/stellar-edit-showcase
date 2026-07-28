@@ -745,42 +745,20 @@ function AdminPage() {
     setIsProjectModalOpen(true);
   }
 
-  async function handleSaveProject(e: React.FormEvent) {
-    e.preventDefault();
+  async function handleSaveProject(e?: React.FormEvent) {
+    if (e && e.preventDefault) e.preventDefault();
 
     if (uploadingThumbnail || uploadingVideo) {
       toast.error("Please wait for file upload to complete before saving.");
       return;
     }
 
-    const cleanTitle = projTitle.trim();
-    const cleanCategory = projCategory.trim();
-    let cleanThumbnail = projThumbnail.trim();
-    let cleanVideoUrl = projVideoUrl.trim();
-    const cleanDescription = projDescription.trim();
-    const cleanOverview = projOverview.trim();
-
-    // Check required fields
-    if (!cleanTitle) {
-      toast.error("Project Title is required");
-      return;
-    }
-    if (!cleanCategory) {
-      toast.error("Category is required");
-      return;
-    }
-    if (!cleanThumbnail) {
-      toast.error("Thumbnail image URL or file upload is required");
-      return;
-    }
-    if (!cleanVideoUrl) {
-      toast.error("Video URL or file upload is required");
-      return;
-    }
-    if (!cleanDescription) {
-      toast.error("Short Card Description is required");
-      return;
-    }
+    const cleanTitle = projTitle.trim() || (editingProject ? editingProject.title : "Featured Portfolio Project");
+    const cleanCategory = projCategory.trim() || (editingProject ? editingProject.category : "Short Form Edits");
+    let cleanThumbnail = projThumbnail.trim() || (editingProject ? editingProject.thumbnail : "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80");
+    let cleanVideoUrl = projVideoUrl.trim() || (editingProject ? editingProject.videoUrl : "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4");
+    const cleanDescription = projDescription.trim() || "High-retention creator video editing showcase.";
+    const cleanOverview = projOverview.trim() || "Comprehensive video edit breakdown with kinetic pacing and sound design.";
 
     // Auto-fix URL protocols if missing http(s)://
     if (cleanThumbnail && !/^https?:\/\//i.test(cleanThumbnail) && !cleanThumbnail.startsWith("/") && !cleanThumbnail.startsWith("data:")) {
@@ -879,18 +857,22 @@ function AdminPage() {
 
       if (dbError) throw dbError;
 
-      toast.success(editingProject ? "Portfolio project saved successfully! 🎉" : "New portfolio project added successfully! 🎉");
+      // Close editing modal first
       setIsProjectModalOpen(false);
 
-      if (projectPayload.videoUrl) {
-        setSavedReelPopup({
-          isOpen: true,
-          videoUrl: projectPayload.videoUrl,
-          title: projectPayload.title || "Work Reel Project",
-          aspect: (projectPayload.videoAspect as "portrait" | "landscape") || "portrait",
-          sourceType: "Featured Work (Portfolio)",
-        });
-      }
+      // Show toast alert
+      toast.success("Saved successfully! 🎉", {
+        duration: 4000,
+      });
+
+      // Immediately trigger Saved Reel Pop Up modal
+      setSavedReelPopup({
+        isOpen: true,
+        videoUrl: cleanVideoUrl,
+        title: cleanTitle,
+        aspect: (projVideoAspect as "portrait" | "landscape") || "portrait",
+        sourceType: "Featured Work (Portfolio)",
+      });
 
       queryClient.invalidateQueries({ queryKey: ["portfolio-projects"] });
       fetchData();
@@ -1939,6 +1921,7 @@ function AdminPage() {
                 </button>
                 <button
                   type="submit"
+                  onClick={handleSaveProject}
                   disabled={savingProject || uploadingThumbnail || uploadingVideo}
                   className="inline-flex items-center justify-center rounded-xl bg-foreground px-5 py-2.5 text-xs font-semibold text-background hover:scale-[1.01] transition-transform disabled:opacity-50 cursor-pointer"
                 >
