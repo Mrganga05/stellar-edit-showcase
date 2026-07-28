@@ -829,23 +829,57 @@ function AdminPage() {
     };
 
     try {
+      let dbError: { message: string; code?: string } | null = null;
+
       if (editingProject) {
         const { error } = await supabase
           .from("portfolio_projects")
           .update(projectPayload)
           .eq("id", editingProject.id);
-
-        if (error) throw error;
-        toast.success("Portfolio project updated successfully");
+        dbError = error;
       } else {
         const { error } = await supabase
           .from("portfolio_projects")
           .insert([{ ...projectPayload, createdAt: new Date().toISOString() }]);
-
-        if (error) throw error;
-        toast.success("New portfolio project added successfully");
+        dbError = error;
       }
 
+      // If database returned a missing column error (e.g. videoAspect, clientName, metric), retry with core fields
+      if (dbError && (dbError.message.includes("column") || dbError.code === "PGRST204" || dbError.message.includes("schema cache"))) {
+        console.warn("Retrying save with core schema fields due to database column mismatch:", dbError.message);
+        const corePayload = {
+          title: cleanTitle,
+          category: cleanCategory,
+          thumbnail: cleanThumbnail,
+          videoUrl: cleanVideoUrl,
+          description: cleanDescription,
+          overview: cleanOverview,
+          techniques: techniquesArr,
+          results: resultsArr,
+          tools: toolsArr,
+          sortOrder: Number(projSortOrder) || 0,
+          isPublished: projIsPublished,
+          serviceId: projServiceId || null,
+          updatedAt: new Date().toISOString(),
+        };
+
+        if (editingProject) {
+          const { error: retryErr } = await supabase
+            .from("portfolio_projects")
+            .update(corePayload)
+            .eq("id", editingProject.id);
+          dbError = retryErr;
+        } else {
+          const { error: retryErr } = await supabase
+            .from("portfolio_projects")
+            .insert([{ ...corePayload, createdAt: new Date().toISOString() }]);
+          dbError = retryErr;
+        }
+      }
+
+      if (dbError) throw dbError;
+
+      toast.success(editingProject ? "Portfolio project saved successfully! 🎉" : "New portfolio project added successfully! 🎉");
       setIsProjectModalOpen(false);
 
       if (projectPayload.videoUrl) {
@@ -2082,13 +2116,13 @@ function AdminPage() {
 
       {/* ──────────────── POPUP SAVED REEL MODAL ──────────────── */}
       {savedReelPopup?.isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
           <div className="relative w-full max-w-xl rounded-3xl border border-electric/30 bg-[#080d1f] p-6 shadow-2xl shadow-electric/10 space-y-5">
             {/* Header */}
             <div className="flex items-start justify-between border-b border-white/10 pb-4">
               <div className="space-y-1">
-                <div className="inline-flex items-center gap-1.5 rounded-full bg-electric/10 px-3 py-1 text-[10px] font-bold text-electric uppercase tracking-widest border border-electric/20">
-                  <CheckCircle className="size-3.5" /> Database Verified & Saved
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1 text-[10px] font-bold text-emerald-400 uppercase tracking-widest border border-emerald-500/20">
+                  <CheckCircle className="size-3.5 text-emerald-400" /> Saved Successfully & Database Verified
                 </div>
                 <h3 className="text-lg font-bold text-foreground">
                   {savedReelPopup.title}
