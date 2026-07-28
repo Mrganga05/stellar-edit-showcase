@@ -1,6 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { generatePresignedUploadUrl, deleteFromR2, getR2Config } from "../server/r2.server";
 
 // Allowed video MIME types and file extensions for production security
 const ALLOWED_VIDEO_MIME_TYPES = [
@@ -63,7 +62,10 @@ export const getPresignedUrlFn = createServerFn({ method: "POST" })
         );
       }
 
-      // 4. Generate presigned URL (confines files inside videos/ with 5-minute expiration)
+      // 4. Dynamically import server storage helper strictly inside server function execution context
+      const { generatePresignedUploadUrl } = await import("../server/r2.server");
+
+      // 5. Generate presigned URL
       const result = await generatePresignedUploadUrl(
         data.fileName,
         data.contentType,
@@ -96,6 +98,7 @@ export const deleteR2FileFn = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     try {
+      const { deleteFromR2, getR2Config } = await import("../server/r2.server");
       const config = getR2Config();
       const publicUrlPrefix = config.publicUrl;
 
