@@ -2,14 +2,31 @@ import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { parse } from "node:path";
 
+// Helper to reliably read R2 environment variables across Node, Vite SSR, and local development
+function getR2Env(key: string): string | undefined {
+  if (typeof process !== "undefined" && process.env) {
+    if (process.env[key]) return process.env[key];
+    if (process.env[`VITE_${key}`]) return process.env[`VITE_${key}`];
+    try {
+      if (typeof process.loadEnvFile === "function") {
+        process.loadEnvFile();
+      }
+    } catch {
+      // ignore
+    }
+    return process.env[key] || process.env[`VITE_${key}`];
+  }
+  return undefined;
+}
+
 // Initialize S3 client for Cloudflare R2 lazily to avoid errors if env vars are not set during build time
 let s3Client: S3Client | null = null;
 
 function getS3Client(): S3Client {
   if (!s3Client) {
-    const accountId = process.env.CLOUDFLARE_R2_ACCOUNT_ID;
-    const accessKeyId = process.env.CLOUDFLARE_R2_ACCESS_KEY_ID;
-    const secretAccessKey = process.env.CLOUDFLARE_R2_SECRET_ACCESS_KEY;
+    const accountId = getR2Env("CLOUDFLARE_R2_ACCOUNT_ID");
+    const accessKeyId = getR2Env("CLOUDFLARE_R2_ACCESS_KEY_ID");
+    const secretAccessKey = getR2Env("CLOUDFLARE_R2_SECRET_ACCESS_KEY");
 
     if (!accountId || !accessKeyId || !secretAccessKey) {
       console.error("Missing Cloudflare R2 credentials in environment variables.");
@@ -38,9 +55,9 @@ export async function generatePresignedUploadUrl(
   contentType: string,
   folder: string = "videos",
 ) {
-  const bucketName = process.env.CLOUDFLARE_R2_BUCKET_NAME;
+  const bucketName = getR2Env("CLOUDFLARE_R2_BUCKET_NAME");
   const publicUrlPrefix =
-    process.env.CLOUDFLARE_R2_PUBLIC_URL || "https://media.raqvine.com";
+    getR2Env("CLOUDFLARE_R2_PUBLIC_URL") || "https://pub-f2e8479a9f704fe2a3f086d9586ab8d9.r2.dev";
 
   if (!bucketName) {
     throw new Error(
@@ -103,7 +120,7 @@ export async function generatePresignedUploadUrl(
  * Deletes an object from Cloudflare R2 by its key.
  */
 export async function deleteFromR2(key: string) {
-  const bucketName = process.env.CLOUDFLARE_R2_BUCKET_NAME;
+  const bucketName = getR2Env("CLOUDFLARE_R2_BUCKET_NAME");
   if (!bucketName) {
     throw new Error("Missing CLOUDFLARE_R2_BUCKET_NAME in environment variables");
   }
