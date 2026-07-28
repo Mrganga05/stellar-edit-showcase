@@ -1,24 +1,52 @@
 import React, { useState, useRef, useEffect } from "react";
-import { UploadCloud, Video, X, RefreshCw, CheckCircle2, AlertCircle } from "lucide-react";
+import {
+  UploadCloud,
+  Video,
+  X,
+  RefreshCw,
+  CheckCircle2,
+  AlertCircle,
+  Clock,
+  Gauge,
+  FileVideo,
+} from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { getPresignedUrlFn, uploadVideoFn } from "@/lib/api/r2.functions";
+import { getPresignedUrlFn } from "@/lib/api/r2.functions";
+import {
+  extractVideoMetadata,
+  uploadDirectToR2,
+  UploadProgressInfo,
+} from "@/lib/utils/direct-r2-upload";
 
-interface VideoDetails {
-  videoUrl: string;
-  thumbnailUrl: string;
+export interface FullVideoUploadMetadata {
+  videoUrl: string; // publicUrl
+  publicUrl: string;
+  objectKey: string;
+  originalName: string;
+  originalFilename: string;
+  fileSize: number;
+  mimeType: string;
+  uploadDate: string;
+  createdAt: string;
+  updatedAt: string;
   duration: number;
   resolution: string;
-  fileSize: number;
+  width: number;
+  height: number;
+  aspectRatio: string;
+  status: "uploaded" | "pending" | "failed";
+  thumbnailUrl: string;
+  userId?: string;
 }
 
 interface VideoUploaderProps {
-  value: string; // Current video URL
-  onChange: (details: VideoDetails | null) => void; // Called when upload succeeds
-  onUploadStateChange?: (uploading: boolean) => void; // Notify parent component about upload state
-  folder?: string; // Target R2 folder (default "portfolio")
-  maxSizeMB?: number; // Configurable Max upload size (default 500MB)
+  value: string; // Current public video URL
+  onChange: (details: FullVideoUploadMetadata | null) => void;
+  onUploadStateChange?: (uploading: boolean) => void;
+  folder?: string; // Target R2 folder inside videos/ (default "portfolio")
+  maxSizeMB?: number; // Maximum allowed size in MB (default 2000MB)
 }
 
 export function VideoUploader({
@@ -26,15 +54,24 @@ export function VideoUploader({
   onChange,
   onUploadStateChange,
   folder = "portfolio",
-  maxSizeMB = 500,
+  maxSizeMB = 2000,
 }: VideoUploaderProps) {
   const [isDragActive, setIsDragActive] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [status, setStatus] = useState<string>("Uploading");
-  const [progress, setProgress] = useState(0);
+  const [statusText, setStatusText] = useState<string>("Initializing...");
+  const [progressInfo, setProgressInfo] = useState<UploadProgressInfo>({
+    progress: 0,
+    loaded: 0,
+    total: 0,
+    speedBytesPerSec: 0,
+    formattedSpeed: "0 B/s",
+    etaSeconds: 0,
+    formattedEta: "Calculating...",
+  });
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [completedMetadata, setCompletedMetadata] = useState<FullVideoUploadMetadata | null>(null);
 
   const xhrRef = useRef<XMLHttpRequest | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -56,111 +93,118 @@ export function VideoUploader({
     setError(null);
     setSelectedFile(file);
 
-    // Mime types and extensions to check (MP4, MOV, WEBM)
-    const allowedTypes = ["video/mp4", "video/quicktime", "video/webm"];
-    const allowedExtensions = [".mp4", ".mov", ".webm"];
+    const allowedMimeTypes = [
+      "video/mp4",
+      "video/quicktime",
+      "video/webm",
+      "video/x-matroska",
+      "video/avi",
+      "video/mkv",
+    ];
+    const allowedExtensions = [".mp4", ".mov", ".webm", ".mkv", ".avi"];
     const fileExtension = "." + file.name.split(".").pop()?.toLowerCase();
 
-    if (!allowedTypes.includes(file.type) && !allowedExtensions.includes(fileExtension)) {
-      setError("Invalid file type. Only MP4, MOV, and WEBM video formats are supported.");
+    if (!allowedMimeTypes.includes(file.type.toLowerCase()) && !allowedExtensions.includes(fileExtension)) {
+      setError(
+        "Invalid file format. Supported video formats are MP4, MOV, WEBM, MKV, and AVI.",
+      );
       return false;
     }
 
     const maxSizeBytes = maxSizeMB * 1024 * 1024;
     if (file.size > maxSizeBytes) {
-      setError(`File is too large. Maximum allowed size is ${maxSizeMB}MB.`);
+      setError(
+        `File is too large (${(file.size / (1024 * 1024)).toFixed(1)}MB). Maximum allowed size is ${maxSizeMB}MB.`,
+      );
       return false;
     }
 
     return true;
   };
 
-  const uploadFileToR2 = async (file: File) => {
+  const uploadFileDirectly = async (file: File) => {
+    console.log("[STEP 1]\nUpload started");
     setUploading(true);
-    setProgress(0);
-    setStatus("Uploading");
+    setStatusText("Extracting video metadata...");
     setError(null);
     setSuccess(false);
+    setProgressInfo({
+      progress: 0,
+      loaded: 0,
+      total: file.size,
+      speedBytesPerSec: 0,
+      formattedSpeed: "0 B/s",
+      etaSeconds: 0,
+      formattedEta: "Calculating...",
+    });
 
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("folder", folder);
+      // Step 1: Extract video metadata natively in browser (duration, resolution, ratio)
+      const metadata = await extractVideoMetadata(file);
 
-      const xhr = new XMLHttpRequest();
-      xhrRef.current = xhr;
+      // Step 2: Request presigned URL from server
+      setStatusText("Requesting presigned upload URL...");
+      const presignedRes = await getPresignedUrlFn({
+        data: {
+          fileName: file.name,
+          contentType: file.type || "video/mp4",
+          fileSize: file.size,
+          folder,
+        },
+      });
 
-      const url = `${uploadVideoFn.url}?_serverFnId=${encodeURIComponent(uploadVideoFn.id)}`;
-      xhr.open("POST", url, true);
-      xhr.setRequestHeader("x-server-fn-id", uploadVideoFn.id);
+      if (!presignedRes || !presignedRes.success || !presignedRes.uploadUrl) {
+        throw new Error(presignedRes?.error || "Failed to generate presigned upload URL");
+      }
 
-      // Track request upload progress (client -> server)
-      xhr.upload.onprogress = (event) => {
-        if (event.lengthComputable) {
-          const percentComplete = Math.round((event.loaded / event.total) * 100);
-          if (percentComplete < 100) {
-            setProgress(percentComplete);
-          } else {
-            setProgress(100);
-          }
-        }
+      const { uploadUrl, objectKey, publicUrl, originalName } = presignedRes;
+
+      // Step 3: Direct PUT upload to Cloudflare R2
+      setStatusText("Uploading directly to Cloudflare R2...");
+      await uploadDirectToR2({
+        uploadUrl,
+        file,
+        contentType: file.type || "video/mp4",
+        xhrRef,
+        onProgress: (info) => {
+          setProgressInfo(info);
+        },
+      });
+
+      console.log(`[STEP 2]\nUpload completed\nURL: ${publicUrl}`);
+
+      // Step 4: Construct complete production metadata record
+      const now = new Date().toISOString();
+      const videoResult: FullVideoUploadMetadata = {
+        videoUrl: publicUrl,
+        publicUrl,
+        objectKey: objectKey || "",
+        originalName: originalName || file.name,
+        originalFilename: originalName || file.name,
+        fileSize: file.size,
+        mimeType: file.type || "video/mp4",
+        uploadDate: now,
+        createdAt: now,
+        updatedAt: now,
+        duration: metadata.duration,
+        resolution: metadata.resolution,
+        width: metadata.width,
+        height: metadata.height,
+        aspectRatio: metadata.aspectRatio,
+        status: "uploaded",
+        thumbnailUrl: "",
       };
 
-      let lastIndex = 0;
-      xhr.onreadystatechange = () => {
-        if (xhr.readyState === 3 || xhr.readyState === 4) {
-          const newText = xhr.responseText.substring(lastIndex);
-          lastIndex = xhr.responseText.length;
-
-          const lines = newText.split("\n");
-          for (const line of lines) {
-            if (line.trim().startsWith("data: ")) {
-              try {
-                const rawData = line.trim().slice(6);
-                const parsed = JSON.parse(rawData);
-                if (parsed.status) {
-                  setStatus(parsed.status);
-                  setProgress(parsed.percent);
-
-                  if (parsed.status === "Completed") {
-                    setSuccess(true);
-                    setUploading(false);
-                    onChange(parsed.data);
-                  } else if (parsed.status === "Failed") {
-                    setError(parsed.error || "Video processing failed.");
-                    setUploading(false);
-                  }
-                }
-              } catch (e) {
-                // Ignore parsing errors for incomplete lines
-              }
-            }
-          }
-        }
-      };
-
-      xhr.onload = () => {
-        if (xhr.status !== 200) {
-          setError(`Upload failed with status code ${xhr.status}`);
-          setUploading(false);
-        }
-      };
-
-      xhr.onerror = () => {
-        setError("Network error occurred during video upload.");
-        setUploading(false);
-      };
-
-      xhr.onabort = () => {
-        setError("Upload cancelled by user.");
-        setUploading(false);
-      };
-
-      xhr.send(formData);
+      setCompletedMetadata(videoResult);
+      setSuccess(true);
+      setUploading(false);
+      onChange(videoResult);
     } catch (err: unknown) {
-      console.error("[R2 Upload] Error in upload workflow:", err);
+      console.error("[Direct R2 Upload] Upload failed:", err);
       const errorMsg =
-        err instanceof Error ? err.message : "An unexpected error occurred during upload.";
+        err instanceof Error
+          ? err.message
+          : "An unexpected network error occurred while uploading directly to R2.";
       setError(errorMsg);
       setUploading(false);
     }
@@ -169,7 +213,7 @@ export function VideoUploader({
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && validateFile(file)) {
-      uploadFileToR2(file);
+      uploadFileDirectly(file);
     }
   };
 
@@ -190,7 +234,7 @@ export function VideoUploader({
 
     const file = e.dataTransfer.files?.[0];
     if (file && validateFile(file)) {
-      uploadFileToR2(file);
+      uploadFileDirectly(file);
     }
   };
 
@@ -202,12 +246,14 @@ export function VideoUploader({
 
   const handleRetry = () => {
     if (selectedFile) {
-      uploadFileToR2(selectedFile);
+      uploadFileDirectly(selectedFile);
     }
   };
 
   const triggerFileInput = () => {
-    fileInputRef.current?.click();
+    if (!uploading) {
+      fileInputRef.current?.click();
+    }
   };
 
   return (
@@ -230,43 +276,53 @@ export function VideoUploader({
           <input
             ref={fileInputRef}
             type="file"
-            accept="video/mp4,video/quicktime,video/webm"
+            accept="video/mp4,video/quicktime,video/webm,video/x-matroska,video/avi"
             className="hidden"
             onChange={handleFileChange}
+            disabled={uploading}
           />
           <UploadCloud className="size-8 text-muted-foreground mb-3 animate-pulse" />
           <div className="text-sm font-medium text-foreground mb-1">
             Drag & drop your video here, or{" "}
-            <span className="text-electric font-semibold hover:underline">browse</span>
+            <span className="text-electric font-semibold hover:underline">browse file</span>
           </div>
           <div className="text-[10px] text-muted-foreground">
-            Supports MP4, MOV, WEBM (Max {maxSizeMB}MB)
+            Direct Cloudflare R2 Upload (Supports MP4, MOV, WEBM, MKV up to {maxSizeMB}MB)
           </div>
         </div>
       )}
 
-      {/* Uploading State with Progress */}
+      {/* Uploading State with Real-Time Progress, Speed & ETA */}
       {uploading && (
         <div className="border border-white/10 bg-white/[0.02] rounded-2xl p-5 space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <RefreshCw className="size-4 text-electric animate-spin" />
-              <span className="text-xs font-semibold text-white/90">
-                {status === "Uploading" ? "Uploading Original Video..." : `${status}...`}
-              </span>
+              <span className="text-xs font-semibold text-white/90">{statusText}</span>
             </div>
-            <span className="text-xs font-bold text-electric">{progress}%</span>
+            <span className="text-xs font-bold text-electric">{progressInfo.progress}%</span>
           </div>
 
-          <Progress value={progress} className="h-1.5 bg-white/5 [&>div]:bg-electric" />
+          <Progress value={progressInfo.progress} className="h-2 bg-white/5 [&>div]:bg-electric transition-all" />
 
-          {selectedFile && (
-            <div className="text-[10px] text-muted-foreground truncate">
-              File: {selectedFile.name}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 pt-1 text-[11px] text-muted-foreground">
+            <div className="flex items-center gap-1.5 truncate">
+              <FileVideo className="size-3.5 text-white/60 flex-shrink-0" />
+              <span className="truncate">{selectedFile?.name}</span>
             </div>
-          )}
 
-          <div className="flex justify-end">
+            <div className="flex items-center gap-1.5">
+              <Gauge className="size-3.5 text-electric flex-shrink-0" />
+              <span className="font-mono text-white/80">{progressInfo.formattedSpeed}</span>
+            </div>
+
+            <div className="flex items-center gap-1.5 col-span-2 sm:col-span-1">
+              <Clock className="size-3.5 text-amber-400 flex-shrink-0" />
+              <span className="font-mono text-white/80">{progressInfo.formattedEta}</span>
+            </div>
+          </div>
+
+          <div className="flex justify-end pt-1">
             <Button
               type="button"
               variant="outline"
@@ -274,7 +330,7 @@ export function VideoUploader({
               onClick={handleCancel}
               className="h-7 px-3 text-[10px] uppercase tracking-wider font-bold rounded-lg border-white/10 hover:bg-white/10 text-white cursor-pointer"
             >
-              Cancel
+              Cancel Upload
             </Button>
           </div>
         </div>
@@ -286,8 +342,8 @@ export function VideoUploader({
           <div className="flex items-start gap-2.5">
             <AlertCircle className="size-4.5 text-red-400 mt-0.5 flex-shrink-0" />
             <div className="space-y-1">
-              <h5 className="text-xs font-bold text-red-400">Upload Failed</h5>
-              <p className="text-xs text-red-200/70 leading-relaxed">{error}</p>
+              <h5 className="text-xs font-bold text-red-400">Direct Upload Failed</h5>
+              <p className="text-xs text-red-200/80 leading-relaxed">{error}</p>
             </div>
           </div>
           <div className="flex gap-2 justify-end">
@@ -311,7 +367,7 @@ export function VideoUploader({
                 onClick={handleRetry}
                 className="h-7 px-3 text-[10px] uppercase tracking-wider font-bold rounded-lg border-red-500/20 hover:bg-red-500/10 text-red-400 cursor-pointer"
               >
-                Retry Upload
+                Retry Direct Upload
               </Button>
             )}
           </div>
@@ -320,15 +376,18 @@ export function VideoUploader({
 
       {/* Success State */}
       {success && !uploading && (
-        <div className="border border-emerald-500/20 bg-emerald-500/5 rounded-2xl p-4 space-y-3">
+        <div className="border border-emerald-500/20 bg-emerald-500/5 rounded-2xl p-4 space-y-3 animate-in fade-in duration-300">
           <div className="flex items-center gap-2.5">
-            <CheckCircle2 className="size-4.5 text-emerald-400 flex-shrink-0" />
+            <CheckCircle2 className="size-5 text-emerald-400 flex-shrink-0" />
             <div className="min-w-0 flex-1">
-              <h5 className="text-xs font-bold text-emerald-400">Upload Complete!</h5>
-              {selectedFile && (
-                <p className="text-[10px] text-emerald-200/60 truncate mt-0.5">
-                  Saved: {selectedFile.name}
-                </p>
+              <h5 className="text-xs font-bold text-emerald-400">Direct Upload Complete!</h5>
+              {completedMetadata && (
+                <div className="text-[10px] text-emerald-200/70 truncate mt-0.5 space-x-2">
+                  <span>File: {completedMetadata.originalName}</span>
+                  {completedMetadata.resolution && <span>• {completedMetadata.resolution}</span>}
+                  {completedMetadata.aspectRatio && <span>• {completedMetadata.aspectRatio}</span>}
+                  {completedMetadata.duration > 0 && <span>• {completedMetadata.duration}s</span>}
+                </div>
               )}
             </div>
           </div>
@@ -340,16 +399,17 @@ export function VideoUploader({
               onClick={() => {
                 setSuccess(false);
                 setSelectedFile(null);
+                setCompletedMetadata(null);
               }}
               className="h-7 px-3 text-[10px] uppercase tracking-wider font-bold rounded-lg border-emerald-500/20 hover:bg-emerald-500/10 text-emerald-400 cursor-pointer"
             >
-              Upload Another
+              Upload Another Video
             </Button>
           </div>
         </div>
       )}
 
-      {/* Display Current Public URL */}
+      {/* Display Current Public R2 Video URL */}
       {value && !uploading && !error && !success && (
         <div className="border border-white/5 bg-white/[0.01] rounded-2xl p-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2 min-w-0">

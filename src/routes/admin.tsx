@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
@@ -49,6 +49,11 @@ function AdminPage() {
   );
   const [loading, setLoading] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Tracks the most recently uploaded showreel URL OUTSIDE of React state.
+  // This ref is the single source of truth for the Save button, preventing
+  // stale-closure bugs where showreelUrl state might lag behind the upload.
+  const latestShowreelUrlRef = useRef<string>("");
 
   // Data states
   const [contacts, setContacts] = useState<ContactInquiry[]>([]);
@@ -106,7 +111,7 @@ function AdminPage() {
   const [uploadingTestimonialAvatar, setUploadingTestimonialAvatar] = useState(false);
 
   // Showreel settings states
-  const [heroId, setHeroId] = useState("71e73e6a-72ef-4d6d-88f5-bfa33dbb48c1");
+  const [heroId, setHeroId] = useState(""); // Never hardcode — always resolved from the DB
   const [showreelUrl, setShowreelUrl] = useState("");
   const [showreelTitle, setShowreelTitle] = useState("");
   const [showreelDescription, setShowreelDescription] = useState("");
@@ -115,6 +120,15 @@ function AdminPage() {
   );
   const [savingShowreel, setSavingShowreel] = useState(false);
   const [uploadingShowreelVideo, setUploadingShowreelVideo] = useState(false);
+
+  // Pop up saved reel modal state
+  const [savedReelPopup, setSavedReelPopup] = useState<{
+    isOpen: boolean;
+    videoUrl: string;
+    title: string;
+    aspect: "portrait" | "landscape";
+    sourceType: string;
+  } | null>(null);
 
   // Source type choice states
   const [showreelSourceType, setShowreelSourceType] = useState<"file" | "url">("url");
@@ -155,7 +169,11 @@ function AdminPage() {
     }
   };
 
-  const handleShowreelUploadComplete = async (
+  // The known seed row ID from supabase_schema.sql — the hero_settings table always
+  // has exactly ONE row. Using UPSERT on this fixed ID guarantees a single record.
+  const HERO_SETTINGS_ID = "71e73e6a-72ef-4d6d-88f5-bfa33dbb48c1";
+
+  const handleShowreelUploadComplete = (
     details: {
       videoUrl: string;
       thumbnailUrl: string;
@@ -165,6 +183,7 @@ function AdminPage() {
     } | null,
   ) => {
     if (!details) {
+      latestShowreelUrlRef.current = "";
       setShowreelUrl("");
       setShowreelThumbnailUrl("");
       setShowreelDuration(null);
@@ -173,58 +192,15 @@ function AdminPage() {
       return;
     }
 
-    const oldUrl = showreelUrl;
-    const oldThumbUrl = showreelThumbnailUrl;
+    const uploadedUrl = details.videoUrl;
 
-    setShowreelUrl(details.videoUrl);
-    setShowreelThumbnailUrl(details.thumbnailUrl);
-    setShowreelDuration(details.duration);
-    setShowreelResolution(details.resolution);
-    setShowreelFileSize(details.fileSize);
-
-    const payload = {
-      showreelVideoUrl: details.videoUrl,
-      thumbnailUrl: details.thumbnailUrl,
-      duration: details.duration,
-      resolution: details.resolution,
-      fileSize: details.fileSize,
-      showreelTitle: showreelTitle,
-      showreelDescription: showreelDescription,
-      videoAspect: showreelVideoAspect,
-      updatedAt: new Date().toISOString(),
-    };
-
-    try {
-      const { data: existing, error: checkErr } = await supabase.from("hero_settings").select("id");
-      if (!checkErr && existing && existing.length > 0) {
-        const { error } = await supabase
-          .from("hero_settings")
-          .update(payload)
-          .eq("id", existing[0].id);
-        if (error) throw error;
-        toast.success("Showreel video updated automatically!");
-      } else {
-        const { error } = await supabase.from("hero_settings").insert([payload]);
-        if (error) throw error;
-        toast.success("Showreel video saved automatically!");
-      }
-
-      if (oldUrl && oldUrl !== details.videoUrl) {
-        await deleteR2FileFn({ data: { url: oldUrl } });
-      }
-      if (oldThumbUrl && oldThumbUrl !== details.thumbnailUrl) {
-        await deleteR2FileFn({ data: { url: oldThumbUrl } });
-      }
-
-      fetchData();
-    } catch (err: unknown) {
-      console.error(err);
-      const message =
-        err instanceof Error ? err.message : "Failed to automatically save showreel settings";
-      toast.error("Failed to automatically save showreel settings", {
-        description: message,
-      });
-    }
+    // Update ref & local state so Save button becomes enabled
+    latestShowreelUrlRef.current = uploadedUrl;
+    setShowreelUrl(uploadedUrl);
+    setShowreelThumbnailUrl(details.thumbnailUrl || "");
+    setShowreelDuration(details.duration || null);
+    setShowreelResolution(details.resolution || "");
+    setShowreelFileSize(details.fileSize || null);
   };
 
   const handleProjectVideoUploadComplete = async (
@@ -342,13 +318,17 @@ function AdminPage() {
       try {
         const { data: heroSettings, error: heroErr } = await supabase
           .from("hero_settings")
-          .select("*");
+          .select("*")
+          .order("updatedAt", { ascending: false })
+          .limit(1);
 
         if (!heroErr && heroSettings && heroSettings.length > 0) {
           const hs = heroSettings[0];
           setHeroId(hs.id);
           const reelUrl = hs.showreelVideoUrl || "";
           setShowreelUrl(reelUrl);
+          // Also sync the ref so Save always has the latest URL even before any new upload
+          latestShowreelUrlRef.current = reelUrl;
           setShowreelTitle(hs.showreelTitle || "");
           setShowreelDescription(hs.showreelDescription || "");
           setShowreelVideoAspect(hs.videoAspect || "portrait");
@@ -357,7 +337,15 @@ function AdminPage() {
           setShowreelResolution(hs.resolution || "");
           setShowreelFileSize(hs.fileSize || null);
 
-          if (reelUrl.includes(".supabase.co") || reelUrl.includes("supabase.in")) {
+          console.log("[Admin fetchData] hero_settings loaded. showreelVideoUrl:", reelUrl);
+
+          // Detect if the URL is a hosted file (Supabase Storage OR Cloudflare R2)
+          const isUploadedFile =
+            reelUrl.includes(".supabase.co") ||
+            reelUrl.includes("supabase.in") ||
+            reelUrl.includes("media.raqvine.com") ||
+            reelUrl.includes(".r2.cloudflarestorage.com");
+          if (isUploadedFile) {
             setShowreelSourceType("file");
           } else {
             setShowreelSourceType("url");
@@ -472,47 +460,164 @@ function AdminPage() {
     }
   }
 
-  async function handleSaveShowreel(e: React.FormEvent) {
-    e.preventDefault();
+  async function handleSaveShowreel(e?: React.FormEvent | React.MouseEvent) {
+    if (e && e.preventDefault) e.preventDefault();
     setSavingShowreel(true);
 
-    const payload = {
-      showreelVideoUrl: showreelUrl,
-      thumbnailUrl: showreelThumbnailUrl,
-      duration: showreelDuration,
-      resolution: showreelResolution,
-      fileSize: showreelFileSize,
-      showreelTitle: showreelTitle,
-      showreelDescription: showreelDescription,
-      videoAspect: showreelVideoAspect,
-      updatedAt: new Date().toISOString(),
-    };
+    const urlToSave = latestShowreelUrlRef.current || showreelUrl;
+    if (!urlToSave) {
+      toast.error("Please upload a showreel video or enter a valid video URL first.");
+      setSavingShowreel(false);
+      return;
+    }
+
+    const defaultHeadline =
+      'Edits That <span className="font-display italic font-normal text-gradient-brand">Hold Attention</span> <br/> And Drive Results.';
+    const defaultSubheadline =
+      "Raqvine transforms raw footage into cinematic, high-retention content built to move audiences, scale channels, and grow ambitious brands worldwide.";
 
     try {
-      // Check if row exists
-      const { data: existing, error: checkErr } = await supabase.from("hero_settings").select("id");
+      // [STEP 3] Database BEFORE
+      const { data: beforeRows, error: fetchErr } = await supabase
+        .from("hero_settings")
+        .select("*")
+        .order("updatedAt", { ascending: false });
 
-      if (!checkErr && existing && existing.length > 0) {
-        const { error } = await supabase
-          .from("hero_settings")
-          .update(payload)
-          .eq("id", existing[0].id);
-
-        if (error) throw error;
-        toast.success("Showreel settings updated successfully");
-      } else {
-        const { error } = await supabase.from("hero_settings").insert([payload]);
-
-        if (error) throw error;
-        toast.success("Showreel settings saved successfully");
+      if (fetchErr) {
+        console.error("DATABASE SAVE FAILED:", fetchErr);
+        throw fetchErr;
       }
-      fetchData();
-    } catch (err: unknown) {
-      console.error(err);
-      const message = err instanceof Error ? err.message : "Failed to save showreel settings";
-      toast.error("Failed to save showreel settings", {
-        description: message,
+
+      const oldUrl = beforeRows?.[0]?.showreelVideoUrl || "";
+      console.log(`[STEP 3]\nDatabase BEFORE\nURL: ${oldUrl}`);
+
+      let targetId: string;
+      let rowsAffected = 0;
+
+      // SINGLETON DB LOGIC:
+      // - IF count == 0 -> INSERT one row
+      // - IF count == 1 -> UPDATE row
+      // - IF count > 1 -> Delete duplicates, keep newest row, update newest row
+      if (!beforeRows || beforeRows.length === 0) {
+        const newId = HERO_SETTINGS_ID;
+        const payload = {
+          id: newId,
+          headline: defaultHeadline,
+          subheadline: defaultSubheadline,
+          showreelVideoUrl: urlToSave,
+          showreelTitle: showreelTitle || "Raqvine Signature Showreel",
+          showreelDescription:
+            showreelDescription ||
+            "A compilation of our finest edits, showcasing pacing, storytelling, sound design, and grading.",
+          videoAspect: showreelVideoAspect || "portrait",
+          updatedAt: new Date().toISOString(),
+        };
+        const { error: insertErr } = await supabase.from("hero_settings").insert(payload);
+        if (insertErr) {
+          console.error("DATABASE SAVE FAILED [insertErr]:", insertErr);
+          toast.error(`DATABASE SAVE FAILED: ${insertErr.message}`);
+          setSavingShowreel(false);
+          return;
+        }
+        targetId = newId;
+        rowsAffected = 1;
+      } else {
+        const newestRow = beforeRows[0];
+        targetId = newestRow.id;
+
+        // Delete older duplicates if count > 1
+        if (beforeRows.length > 1) {
+          const duplicateIds = beforeRows.slice(1).map((r) => r.id);
+          console.log("[DATABASE] Deleting duplicate hero_settings rows:", duplicateIds);
+          await supabase.from("hero_settings").delete().in("id", duplicateIds);
+        }
+
+        const updatePayload = {
+          showreelVideoUrl: urlToSave,
+          showreelTitle: showreelTitle || "Raqvine Signature Showreel",
+          showreelDescription:
+            showreelDescription ||
+            "A compilation of our finest edits, showcasing pacing, storytelling, sound design, and grading.",
+          videoAspect: showreelVideoAspect || "portrait",
+          updatedAt: new Date().toISOString(),
+        };
+
+        const { error: updateErr } = await supabase
+          .from("hero_settings")
+          .update(updatePayload)
+          .eq("id", targetId);
+
+        if (updateErr) {
+          console.error("DATABASE SAVE FAILED [updateErr]:", updateErr);
+          toast.error(`DATABASE SAVE FAILED: ${updateErr.message}`);
+          setSavingShowreel(false);
+          return;
+        }
+        rowsAffected = 1;
+      }
+
+      console.log(`[STEP 4]\nUpdating row ID:\n${targetId}`);
+      console.log(`[STEP 5]\nRows affected:\n${rowsAffected}`);
+
+      // [STEP 6] Database AFTER & Verification
+      const { data: afterRows, error: verifyErr } = await supabase
+        .from("hero_settings")
+        .select("showreelVideoUrl")
+        .eq("id", targetId)
+        .limit(1);
+
+      if (verifyErr) {
+        console.error("DATABASE SAVE FAILED:", verifyErr);
+        throw verifyErr;
+      }
+
+      const storedUrl = afterRows?.[0]?.showreelVideoUrl || "";
+      console.log(`[STEP 6]\nDatabase AFTER\nURL: ${storedUrl}`);
+
+      const verified = storedUrl === urlToSave;
+      console.log(`[STEP 7]\nVerification passed\n${verified ? "TRUE" : "FALSE"}`);
+
+      if (!verified) {
+        console.error("DATABASE SAVE FAILED");
+        toast.error("DATABASE SAVE FAILED: Stored URL does not match uploaded URL.");
+        return;
+      }
+
+      // Fire & forget R2 deletion so UI response is instantaneous
+      if (
+        oldUrl &&
+        oldUrl !== urlToSave &&
+        (oldUrl.includes("media.raqvine.com") ||
+          oldUrl.includes("r2.dev") ||
+          oldUrl.includes("r2.cloudflarestorage.com"))
+      ) {
+        console.log("[R2 CLEANUP] Deleting old video file from R2:", oldUrl);
+        deleteR2FileFn({ data: { url: oldUrl } })
+          .then(() => console.log("Old R2 file deleted"))
+          .catch((err) => console.error("Failed to delete old R2 file:", err));
+      }
+
+      setShowreelUrl(urlToSave);
+      setHeroId(targetId);
+
+      // Pop up saved reel modal immediately
+      setSavedReelPopup({
+        isOpen: true,
+        videoUrl: urlToSave,
+        title: showreelTitle || "Raqvine Signature Showreel",
+        aspect: showreelVideoAspect || "portrait",
+        sourceType: "Showreel Settings",
       });
+
+      // Success toast
+      toast.success("Showreel saved successfully.");
+
+      // Refetch hero_settings on homepage
+      queryClient.invalidateQueries({ queryKey: ["hero-settings"] });
+    } catch (err: unknown) {
+      console.error("DATABASE SAVE FAILED:", err);
+      const message = err instanceof Error ? err.message : "Failed to save showreel settings";
+      toast.error(`DATABASE SAVE FAILED: ${message}`);
     } finally {
       setSavingShowreel(false);
     }
@@ -696,6 +801,16 @@ function AdminPage() {
 
         if (error) throw error;
         toast.success("New portfolio project added successfully");
+      }
+
+      if (projectPayload.videoUrl) {
+        setSavedReelPopup({
+          isOpen: true,
+          videoUrl: projectPayload.videoUrl,
+          title: projectPayload.title || "Work Reel Project",
+          aspect: (projectPayload.videoAspect as "portrait" | "landscape") || "portrait",
+          sourceType: "Work Reel (Portfolio)",
+        });
       }
 
       queryClient.invalidateQueries({ queryKey: ["portfolio-projects"] });
@@ -1327,10 +1442,12 @@ function AdminPage() {
                             />
                           ) : (
                             <input
-                              required
                               type="url"
                               value={showreelUrl}
-                              onChange={(e) => setShowreelUrl(e.target.value)}
+                              onChange={(e) => {
+                                setShowreelUrl(e.target.value);
+                                latestShowreelUrlRef.current = e.target.value;
+                              }}
                               placeholder="https://commondatastorage.googleapis.com/..."
                               className="w-full rounded-xl border border-white/10 bg-white/[0.03] p-3.5 text-sm text-foreground focus:border-electric focus:outline-none focus:ring-1 focus:ring-electric/30 transition text-white/90"
                             />
@@ -1343,7 +1460,6 @@ function AdminPage() {
                           Showreel Description / Details
                         </label>
                         <textarea
-                          required
                           value={showreelDescription}
                           onChange={(e) => setShowreelDescription(e.target.value)}
                           rows={4}
@@ -1355,12 +1471,13 @@ function AdminPage() {
 
                     <div className="pt-4 flex justify-start gap-3 border-t border-white/5">
                       <button
-                        type="submit"
+                        type="button"
+                        onClick={handleSaveShowreel}
                         disabled={savingShowreel || uploadingShowreelVideo}
                         className="inline-flex items-center justify-center gap-2 rounded-xl bg-foreground px-6 py-3 text-xs font-semibold text-background hover:scale-[1.01] transition-transform disabled:opacity-50 cursor-pointer"
                       >
                         <Save className="size-4" />
-                        {savingShowreel ? "Saving Settings..." : "Save Showreel Settings"}
+                        {savingShowreel ? "Saving..." : "Save Showreel Settings"}
                       </button>
                     </div>
                   </form>
@@ -1400,10 +1517,13 @@ function AdminPage() {
                         >
                           {showreelUrl ? (
                             <video
+                              key={showreelUrl}
                               src={showreelUrl}
-                              className={`size-full opacity-80 ${showreelVideoAspect === "landscape" ? "object-contain" : "object-cover"}`}
+                              autoPlay
+                              loop
                               muted
                               playsInline
+                              className={`size-full opacity-90 ${showreelVideoAspect === "landscape" ? "object-contain" : "object-cover"}`}
                             />
                           ) : (
                             <div className="text-[10px] text-muted-foreground text-center p-3">
@@ -1911,6 +2031,76 @@ function AdminPage() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ──────────────── POPUP SAVED REEL MODAL ──────────────── */}
+      {savedReelPopup?.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="relative w-full max-w-xl rounded-3xl border border-electric/30 bg-[#080d1f] p-6 shadow-2xl shadow-electric/10 space-y-5">
+            {/* Header */}
+            <div className="flex items-start justify-between border-b border-white/10 pb-4">
+              <div className="space-y-1">
+                <div className="inline-flex items-center gap-1.5 rounded-full bg-electric/10 px-3 py-1 text-[10px] font-bold text-electric uppercase tracking-widest border border-electric/20">
+                  <CheckCircle className="size-3.5" /> Database Verified & Saved
+                </div>
+                <h3 className="text-lg font-bold text-foreground">
+                  {savedReelPopup.title}
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  Source: <span className="text-white/80 font-medium">{savedReelPopup.sourceType}</span>
+                </p>
+              </div>
+              <button
+                onClick={() => setSavedReelPopup(null)}
+                className="grid size-8 place-items-center rounded-xl border border-white/10 bg-white/[0.03] text-muted-foreground hover:text-white transition cursor-pointer"
+              >
+                <X className="size-4" />
+              </button>
+            </div>
+
+            {/* Video Reel Player Container */}
+            <div className="space-y-2">
+              <div
+                className={cn(
+                  "relative mx-auto rounded-2xl border border-white/10 bg-black overflow-hidden flex items-center justify-center shadow-inner",
+                  savedReelPopup.aspect === "landscape"
+                    ? "aspect-video w-full"
+                    : "aspect-[9/16] w-full max-w-[260px] max-h-[360px]"
+                )}
+              >
+                <video
+                  src={savedReelPopup.videoUrl}
+                  controls
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="size-full object-cover rounded-2xl"
+                />
+              </div>
+              <p className="text-[10px] text-center font-mono text-muted-foreground break-all px-2 pt-1">
+                {savedReelPopup.videoUrl}
+              </p>
+            </div>
+
+            {/* Actions */}
+            <div className="pt-3 border-t border-white/5 flex items-center justify-between gap-3">
+              <Link
+                to="/"
+                target="_blank"
+                className="inline-flex items-center gap-2 text-xs font-semibold text-electric hover:underline"
+              >
+                <Sparkles className="size-3.5" /> View on Live Homepage
+              </Link>
+              <button
+                onClick={() => setSavedReelPopup(null)}
+                className="rounded-xl bg-foreground px-5 py-2 text-xs font-semibold text-background hover:scale-[1.01] transition-transform cursor-pointer"
+              >
+                Close Preview
+              </button>
+            </div>
           </div>
         </div>
       )}

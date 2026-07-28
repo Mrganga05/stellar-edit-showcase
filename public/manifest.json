@@ -1,0 +1,22 @@
+{
+  "name": "Raqvine | Premium Video Editing Agency",
+  "short_name": "Raqvine",
+  "description": "Raqvine delivers premium YouTube video editing, Shorts, Reels, podcasts, motion graphics, color grading, and commercial video production for creators and businesses.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#030712",
+  "theme_color": "#030712",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

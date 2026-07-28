@@ -11,6 +11,7 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { JsonLd } from "../components/seo/JsonLd";
 
 function NotFoundComponent() {
   return (
@@ -76,24 +77,57 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Raqvine — Professional Video Editor & Content Showcase" },
+      { name: "viewport", content: "width=device-width, initial-scale=1, maximum-scale=5" },
+      { name: "theme-color", content: "#030712" },
+      { title: "Raqvine | Premium Video Editing Agency for YouTubers & Brands" },
       {
         name: "description",
         content:
-          "Helping creators, startups, and brands transform raw footage into retention-focused video edits that capture attention.",
+          "Raqvine delivers premium YouTube video editing, Shorts, Reels, podcasts, motion graphics, color grading, and commercial video production for creators and businesses.",
       },
-      { name: "author", content: "Raqvine" },
-      { property: "og:title", content: "Raqvine — Professional Video Editor & Content Showcase" },
+      {
+        name: "keywords",
+        content:
+          "video editing, youtube editing, youtube editor, shorts editing, instagram reels editing, podcast editing, video editor, motion graphics, content creation, creative agency, video production, professional editing, brand videos, commercial editing, AI video editing",
+      },
+      { name: "author", content: "Raqvine Creative Studio" },
+      {
+        name: "robots",
+        content: "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1",
+      },
+      { name: "googlebot", content: "index, follow, max-snippet:-1, max-image-preview:large" },
+
+      // Open Graph Tags
+      { property: "og:title", content: "Raqvine | Premium Video Editing Agency for YouTubers & Brands" },
       {
         property: "og:description",
         content:
-          "Helping creators, startups, and brands transform raw footage into retention-focused video edits that capture attention.",
+          "Raqvine delivers premium YouTube video editing, Shorts, Reels, podcasts, motion graphics, color grading, and commercial video production for creators and businesses.",
       },
+      { property: "og:url", content: "https://raqvine.com" },
+      { property: "og:site_name", content: "Raqvine" },
       { property: "og:type", content: "website" },
+      { property: "og:locale", content: "en_US" },
+      { property: "og:image", content: "https://raqvine.com/favicon.png" },
+
+      // Twitter Card Meta
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:site", content: "@raqvine" },
+      { name: "twitter:creator", content: "@raqvine" },
+      { name: "twitter:title", content: "Raqvine | Premium Video Editing Agency for YouTubers & Brands" },
+      {
+        name: "twitter:description",
+        content:
+          "High-retention YouTube editing, Shorts, Reels, podcasts, motion graphics, and commercial video ads engineered to scale channels.",
+      },
+      { name: "twitter:image", content: "https://raqvine.com/favicon.png" },
     ],
     links: [
+      { rel: "canonical", href: "https://raqvine.com" },
+      { rel: "manifest", href: "/manifest.json" },
+      { rel: "icon", type: "image/png", href: "/favicon.png" },
+      { rel: "shortcut icon", href: "/favicon.ico" },
+      { rel: "apple-touch-icon", href: "/apple-touch-icon.png" },
       { rel: "stylesheet", href: appCss },
       { rel: "preconnect", href: "https://api.fontshare.com" },
       {
@@ -113,6 +147,7 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="en">
       <head>
         <HeadContent />
+        <JsonLd />
       </head>
       <body>
         {children}

@@ -1,0 +1,26 @@
+# Allow search engines and AI web crawlers for maximum indexing
+User-agent: *
+Allow: /
+Disallow: /admin
+
+# AI Search Engine Crawlers Explicit Access (Google AI, ChatGPT, Perplexity, Claude, Gemini)
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Bytespider
+Allow: /
+
+# Sitemap Index Pointer
+Sitemap: https://raqvine.com/sitemap.xml

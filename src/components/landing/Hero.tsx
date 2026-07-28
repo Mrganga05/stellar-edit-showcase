@@ -19,7 +19,7 @@ import {
   Music,
 } from "lucide-react";
 import { useRef, useState, useEffect } from "react";
-import { HERO_VIDEO } from "@/lib/portfolio-data";
+import { useQuery } from "@tanstack/react-query";
 import heroBgImg from "@/assets/hero-bg.png";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/lib/supabase";
@@ -182,41 +182,69 @@ function MagneticButton({
 export function Hero() {
   const [showreelOpen, setShowreelOpen] = useState(false);
 
-  const [heroData, setHeroData] = useState({
+  // Use React Query so that queryClient.invalidateQueries({ queryKey: ["hero-settings"] })
+  // in admin.tsx triggers an immediate re-fetch here — no full page reload required.
+  const { data: heroRaw } = useQuery({
+    queryKey: ["hero-settings"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("hero_settings")
+        .select("*")
+        .order("updatedAt", { ascending: false })
+        .limit(1);
+      if (error) {
+        console.error("[Hero] Failed to load hero settings from database:", error);
+        throw error;
+      }
+      if (!data || data.length === 0) {
+        console.warn("[HERO] No hero_settings row found in DB.");
+        return null;
+      }
+      const row = data[0];
+      console.log(`[STEP 8]\nHero fetched URL\n${row.showreelVideoUrl || ""}`);
+      return {
+        showreelVideoUrl: row.showreelVideoUrl || "",
+        thumbnailUrl: row.thumbnailUrl || "",
+        showreelTitle: row.showreelTitle || "Raqvine Signature Showreel",
+        showreelDescription:
+          row.showreelDescription ||
+          "A compilation of our finest edits, showcasing pacing, storytelling, sound design, and grading.",
+        videoAspect: row.videoAspect || "portrait",
+        updatedAt: row.updatedAt || "",
+      };
+    },
+    // Refresh every 60s as a safety net; primary update path is cache invalidation from admin
+    staleTime: 60_000,
+    refetchOnWindowFocus: true,
+  });
+
+  // Fallback defaults if no DB row exists yet
+  const heroData = heroRaw ?? {
     showreelVideoUrl: "",
     thumbnailUrl: "",
     showreelTitle: "Raqvine Signature Showreel",
     showreelDescription:
       "A compilation of our finest edits, showcasing pacing, storytelling, sound design, and grading.",
     videoAspect: "portrait",
-  });
+    updatedAt: "",
+  };
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    async function loadHeroSettings() {
-      try {
-        const { data, error } = await supabase.from("hero_settings").select("*");
-        if (!error && data && data.length > 0) {
-          const row = data[0];
-          setHeroData({
-            showreelVideoUrl: row.showreelVideoUrl || "",
-            thumbnailUrl: row.thumbnailUrl || "",
-            showreelTitle: row.showreelTitle || "Raqvine Signature Showreel",
-            showreelDescription:
-              row.showreelDescription ||
-              "A compilation of our finest edits, showcasing pacing, storytelling, sound design, and grading.",
-            videoAspect: row.videoAspect || "portrait",
-          });
-        }
-      } catch (err) {
-        console.error("Failed to load hero settings from database:", err);
-      }
-    }
-    loadHeroSettings();
-  }, []);
+  // The showreel URL from the DB. We intentionally do NOT fall back to a hardcoded
+  // static video — that was the root cause of the old video appearing after a new upload.
+  // Add a ?v= cache-buster tied to updatedAt so the browser skips any cached old file.
+  const rawShowreelUrl = heroData?.showreelVideoUrl || "";
+  const showreelUrl = rawShowreelUrl
+    ? `${rawShowreelUrl}${rawShowreelUrl.includes("?") ? "&" : "?"}v=${encodeURIComponent(heroData.updatedAt || String(Date.now()))}`
+    : "";
 
-  const showreelUrl = heroData.showreelVideoUrl || HERO_VIDEO;
+  useEffect(() => {
+    if (rawShowreelUrl) {
+      console.log(`[STEP 8]\nHero fetched URL\n${rawShowreelUrl}`);
+      console.log(`[STEP 9]\nVideo rendered URL\n${showreelUrl}`);
+    }
+  }, [rawShowreelUrl, showreelUrl]);
 
   return (
     <section
