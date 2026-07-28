@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { generatePresignedUploadUrl, deleteFromR2 } from "../server/r2.server";
+import { generatePresignedUploadUrl, deleteFromR2, getR2Config } from "../server/r2.server";
 
 // Allowed video MIME types and file extensions for production security
 const ALLOWED_VIDEO_MIME_TYPES = [
@@ -96,8 +96,8 @@ export const deleteR2FileFn = createServerFn({ method: "POST" })
   )
   .handler(async ({ data }) => {
     try {
-      const publicUrlPrefix =
-        process.env.CLOUDFLARE_R2_PUBLIC_URL || "https://media.raqvine.com";
+      const config = getR2Config();
+      const publicUrlPrefix = config.publicUrl;
 
       const normalizedPrefix = publicUrlPrefix.endsWith("/")
         ? publicUrlPrefix
