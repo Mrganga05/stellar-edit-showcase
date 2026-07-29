@@ -188,8 +188,8 @@ export function usePortfolioProjects() {
   return useQuery({
     queryKey: ["portfolio-projects"],
     queryFn: portfolioApi.list,
-    staleTime: 60_000,
-    initialData: initialPortfolioProjects,
+    staleTime: 0,
+    placeholderData: initialPortfolioProjects,
   });
 }
 

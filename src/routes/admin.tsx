@@ -3,9 +3,10 @@ import { useState, useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
-import { cn } from "@/lib/utils";
+import { cn, addCacheBuster } from "@/lib/utils";
 import { VideoUploader } from "@/components/ui/video-uploader";
-import { deleteR2FileFn } from "@/lib/api/r2.functions";
+import { deleteR2FileFn, getPresignedUrlFn } from "@/lib/api/r2.functions";
+import { uploadDirectToR2 } from "@/lib/utils/direct-r2-upload";
 import type { ContactInquiry, PortfolioProject, Service, Testimonial } from "@/lib/api/contracts";
 import {
   Lock,
@@ -142,21 +143,26 @@ function AdminPage() {
   ) => {
     setUploadingState(true);
     try {
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
-      const filePath = `${folder}/${fileName}`;
+      const presignedRes = await getPresignedUrlFn({
+        data: {
+          fileName: file.name,
+          contentType: file.type || "image/jpeg",
+          fileSize: file.size,
+          folder,
+        },
+      });
 
-      const { error: uploadError } = await supabase.storage
-        .from("portfolio")
-        .upload(filePath, file);
+      if (!presignedRes || !presignedRes.success || !presignedRes.uploadUrl) {
+        throw new Error(presignedRes?.error || "Failed to generate presigned upload URL");
+      }
 
-      if (uploadError) throw uploadError;
+      await uploadDirectToR2({
+        uploadUrl: presignedRes.uploadUrl,
+        file,
+        contentType: file.type || "image/jpeg",
+      });
 
-      const {
-        data: { publicUrl },
-      } = supabase.storage.from("portfolio").getPublicUrl(filePath);
-
-      setUrlState(publicUrl);
+      setUrlState(presignedRes.publicUrl);
       toast.success("File uploaded successfully!");
     } catch (err: unknown) {
       console.error(err);
@@ -214,7 +220,6 @@ function AdminPage() {
   ) => {
     if (!details) {
       setProjVideoUrl("");
-      setProjThumbnail("");
       setProjDuration(null);
       setProjResolution("");
       setProjFileSize(null);
@@ -224,38 +229,67 @@ function AdminPage() {
     const oldUrl = projVideoUrl;
     const oldThumbUrl = projThumbnail;
 
-    setProjVideoUrl(details.videoUrl);
-    setProjThumbnail(details.thumbnailUrl);
+    const timestamp = Date.now();
+    const cacheBustedVideoUrl = addCacheBuster(details.videoUrl, timestamp);
+    const cacheBustedThumbUrl = details.thumbnailUrl
+      ? addCacheBuster(details.thumbnailUrl, timestamp)
+      : cacheBustedVideoUrl;
+
+    setProjVideoUrl(cacheBustedVideoUrl);
+    setProjThumbnail(cacheBustedThumbUrl);
     setProjDuration(details.duration);
     setProjResolution(details.resolution);
     setProjFileSize(details.fileSize);
 
     if (editingProject) {
-      try {
-        const { error } = await supabase
-          .from("portfolio_projects")
-          .update({
-            videoUrl: details.videoUrl,
-            thumbnail: details.thumbnailUrl,
-            duration: details.duration,
-            resolution: details.resolution,
-            fileSize: details.fileSize,
-            updatedAt: new Date().toISOString(),
-          })
-          .eq("id", editingProject.id);
+      const selectedId = editingProject.id;
+      console.log(`[Featured Work Auto-Update] Selected project ID:`, selectedId);
+      console.log(`[Featured Work Auto-Update] Uploaded video URL:`, cacheBustedVideoUrl);
 
-        if (error) throw error;
+      try {
+        const updatePayload: Record<string, unknown> = {
+          videoUrl: cacheBustedVideoUrl,
+          duration: details.duration,
+          resolution: details.resolution,
+          fileSize: details.fileSize,
+          updatedAt: new Date().toISOString(),
+        };
+
+        if (cacheBustedThumbUrl) {
+          updatePayload.thumbnail = cacheBustedThumbUrl;
+        }
+
+        const { error: updateErr } = await supabase
+          .from("portfolio_projects")
+          .update(updatePayload)
+          .eq("id", selectedId);
+
+        console.log(`[Featured Work Auto-Update] Database UPDATE result:`, updateErr ? `ERROR: ${updateErr.message}` : "SUCCESS");
+
+        if (updateErr) throw updateErr;
+
+        const { data: selectAfter, error: selectErr } = await supabase
+          .from("portfolio_projects")
+          .select("id, videoUrl, thumbnail, updatedAt")
+          .eq("id", selectedId)
+          .single();
+
+        console.log(`[Featured Work Auto-Update] Database SELECT result after save:`, selectAfter, selectErr ? `ERROR: ${selectErr.message}` : "");
+
         toast.success("Project video updated automatically!");
 
         if (oldUrl && oldUrl !== details.videoUrl) {
           await deleteR2FileFn({ data: { url: oldUrl } });
         }
-        if (oldThumbUrl && oldThumbUrl !== details.thumbnailUrl) {
+        if (details.thumbnailUrl && oldThumbUrl && oldThumbUrl !== details.thumbnailUrl) {
           await deleteR2FileFn({ data: { url: oldThumbUrl } });
         }
 
-        queryClient.invalidateQueries({ queryKey: ["portfolio-projects"] });
-        fetchData();
+        await queryClient.invalidateQueries({ queryKey: ["portfolio-projects"] });
+        await queryClient.refetchQueries({ queryKey: ["portfolio-projects"] });
+        await fetchData();
+
+        console.log(`[Featured Work Auto-Update] Final UI data state synced.`);
       } catch (err: unknown) {
         console.error(err);
         const message =
@@ -753,22 +787,38 @@ function AdminPage() {
       return;
     }
 
+    setSavingProject(true);
+
+    const timestamp = Date.now();
     const cleanTitle = projTitle.trim() || (editingProject ? editingProject.title : "Featured Portfolio Project");
     const cleanCategory = projCategory.trim() || (editingProject ? editingProject.category : "Short Form Edits");
-    let cleanThumbnail = projThumbnail.trim() || (editingProject ? editingProject.thumbnail : "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80");
-    let cleanVideoUrl = projVideoUrl.trim() || (editingProject ? editingProject.videoUrl : "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4");
+    let rawVideoUrl = projVideoUrl.trim() || (editingProject ? editingProject.videoUrl : "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4");
+    let rawThumbnail = projThumbnail.trim() || (editingProject ? editingProject.thumbnail : rawVideoUrl);
+
+    // If thumbnail was not explicitly set to a custom image, default it to the video URL so media source is unified
+    if (!projThumbnail.trim() && rawVideoUrl) {
+      rawThumbnail = rawVideoUrl;
+    }
     const cleanDescription = projDescription.trim() || "High-retention creator video editing showcase.";
     const cleanOverview = projOverview.trim() || "Comprehensive video edit breakdown with kinetic pacing and sound design.";
 
     // Auto-fix URL protocols if missing http(s)://
-    if (cleanThumbnail && !/^https?:\/\//i.test(cleanThumbnail) && !cleanThumbnail.startsWith("/") && !cleanThumbnail.startsWith("data:")) {
-      cleanThumbnail = `https://${cleanThumbnail}`;
+    if (rawThumbnail && !/^https?:\/\//i.test(rawThumbnail) && !rawThumbnail.startsWith("/") && !rawThumbnail.startsWith("data:")) {
+      rawThumbnail = `https://${rawThumbnail}`;
     }
-    if (cleanVideoUrl && !/^https?:\/\//i.test(cleanVideoUrl) && !cleanVideoUrl.startsWith("/") && !cleanVideoUrl.startsWith("data:")) {
-      cleanVideoUrl = `https://${cleanVideoUrl}`;
+    if (rawVideoUrl && !/^https?:\/\//i.test(rawVideoUrl) && !rawVideoUrl.startsWith("/") && !rawVideoUrl.startsWith("data:")) {
+      rawVideoUrl = `https://${rawVideoUrl}`;
     }
 
-    setSavingProject(true);
+    const cleanThumbnail = addCacheBuster(rawThumbnail, timestamp);
+    const cleanVideoUrl = addCacheBuster(rawVideoUrl, timestamp);
+
+    const targetId = editingProject?.id || (typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `proj_${Date.now()}`);
+
+    console.log(`[Featured Work Save] ========================================`);
+    console.log(`[Featured Work Save] 1. Selected Project ID:`, targetId);
+    console.log(`[Featured Work Save] 2. Uploaded Video URL:`, cleanVideoUrl);
+    console.log(`[Featured Work Save] 2. Uploaded Thumbnail URL:`, cleanThumbnail);
 
     // Parse newline-separated values
     const techniquesArr = projTechniques
@@ -783,8 +833,6 @@ function AdminPage() {
       .split("\n")
       .map((s) => s.trim())
       .filter(Boolean);
-
-    const targetId = editingProject?.id || (typeof crypto !== "undefined" && crypto.randomUUID ? crypto.randomUUID() : `proj_${Date.now()}`);
 
     const savedProjectObj: PortfolioProject = {
       id: targetId,
@@ -810,53 +858,40 @@ function AdminPage() {
       videoAspect: projVideoAspect,
     };
 
-    // 1. Instantly update local state optimistically
-    if (editingProject) {
-      setPortfolioProjects((prev) =>
-        prev.map((p) => (p.id === editingProject.id ? { ...p, ...savedProjectObj } : p))
-      );
-    } else {
-      setPortfolioProjects((prev) => [savedProjectObj, ...prev]);
-    }
-
-    // 2. Instantly close editing modal
-    setIsProjectModalOpen(false);
-
-    // 3. Instantly show success toast alert
-    toast.success("Saved successfully! 🎉", {
-      duration: 4000,
-    });
-
-    // 4. Instantly launch Saved Reel Pop Up modal
-    setSavedReelPopup({
-      isOpen: true,
-      videoUrl: cleanVideoUrl,
-      title: cleanTitle,
-      aspect: (projVideoAspect as "portrait" | "landscape") || "portrait",
-      sourceType: "Featured Work (Portfolio)",
-    });
-
-    // 5. Persist to Supabase in background
     try {
       const projectPayload = { ...savedProjectObj };
       let dbError: { message: string; code?: string } | null = null;
 
       if (editingProject) {
-        const { error } = await supabase
+        // Check if row actually exists in Supabase DB first
+        const { data: checkRows } = await supabase
           .from("portfolio_projects")
-          .update(projectPayload)
+          .select("id")
           .eq("id", editingProject.id);
-        dbError = error;
+
+        if (!checkRows || checkRows.length === 0) {
+          console.warn(`[Featured Work Save] Project ID ${editingProject.id} not found in DB! Inserting new record.`);
+          const { error: insertErr } = await supabase
+            .from("portfolio_projects")
+            .insert([projectPayload]);
+          dbError = insertErr;
+        } else {
+          const { error: updateErr } = await supabase
+            .from("portfolio_projects")
+            .update(projectPayload)
+            .eq("id", editingProject.id);
+          dbError = updateErr;
+        }
       } else {
-        const { error } = await supabase
+        const { error: insertErr } = await supabase
           .from("portfolio_projects")
           .insert([projectPayload]);
-        dbError = error;
+        dbError = insertErr;
       }
 
-      // If database returned a missing column error (e.g. videoAspect, clientName, metric), retry with core fields
+      // Fallback for schema mismatch
       if (dbError && (dbError.message.includes("column") || dbError.code === "PGRST204" || dbError.message.includes("schema cache"))) {
-        console.warn("Retrying save with core schema fields due to database column mismatch:", dbError.message);
+        console.warn("[Featured Work Save] Retrying save with core schema fields due to database column mismatch:", dbError.message);
         const corePayload = {
           id: savedProjectObj.id,
           title: cleanTitle,
@@ -876,20 +911,70 @@ function AdminPage() {
         };
 
         if (editingProject) {
-          await supabase
+          const { error: retryErr } = await supabase
             .from("portfolio_projects")
             .update(corePayload)
             .eq("id", editingProject.id);
+          dbError = retryErr;
         } else {
-          await supabase
+          const { error: retryErr } = await supabase
             .from("portfolio_projects")
             .insert([corePayload]);
+          dbError = retryErr;
         }
       }
 
-      queryClient.invalidateQueries({ queryKey: ["portfolio-projects"] });
+      console.log(`[Featured Work Save] 3. Database UPDATE result:`, dbError ? `ERROR: ${dbError.message}` : "SUCCESS");
+
+      if (dbError) {
+        toast.error(`DATABASE SAVE FAILED: ${dbError.message}`);
+        return;
+      }
+
+      // Immediately SELECT the record from DB to verify stored videoUrl & thumbnail
+      const { data: selectAfter, error: selectErr } = await supabase
+        .from("portfolio_projects")
+        .select("*")
+        .eq("id", targetId)
+        .limit(1);
+
+      console.log(`[Featured Work Save] 4. Database SELECT result after save (ID: ${targetId}):`, selectAfter, selectErr ? `ERROR: ${selectErr.message}` : "");
+
+      const verifiedRow = selectAfter?.[0];
+      if (selectErr || !verifiedRow) {
+        console.error(`[Featured Work Save] SELECT verification failed!`, selectErr);
+        toast.error("DATABASE SAVE FAILED: Project record could not be retrieved from database after save.");
+        return;
+      }
+
+      const dbVideoUrl = verifiedRow.videoUrl || verifiedRow["videoUrl"];
+      const dbThumbnail = verifiedRow.thumbnail || verifiedRow["thumbnail"];
+
+      console.log(`[Featured Work Save] Verified Stored videoUrl in DB:`, dbVideoUrl);
+      console.log(`[Featured Work Save] Verified Stored thumbnail in DB:`, dbThumbnail);
+
+      // Re-fetch queries and sync state
+      await queryClient.invalidateQueries({ queryKey: ["portfolio-projects"] });
+      await queryClient.refetchQueries({ queryKey: ["portfolio-projects"] });
+      await fetchData();
+
+      console.log(`[Featured Work Save] 5. Final UI Data state synced successfully:`, verifiedRow);
+
+      setIsProjectModalOpen(false);
+
+      setSavedReelPopup({
+        isOpen: true,
+        videoUrl: cleanVideoUrl,
+        title: cleanTitle,
+        aspect: (projVideoAspect as "portrait" | "landscape") || "portrait",
+        sourceType: "Featured Work (Portfolio)",
+      });
+
+      toast.success("Saved & Database Verified Successfully! 🎉", { duration: 4000 });
     } catch (err: unknown) {
-      console.warn("Background DB save notice:", err);
+      console.error("[Featured Work Save] Unexpected error during save:", err);
+      const message = err instanceof Error ? err.message : "Failed to save project";
+      toast.error(`DATABASE SAVE FAILED: ${message}`);
     } finally {
       setSavingProject(false);
     }
@@ -1776,7 +1861,7 @@ function AdminPage() {
                         onChange={handleProjectVideoUploadComplete}
                         onUploadStateChange={setUploadingVideo}
                         folder="portfolio"
-                        maxSizeMB={500}
+                        maxSizeMB={2000}
                       />
                     ) : (
                       <input
@@ -2143,6 +2228,7 @@ function AdminPage() {
                 )}
               >
                 <video
+                  key={savedReelPopup.videoUrl}
                   src={savedReelPopup.videoUrl}
                   controls
                   autoPlay

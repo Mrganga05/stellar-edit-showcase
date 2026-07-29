@@ -72,6 +72,24 @@ function Card({ p, onOpen }: { p: Project; onOpen: () => void }) {
   // Extract key metric from results if metric field is not set
   const displayMetric = p.metric || (p.results && p.results[0]) || "";
 
+  // Check if thumbnail URL is a video format or matches video URL
+  const isVideoFormat = (url: string) => {
+    if (!url) return false;
+    const lower = url.toLowerCase();
+    return (
+      lower.includes(".mp4") ||
+      lower.includes(".mov") ||
+      lower.includes(".webm") ||
+      lower.includes(".mkv") ||
+      lower.includes(".avi") ||
+      lower.includes("media.raqvine.com") ||
+      lower.includes("r2.cloudflarestorage.com")
+    );
+  };
+
+  const mediaSource = p.video || p.thumb;
+  const isThumbVideo = isVideoFormat(p.thumb) || p.thumb === p.video || !p.thumb;
+
   return (
     <motion.button
       whileTap={{ scale: 0.97 }}
@@ -90,29 +108,33 @@ function Card({ p, onOpen }: { p: Project; onOpen: () => void }) {
         p.videoAspect === "landscape" ? "aspect-video" : "aspect-[9/16]",
       )}
     >
-      <img
-        src={p.thumb}
-        alt={p.title}
-        loading="lazy"
-        width={1280}
-        height={768}
-        className={cn(
-          "absolute inset-0 size-full object-cover transition-opacity duration-500",
-          hover && "opacity-0",
-        )}
-      />
+      {!isThumbVideo && p.thumb ? (
+        <img
+          key={p.thumb}
+          src={p.thumb}
+          alt={p.title}
+          loading="lazy"
+          width={1280}
+          height={768}
+          className={cn(
+            "absolute inset-0 size-full object-cover transition-opacity duration-500",
+            hover && "opacity-0",
+          )}
+        />
+      ) : null}
       <video
+        key={mediaSource}
         ref={videoRef}
-        src={p.video}
+        src={mediaSource ? `${mediaSource}#t=0.001` : undefined}
         muted
         loop
         playsInline
         preload="metadata"
         controlsList="nodownload"
-        poster={p.thumb}
+        poster={!isThumbVideo ? p.thumb : undefined}
         className={cn(
           "absolute inset-0 size-full object-cover transition-opacity duration-500",
-          hover ? "opacity-100" : "opacity-0",
+          !isThumbVideo ? (hover ? "opacity-100" : "opacity-0") : "opacity-100",
         )}
       />
 
@@ -343,6 +365,7 @@ export function Portfolio() {
                   </div>
 
                   <video
+                    key={open.video}
                     src={open.video}
                     controls
                     autoPlay

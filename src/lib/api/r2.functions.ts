@@ -1,17 +1,37 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
-// Allowed video MIME types and file extensions for production security
-const ALLOWED_VIDEO_MIME_TYPES = [
+// Allowed MIME types and file extensions for production security (video and image uploads)
+const ALLOWED_MIME_TYPES = [
   "video/mp4",
   "video/quicktime",
   "video/webm",
   "video/x-matroska",
   "video/avi",
   "video/mkv",
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+  "image/gif",
+  "image/svg+xml",
+  "image/avif",
 ];
 
-const ALLOWED_VIDEO_EXTENSIONS = [".mp4", ".mov", ".webm", ".mkv", ".avi"];
+const ALLOWED_EXTENSIONS = [
+  ".mp4",
+  ".mov",
+  ".webm",
+  ".mkv",
+  ".avi",
+  ".jpg",
+  ".jpeg",
+  ".png",
+  ".webp",
+  ".gif",
+  ".svg",
+  ".avif",
+];
 
 /**
  * Server function to generate a temporary presigned PUT URL for direct browser-to-R2 uploads.
@@ -38,17 +58,17 @@ export const getPresignedUrlFn = createServerFn({ method: "POST" })
 
       // 1. Validate MIME type
       const normalizedMime = data.contentType.toLowerCase().trim();
-      if (!ALLOWED_VIDEO_MIME_TYPES.includes(normalizedMime)) {
+      if (!ALLOWED_MIME_TYPES.includes(normalizedMime)) {
         throw new Error(
-          `Invalid media type (${data.contentType}). Allowed video formats: MP4, MOV, WEBM, MKV, AVI.`,
+          `Invalid media type (${data.contentType}). Allowed formats: MP4, MOV, WEBM, MKV, AVI, JPG, PNG, WEBP, GIF, SVG, AVIF.`,
         );
       }
 
       // 2. Validate file extension
       const fileExt = "." + data.fileName.split(".").pop()?.toLowerCase();
-      if (!ALLOWED_VIDEO_EXTENSIONS.includes(fileExt)) {
+      if (!ALLOWED_EXTENSIONS.includes(fileExt)) {
         throw new Error(
-          `Invalid file extension (${fileExt}). Allowed extensions: .mp4, .mov, .webm, .mkv, .avi`,
+          `Invalid file extension (${fileExt}). Allowed extensions: .mp4, .mov, .webm, .mkv, .avi, .jpg, .jpeg, .png, .webp, .gif, .svg, .avif`,
         );
       }
 

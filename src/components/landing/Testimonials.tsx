@@ -7,6 +7,8 @@ import { useTestimonials } from "@/lib/api/hooks";
 import { supabase } from "@/lib/supabase";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { getPresignedUrlFn } from "@/lib/api/r2.functions";
+import { uploadDirectToR2 } from "@/lib/utils/direct-r2-upload";
 
 const defaultAvatars = [
   "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80",
@@ -44,21 +46,26 @@ export function Testimonials() {
 
     setUploadingAvatar(true);
     try {
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
-      const filePath = `avatars/${fileName}`;
+      const presignedRes = await getPresignedUrlFn({
+        data: {
+          fileName: file.name,
+          contentType: file.type || "image/jpeg",
+          fileSize: file.size,
+          folder: "avatars",
+        },
+      });
 
-      const { error: uploadError } = await supabase.storage
-        .from("portfolio")
-        .upload(filePath, file);
+      if (!presignedRes || !presignedRes.success || !presignedRes.uploadUrl) {
+        throw new Error(presignedRes?.error || "Failed to generate presigned upload URL");
+      }
 
-      if (uploadError) throw uploadError;
+      await uploadDirectToR2({
+        uploadUrl: presignedRes.uploadUrl,
+        file,
+        contentType: file.type || "image/jpeg",
+      });
 
-      const {
-        data: { publicUrl },
-      } = supabase.storage.from("portfolio").getPublicUrl(filePath);
-
-      setCustomAvatarUrl(publicUrl);
+      setCustomAvatarUrl(presignedRes.publicUrl);
       setSelectedAvatarIdx(-1);
       toast.success("Avatar uploaded successfully!");
     } catch (err: unknown) {
