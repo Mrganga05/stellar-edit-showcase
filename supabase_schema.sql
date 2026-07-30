@@ -74,6 +74,7 @@ CREATE TABLE IF NOT EXISTS contact_requests (
   "serviceId" UUID REFERENCES services(id) ON DELETE SET NULL,
   name TEXT NOT NULL,
   email TEXT NOT NULL,
+  phone TEXT NOT NULL DEFAULT '',
   "projectType" TEXT NOT NULL,
   budget TEXT NOT NULL,
   timeline TEXT NOT NULL,
@@ -83,6 +84,9 @@ CREATE TABLE IF NOT EXISTS contact_requests (
   "createdAt" TIMESTAMPTZ NOT NULL DEFAULT now(),
   "updatedAt" TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Migration for existing contact_requests tables:
+ALTER TABLE contact_requests ADD COLUMN IF NOT EXISTS phone TEXT NOT NULL DEFAULT '';
 
 -- Create Sample Edit Requests Table
 CREATE TABLE IF NOT EXISTS sample_edit_requests (

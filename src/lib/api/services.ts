@@ -87,6 +87,7 @@ export const contactApi = {
             serviceId: input.serviceId,
             name: input.name,
             email: input.email,
+            phone: input.phone,
             projectType: input.projectType,
             budget: input.budget,
             timeline: input.timeline,

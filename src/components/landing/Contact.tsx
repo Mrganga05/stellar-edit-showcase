@@ -50,8 +50,64 @@ const defaultProjectTypes = [
 ];
 const timelines = ["ASAP / Urgent", "1–2 Weeks", "3–4 Weeks", "Ongoing Partnership"];
 
+const countryCodes = [
+  { code: "+91", country: "IN", flag: "🇮🇳", label: "India (+91)" },
+  { code: "+1", country: "US", flag: "🇺🇸", label: "USA/Canada (+1)" },
+  { code: "+44", country: "GB", flag: "🇬🇧", label: "UK (+44)" },
+  { code: "+61", country: "AU", flag: "🇦🇺", label: "Australia (+61)" },
+  { code: "+971", country: "AE", flag: "🇦🇪", label: "UAE (+971)" },
+  { code: "+49", country: "DE", flag: "🇩🇪", label: "Germany (+49)" },
+  { code: "+33", country: "FR", flag: "🇫🇷", label: "France (+33)" },
+  { code: "+81", country: "JP", flag: "🇯🇵", label: "Japan (+81)" },
+  { code: "+65", country: "SG", flag: "🇸🇬", label: "Singapore (+65)" },
+  { code: "+86", country: "CN", flag: "🇨🇳", label: "China (+86)" },
+  { code: "+966", country: "SA", flag: "🇸🇦", label: "Saudi Arabia (+966)" },
+  { code: "+31", country: "NL", flag: "🇳🇱", label: "Netherlands (+31)" },
+  { code: "+41", country: "CH", flag: "🇨🇭", label: "Switzerland (+41)" },
+  { code: "+55", country: "BR", flag: "🇧🇷", label: "Brazil (+55)" },
+  { code: "+27", country: "ZA", flag: "🇿🇦", label: "South Africa (+27)" },
+  { code: "+82", country: "KR", flag: "🇰🇷", label: "South Korea (+82)" },
+  { code: "+64", country: "NZ", flag: "🇳🇿", label: "New Zealand (+64)" },
+  { code: "+39", country: "IT", flag: "🇮🇹", label: "Italy (+39)" },
+  { code: "+34", country: "ES", flag: "🇪🇸", label: "Spain (+34)" },
+  { code: "+62", country: "ID", flag: "🇮🇩", label: "Indonesia (+62)" },
+  { code: "+60", country: "MY", flag: "🇲🇾", label: "Malaysia (+60)" },
+  { code: "+63", country: "PH", flag: "🇵🇭", label: "Philippines (+63)" },
+  { code: "+84", country: "VN", flag: "🇻🇳", label: "Vietnam (+84)" },
+  { code: "+92", country: "PK", flag: "🇵🇰", label: "Pakistan (+92)" },
+  { code: "+880", country: "BD", flag: "🇧🇩", label: "Bangladesh (+880)" },
+  { code: "+94", country: "LK", flag: "🇱🇰", label: "Sri Lanka (+94)" },
+  { code: "+977", country: "NP", flag: "🇳🇵", label: "Nepal (+977)" },
+  { code: "+20", country: "EG", flag: "🇪🇬", label: "Egypt (+20)" },
+  { code: "+234", country: "NG", flag: "🇳🇬", label: "Nigeria (+234)" },
+  { code: "+254", country: "KE", flag: "🇰🇪", label: "Kenya (+254)" },
+  { code: "+52", country: "MX", flag: "🇲🇽", label: "Mexico (+52)" },
+  { code: "+54", country: "AR", flag: "🇦🇷", label: "Argentina (+54)" },
+  { code: "+57", country: "CO", flag: "🇨🇴", label: "Colombia (+57)" },
+  { code: "+56", country: "CL", flag: "🇨🇱", label: "Chile (+56)" },
+  { code: "+46", country: "SE", flag: "🇸🇪", label: "Sweden (+46)" },
+  { code: "+47", country: "NO", flag: "🇳🇴", label: "Norway (+47)" },
+  { code: "+45", country: "DK", flag: "🇩🇰", label: "Denmark (+45)" },
+  { code: "+358", country: "FI", flag: "🇫🇮", label: "Finland (+358)" },
+  { code: "+353", country: "IE", flag: "🇮🇪", label: "Ireland (+353)" },
+  { code: "+32", country: "BE", flag: "🇧🇪", label: "Belgium (+32)" },
+  { code: "+43", country: "AT", flag: "🇦🇹", label: "Austria (+43)" },
+  { code: "+48", country: "PL", flag: "🇵🇱", label: "Poland (+48)" },
+  { code: "+420", country: "CZ", flag: "🇨🇿", label: "Czechia (+420)" },
+  { code: "+30", country: "GR", flag: "🇬🇷", label: "Greece (+30)" },
+  { code: "+351", country: "PT", flag: "🇵🇹", label: "Portugal (+351)" },
+  { code: "+90", country: "TR", flag: "🇹🇷", label: "Turkey (+90)" },
+  { code: "+972", country: "IL", flag: "🇮🇱", label: "Israel (+972)" },
+  { code: "+974", country: "QA", flag: "🇶🇦", label: "Qatar (+974)" },
+  { code: "+968", country: "OM", flag: "🇴🇲", label: "Oman (+968)" },
+  { code: "+965", country: "KW", flag: "🇰🇼", label: "Kuwait (+965)" },
+  { code: "+973", country: "BH", flag: "🇧🇭", label: "Bahrain (+973)" },
+];
+
 export function Contact() {
   const [loading, setLoading] = useState(false);
+  const [countryCode, setCountryCode] = useState("+91");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const { data: dbServices } = useServices();
 
   const projectTypes =
@@ -67,6 +123,8 @@ export function Contact() {
 
     const name = formData.get("name") as string;
     const email = formData.get("email") as string;
+    const rawPhone = (formData.get("phoneNumber") as string) || "";
+    const phone = rawPhone.trim().startsWith("+") ? rawPhone.trim() : `${countryCode} ${rawPhone.trim()}`;
     const projectType = formData.get("type") as string;
     const timeline = formData.get("timeline") as string;
     const details = formData.get("details") as string;
@@ -74,6 +132,7 @@ export function Contact() {
     const validationResult = contactCreateSchema.safeParse({
       name,
       email,
+      phone,
       projectType,
       budget: "Not Specified",
       timeline,
@@ -93,6 +152,7 @@ export function Contact() {
     try {
       await contactApi.create(validationResult.data);
       form.reset();
+      setPhoneNumber("");
       toast.success("Project request received", {
         description: "I'll be in touch within 12 hours.",
       });
@@ -134,6 +194,31 @@ export function Contact() {
                   placeholder="you@brand.com"
                 />
               </Field>
+              <Field label="Phone Number">
+                <div className="w-full rounded-xl border border-white/10 bg-[#050816]/90 flex items-center focus-within:border-electric focus-within:ring-2 focus-within:ring-electric/30 transition overflow-hidden">
+                  <select
+                    aria-label="Country Code"
+                    value={countryCode}
+                    onChange={(e) => setCountryCode(e.target.value)}
+                    className="bg-[#050816] text-foreground text-[14px] md:text-sm py-3 pl-3 pr-1.5 focus:outline-none border-r border-white/10 cursor-pointer shrink-0"
+                  >
+                    {countryCodes.map((c) => (
+                      <option key={`${c.country}-${c.code}`} value={c.code} className="bg-[#050816] text-white">
+                        {c.flag} {c.code}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    required
+                    type="tel"
+                    name="phoneNumber"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    className="w-full bg-transparent px-3.5 py-3 sm:px-4 sm:py-3 text-[16px] md:text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
+                    placeholder="91608 51678"
+                  />
+                </div>
+              </Field>
               <Field label="Project Type">
                 <select required name="type" className={inputCls} defaultValue="">
                   <option value="" disabled className="bg-[#050816] text-white">
@@ -146,7 +231,7 @@ export function Contact() {
                   ))}
                 </select>
               </Field>
-              <Field label="Timeline">
+              <Field label="Timeline" className="sm:col-span-2">
                 <select required name="timeline" className={inputCls} defaultValue="">
                   <option value="" disabled className="bg-[#050816] text-white">
                     Choose one

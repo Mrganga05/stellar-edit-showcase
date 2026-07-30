@@ -1019,6 +1019,7 @@ function AdminPage() {
     (c) =>
       c.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       c.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      c.phone?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       c.projectType?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       c.details?.toLowerCase().includes(searchQuery.toLowerCase()),
   );
@@ -1291,6 +1292,7 @@ function AdminPage() {
                         <div className="flex flex-wrap items-center gap-2">
                           <span className="font-semibold text-lg text-foreground">{c.name}</span>
                           <span className="text-muted-foreground text-sm">({c.email})</span>
+                          {c.phone && <span className="text-muted-foreground text-sm">• {c.phone}</span>}
                           <span className="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider text-muted-foreground bg-white/5 rounded-full px-2 py-0.5">
                             {c.projectType}
                           </span>

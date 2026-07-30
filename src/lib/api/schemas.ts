@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isValidPhoneNumber } from "libphonenumber-js";
 
 const mediaUrl = z
   .string()
@@ -91,6 +92,17 @@ export const contactCreateSchema = z.object({
     .email("Please enter a valid email address")
     .max(254)
     .transform((value) => value.toLowerCase()),
+  phone: z
+    .string()
+    .trim()
+    .min(1, "Phone number is required")
+    .refine((val) => {
+      try {
+        return isValidPhoneNumber(val);
+      } catch {
+        return false;
+      }
+    }, "Please enter a valid phone number with country code (e.g. +91 9876543210)"),
   projectType: z.string().trim().min(1, "Please select a project type").max(160),
   budget: z.string().optional().default("Not Specified"),
   timeline: z.enum(["ASAP / Urgent", "1–2 Weeks", "3–4 Weeks", "Ongoing Partnership"]),

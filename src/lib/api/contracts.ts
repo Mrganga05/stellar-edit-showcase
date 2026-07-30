@@ -74,6 +74,7 @@ export type ContactInquiry = {
   serviceId: string | null;
   name: string;
   email: string;
+  phone: string;
   projectType: string;
   budget: string;
   timeline: string;
