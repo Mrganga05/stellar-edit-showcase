@@ -144,3 +144,60 @@ export const deleteR2FileFn = createServerFn({ method: "POST" })
       return { success: false, error: message };
     }
   });
+
+/**
+ * Server function to receive, re-encode (H.264, CRF 20, maxrate 10M, AAC 192k, +faststart),
+ * and store a video directly to Cloudflare R2 with immutable cache headers.
+ */
+export const uploadAndOptimizeVideoFn = createServerFn({ method: "POST" })
+  .validator(
+    z.object({
+      fileBase64: z.string(),
+      fileName: z.string(),
+      contentType: z.string(),
+      folder: z.string().optional().default("videos"),
+    }),
+  )
+  .handler(async ({ data }) => {
+    try {
+      console.log(
+        `[R2 Server Optimization] Processing video upload: ${data.fileName} (${data.contentType})`,
+      );
+
+      const { reencodeVideoServer, uploadBufferToR2 } = await import("../server/r2.server");
+      const inputBuffer = Buffer.from(data.fileBase64, "base64");
+
+      const isVideo =
+        data.contentType.toLowerCase().startsWith("video/") ||
+        /\.(mp4|mov|webm|mkv|avi)$/i.test(data.fileName);
+
+      let finalBuffer = inputBuffer;
+      let finalContentType = data.contentType;
+
+      if (isVideo) {
+        console.log(`[R2 Server Optimization] Re-encoding video with ffmpeg: ${data.fileName}`);
+        finalBuffer = await reencodeVideoServer(inputBuffer, data.fileName);
+        finalContentType = "video/mp4";
+      }
+
+      const result = await uploadBufferToR2(
+        finalBuffer,
+        data.fileName,
+        finalContentType,
+        data.folder || "videos",
+      );
+
+      return {
+        success: true,
+        objectKey: result.key,
+        publicUrl: result.publicUrl,
+        originalName: result.originalName,
+        fileSize: finalBuffer.length,
+      };
+    } catch (error: unknown) {
+      console.error("[R2 Server Optimization Error]:", error);
+      const message = error instanceof Error ? error.message : "An unexpected server error occurred";
+      return { success: false, error: message };
+    }
+  });
+

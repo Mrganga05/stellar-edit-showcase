@@ -13,12 +13,26 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { getPresignedUrlFn } from "@/lib/api/r2.functions";
+import { getPresignedUrlFn, uploadAndOptimizeVideoFn } from "@/lib/api/r2.functions";
 import {
   extractVideoMetadata,
   uploadDirectToR2,
   UploadProgressInfo,
 } from "@/lib/utils/direct-r2-upload";
+
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      const result = reader.result as string;
+      const base64 = result.split(",")[1];
+      resolve(base64);
+    };
+    reader.onerror = (err) => reject(err);
+  });
+}
+
 
 export interface FullVideoUploadMetadata {
   videoUrl: string; // publicUrl
@@ -142,47 +156,84 @@ export function VideoUploader({
       // Step 1: Extract video metadata natively in browser (duration, resolution, ratio)
       const metadata = await extractVideoMetadata(file);
 
-      // Step 2: Request presigned URL from server
-      setStatusText("Requesting presigned upload URL...");
-      const presignedRes = await getPresignedUrlFn({
-        data: {
-          fileName: file.name,
-          contentType: file.type || "video/mp4",
-          fileSize: file.size,
-          folder,
-        },
-      });
+      let finalPublicUrl = "";
+      let finalObjectKey = "";
+      let finalOriginalName = file.name;
+      let finalFileSize = file.size;
 
-      if (!presignedRes || !presignedRes.success || !presignedRes.uploadUrl) {
-        throw new Error(presignedRes?.error || "Failed to generate presigned upload URL");
+      // Primary Attempt: Server-side ffmpeg re-encode (H.264, CRF 20, maxrate 10M, AAC 192k, +faststart)
+      try {
+        setStatusText("Optimizing & re-encoding video with ffmpeg (H.264 + faststart)...");
+        const fileBase64 = await fileToBase64(file);
+
+        const optimizeRes = await uploadAndOptimizeVideoFn({
+          data: {
+            fileBase64,
+            fileName: file.name,
+            contentType: file.type || "video/mp4",
+            folder,
+          },
+        });
+
+        if (optimizeRes && optimizeRes.success && optimizeRes.publicUrl) {
+          finalPublicUrl = optimizeRes.publicUrl;
+          finalObjectKey = optimizeRes.objectKey || "";
+          finalOriginalName = optimizeRes.originalName || file.name;
+          finalFileSize = optimizeRes.fileSize || file.size;
+        }
+      } catch (optErr) {
+        console.warn(
+          "[VideoUploader] Server ffmpeg optimization skipped, using direct upload:",
+          optErr,
+        );
       }
 
-      const { uploadUrl, objectKey, publicUrl, originalName } = presignedRes;
+      // Fallback: Presigned URL direct upload to R2 if server re-encode was skipped or hit limits
+      if (!finalPublicUrl) {
+        setStatusText("Requesting presigned upload URL...");
+        const presignedRes = await getPresignedUrlFn({
+          data: {
+            fileName: file.name,
+            contentType: file.type || "video/mp4",
+            fileSize: file.size,
+            folder,
+          },
+        });
 
-      // Step 3: Direct PUT upload to Cloudflare R2
-      setStatusText("Uploading directly to Cloudflare R2...");
-      await uploadDirectToR2({
-        uploadUrl,
-        file,
-        contentType: file.type || "video/mp4",
-        xhrRef,
-        onProgress: (info) => {
-          setProgressInfo(info);
-        },
-      });
+        if (!presignedRes || !presignedRes.success || !presignedRes.uploadUrl) {
+          throw new Error(presignedRes?.error || "Failed to generate presigned upload URL");
+        }
 
-      console.log(`[STEP 2]\nUpload completed\nURL: ${publicUrl}`);
+        const { uploadUrl, objectKey, publicUrl, originalName } = presignedRes;
+
+        setStatusText("Uploading directly to Cloudflare R2...");
+        await uploadDirectToR2({
+          uploadUrl,
+          file,
+          contentType: file.type || "video/mp4",
+          xhrRef,
+          onProgress: (info) => {
+            setProgressInfo(info);
+          },
+        });
+
+        finalPublicUrl = publicUrl;
+        finalObjectKey = objectKey || "";
+        finalOriginalName = originalName || file.name;
+      }
+
+      console.log(`[STEP 2]\nUpload completed\nURL: ${finalPublicUrl}`);
 
       // Step 4: Construct complete production metadata record
       const now = new Date().toISOString();
       const videoResult: FullVideoUploadMetadata = {
-        videoUrl: publicUrl,
-        publicUrl,
-        objectKey: objectKey || "",
-        originalName: originalName || file.name,
-        originalFilename: originalName || file.name,
-        fileSize: file.size,
-        mimeType: file.type || "video/mp4",
+        videoUrl: finalPublicUrl,
+        publicUrl: finalPublicUrl,
+        objectKey: finalObjectKey,
+        originalName: finalOriginalName,
+        originalFilename: finalOriginalName,
+        fileSize: finalFileSize,
+        mimeType: "video/mp4",
         uploadDate: now,
         createdAt: now,
         updatedAt: now,
@@ -209,6 +260,7 @@ export function VideoUploader({
       setUploading(false);
     }
   };
+
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

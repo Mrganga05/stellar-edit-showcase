@@ -158,6 +158,7 @@ export function uploadDirectToR2({
 
     xhr.open("PUT", uploadUrl, true);
     xhr.setRequestHeader("Content-Type", contentType);
+    xhr.setRequestHeader("Cache-Control", "public, max-age=31536000, immutable");
 
     xhr.upload.onprogress = (event) => {
       if (!event.lengthComputable) return;

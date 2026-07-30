@@ -67,7 +67,29 @@ const Particle = ({ delay = 0, x = 0, y = 0 }: { delay?: number; x?: number; y?:
 };
 function Card({ p, onOpen }: { p: Project; onOpen: () => void }) {
   const [hover, setHover] = useState(false);
+  const [inView, setInView] = useState(false);
+  const cardRef = useRef<HTMLButtonElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setInView(true);
+            observer.disconnect();
+          }
+        });
+      },
+      { rootMargin: "200px" },
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   // Extract key metric from results if metric field is not set
   const displayMetric = p.metric || (p.results && p.results[0]) || "";
@@ -92,16 +114,21 @@ function Card({ p, onOpen }: { p: Project; onOpen: () => void }) {
 
   return (
     <motion.button
+      ref={cardRef}
       whileTap={{ scale: 0.97 }}
       onClick={onOpen}
       onMouseEnter={() => {
         setHover(true);
-        videoRef.current?.play().catch(() => {});
+        if (inView && videoRef.current) {
+          videoRef.current.play().catch(() => {});
+        }
       }}
       onMouseLeave={() => {
         setHover(false);
-        videoRef.current?.pause();
-        if (videoRef.current) videoRef.current.currentTime = 0;
+        if (videoRef.current) {
+          videoRef.current.pause();
+          videoRef.current.currentTime = 0;
+        }
       }}
       className={cn(
         "group relative w-full overflow-hidden rounded-2xl border border-white/8 bg-surface text-left transition-all duration-500 hover:scale-[1.03] hover:border-electric/40 hover:shadow-[0_0_25px_rgba(0,212,255,0.15)] focus:outline-none focus-visible:ring-2 focus-visible:ring-electric/50 cursor-pointer",
@@ -125,7 +152,7 @@ function Card({ p, onOpen }: { p: Project; onOpen: () => void }) {
       <video
         key={mediaSource}
         ref={videoRef}
-        src={mediaSource ? `${mediaSource}#t=0.001` : undefined}
+        src={inView && mediaSource ? `${mediaSource}#t=0.001` : undefined}
         muted
         loop
         playsInline
@@ -137,6 +164,7 @@ function Card({ p, onOpen }: { p: Project; onOpen: () => void }) {
           !isThumbVideo ? (hover ? "opacity-100" : "opacity-0") : "opacity-100",
         )}
       />
+
 
       {/* Background gradient shadow */}
       <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/45 to-transparent transition-opacity duration-300 group-hover:from-black/100" />

@@ -177,6 +177,7 @@ export async function generatePresignedUploadUrl(
     Bucket: config.bucketName,
     Key: key,
     ContentType: contentType,
+    CacheControl: "public, max-age=31536000, immutable",
     Metadata: {
       "original-filename": encodeURIComponent(fileName),
       "upload-timestamp": String(Date.now()),
@@ -203,6 +204,149 @@ export async function generatePresignedUploadUrl(
 }
 
 /**
+ * Uploads a raw or re-encoded Buffer directly to Cloudflare R2 with explicit cache control headers.
+ */
+export async function uploadBufferToR2(
+  buffer: Buffer,
+  fileName: string,
+  contentType: string = "video/mp4",
+  folder: string = "videos",
+) {
+  const config = getR2Config();
+
+  const { name, ext } = parse(fileName);
+  const cleanBaseName = name.replace(/[^a-zA-Z0-9_-]/g, "-").toLowerCase();
+  const fileExt = ext ? (ext.startsWith(".") ? ext : `.${ext}`) : ".mp4";
+  const uuid = crypto.randomUUID();
+  const uniqueFilename = `${cleanBaseName || "video"}-${uuid}-${Date.now()}${fileExt}`;
+
+  const sanitizedFolder = folder
+    .replace(/\.\./g, "")
+    .replace(/^\/+/, "")
+    .replace(/[^a-zA-Z0-9_\-\/]/g, "");
+
+  const safePath = sanitizedFolder
+    ? sanitizedFolder.startsWith("videos")
+      ? sanitizedFolder
+      : `videos/${sanitizedFolder}`
+    : "videos";
+
+  const key = `${safePath}/${uniqueFilename}`;
+
+  const client = getS3Client();
+  const command = new PutObjectCommand({
+    Bucket: config.bucketName,
+    Key: key,
+    Body: buffer,
+    ContentType: contentType,
+    CacheControl: "public, max-age=31536000, immutable",
+    Metadata: {
+      "original-filename": encodeURIComponent(fileName),
+      "upload-timestamp": String(Date.now()),
+    },
+  });
+
+  await client.send(command);
+
+  const normalizedPrefix = config.publicUrl.endsWith("/")
+    ? config.publicUrl.slice(0, -1)
+    : config.publicUrl;
+  const publicUrl = `${normalizedPrefix}/${key}`;
+
+  console.log(`[R2 Server] Successfully uploaded object to R2: ${key}`);
+
+  return {
+    publicUrl,
+    key,
+    originalName: fileName,
+  };
+}
+
+/**
+ * Server-side re-encodes a video file buffer using ffmpeg with constraints:
+ * - H.264 video codec
+ * - CRF ~20 (visually near-lossless 1080p60)
+ * - maxrate 10M, bufsize 20M
+ * - AAC audio 192k
+ * - -movflags +faststart (moves moov atom to start of file for instant playback)
+ */
+export async function reencodeVideoServer(
+  inputBuffer: Buffer,
+  originalFilename: string,
+): Promise<Buffer> {
+  const { execFile } = await import("node:child_process");
+  const { promisify } = await import("node:util");
+  const { readFile, writeFile, unlink, mkdir } = await import("node:fs/promises");
+  const { join } = await import("node:path");
+  const { tmpdir } = await import("node:os");
+
+  const execFileAsync = promisify(execFile);
+  const tempDir = join(tmpdir(), "raqvine-ffmpeg-" + Date.now());
+  await mkdir(tempDir, { recursive: true });
+
+  const inputExt = parse(originalFilename).ext || ".mp4";
+  const inputPath = join(tempDir, `input-${Date.now()}${inputExt}`);
+  const outputPath = join(tempDir, `output-${Date.now()}.mp4`);
+
+  try {
+    await writeFile(inputPath, inputBuffer);
+
+    // Locate ffmpeg binary (ffmpeg-static or system ffmpeg)
+    let ffmpegExec = "ffmpeg";
+    try {
+      const ffmpegStaticModule = await import("ffmpeg-static");
+      const staticPath = ffmpegStaticModule.default || ffmpegStaticModule;
+      if (staticPath && typeof staticPath === "string") {
+        ffmpegExec = staticPath;
+      }
+    } catch {
+      // Fall back to system ffmpeg binary
+    }
+
+    const ffmpegArgs = [
+      "-i",
+      inputPath,
+      "-c:v",
+      "libx264",
+      "-crf",
+      "20",
+      "-maxrate",
+      "10M",
+      "-bufsize",
+      "20M",
+      "-pix_fmt",
+      "yuv420p",
+      "-c:a",
+      "aac",
+      "-b:a",
+      "192k",
+      "-movflags",
+      "+faststart",
+      "-y",
+      outputPath,
+    ];
+
+    console.log(`[FFmpeg Server] Executing re-encode: ${ffmpegExec} ${ffmpegArgs.join(" ")}`);
+    await execFileAsync(ffmpegExec, ffmpegArgs);
+
+    const encodedBuffer = await readFile(outputPath);
+    console.log(
+      `[FFmpeg Server] Re-encode successful: ${originalFilename} (${inputBuffer.length} bytes -> ${encodedBuffer.length} bytes with faststart)`,
+    );
+    return encodedBuffer;
+  } catch (error) {
+    console.error(
+      "[FFmpeg Server Warning] Re-encode failed or ffmpeg not found, using original buffer:",
+      error,
+    );
+    return inputBuffer;
+  } finally {
+    await unlink(inputPath).catch(() => {});
+    await unlink(outputPath).catch(() => {});
+  }
+}
+
+/**
  * Deletes an object from Cloudflare R2 by its key.
  */
 export async function deleteFromR2(key: string) {
@@ -218,3 +362,4 @@ export async function deleteFromR2(key: string) {
   await client.send(command);
   console.log(`[R2 Server] Successfully deleted key from storage: ${cleanKey}`);
 }
+
