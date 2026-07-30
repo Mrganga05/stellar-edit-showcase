@@ -78,25 +78,69 @@ export const faqApi = {
 };
 
 export const contactApi = {
-  create: (input: ContactCreateInput) =>
-    handleSupabaseResponse<ContactInquiry>(
-      supabase
+  create: async (input: ContactCreateInput): Promise<ContactInquiry> => {
+    const { data, error } = await supabase
+      .from("contact_requests")
+      .insert([
+        {
+          serviceId: input.serviceId,
+          name: input.name,
+          email: input.email,
+          phone: input.phone,
+          projectType: input.projectType,
+          budget: input.budget,
+          timeline: input.timeline,
+          details: input.details,
+        },
+      ])
+      .select()
+      .single();
+
+    if (!error && data) {
+      return data as ContactInquiry;
+    }
+
+    // Fallback if the 'phone' column has not been added to the remote Supabase database yet
+    if (error && (error.message?.includes("phone") || error.code === "PGRST204" || error.code === "PGRST202")) {
+      const fallbackDetails = `[Phone: ${input.phone}]\n\n${input.details}`;
+      const { data: fbData, error: fbError } = await supabase
         .from("contact_requests")
         .insert([
           {
             serviceId: input.serviceId,
             name: input.name,
             email: input.email,
-            phone: input.phone,
             projectType: input.projectType,
             budget: input.budget,
             timeline: input.timeline,
-            details: input.details,
+            details: fallbackDetails,
           },
         ])
         .select()
-        .single(),
-    ),
+        .single();
+
+      if (fbError) {
+        throw new ApiClientError(400, {
+          success: false,
+          error: {
+            code: fbError.code || "DATABASE_ERROR",
+            message: fbError.message || "An error occurred while submitting request",
+            details: fbError.details,
+          },
+        });
+      }
+      return { ...fbData, phone: input.phone } as ContactInquiry;
+    }
+
+    throw new ApiClientError(400, {
+      success: false,
+      error: {
+        code: error?.code || "DATABASE_ERROR",
+        message: error?.message || "An error occurred while submitting request",
+        details: error?.details,
+      },
+    });
+  },
 };
 
 export const sampleRequestApi = {
