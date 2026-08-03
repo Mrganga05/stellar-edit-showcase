@@ -197,8 +197,8 @@ export function useComparisons() {
   return useQuery({
     queryKey: ["before-after-projects"],
     queryFn: comparisonApi.list,
-    staleTime: 60_000,
-    initialData: initialComparisons,
+    staleTime: 0,
+    placeholderData: initialComparisons,
   });
 }
 
@@ -206,8 +206,8 @@ export function useTestimonials() {
   return useQuery({
     queryKey: ["testimonials"],
     queryFn: testimonialApi.list,
-    staleTime: 60_000,
-    initialData: initialTestimonials,
+    staleTime: 0,
+    placeholderData: initialTestimonials,
   });
 }
 
@@ -215,8 +215,8 @@ export function useServices() {
   return useQuery({
     queryKey: ["services"],
     queryFn: serviceApi.list,
-    staleTime: 60_000,
-    initialData: initialServices,
+    staleTime: 0,
+    placeholderData: initialServices,
   });
 }
 
@@ -224,7 +224,7 @@ export function useFaqs() {
   return useQuery({
     queryKey: ["faqs"],
     queryFn: faqApi.list,
-    staleTime: 60_000,
-    initialData: initialFaqs,
+    staleTime: 0,
+    placeholderData: initialFaqs,
   });
 }
